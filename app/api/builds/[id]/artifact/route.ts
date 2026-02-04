@@ -40,12 +40,15 @@ export async function GET(
   const validPaths: { fullPath: string; archiveName: string; isDirectory: boolean }[] = []
 
   for (const pattern of project.outputPaths) {
+    // 统一使用正斜杠（fast-glob 要求 POSIX 风格路径）
+    const normalizedPattern = pattern.replace(/\\/g, '/')
+
     // 检查是否是 glob 模式
-    const isGlob = pattern.includes('*') || pattern.includes('?') || pattern.includes('[')
+    const isGlob = normalizedPattern.includes('*') || normalizedPattern.includes('?') || normalizedPattern.includes('[')
 
     if (isGlob) {
       // 使用 fast-glob 匹配
-      const matches = await fg(pattern, {
+      const matches = await fg(normalizedPattern, {
         cwd: project.path,
         absolute: true,
         onlyFiles: false,
@@ -69,15 +72,15 @@ export async function GET(
       }
     } else {
       // 普通路径
-      const fullPath = path.isAbsolute(pattern)
-        ? pattern
-        : path.join(project.path, pattern)
+      const fullPath = path.isAbsolute(normalizedPattern)
+        ? normalizedPattern
+        : path.join(project.path, normalizedPattern)
 
       try {
         const stat = fs.statSync(fullPath)
         validPaths.push({
           fullPath,
-          archiveName: pattern,
+          archiveName: normalizedPattern,
           isDirectory: stat.isDirectory(),
         })
       } catch {
