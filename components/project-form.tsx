@@ -83,14 +83,17 @@ export function ProjectForm({ project, mode, formId = 'project-form', onLoadingC
           setCredentials(data.gitCredentials || [])
 
           if (project?.path && data.workDir) {
-            if (project.path.startsWith(data.workDir)) {
-              const rel = project.path.slice(data.workDir.length)
+            // 统一使用正斜杠比较路径
+            const normalizedPath = project.path.replace(/\\/g, '/')
+            const normalizedWorkDir = data.workDir.replace(/\\/g, '/')
+            if (normalizedPath.startsWith(normalizedWorkDir)) {
+              const rel = normalizedPath.slice(normalizedWorkDir.length)
               setRelativePath(rel.startsWith('/') ? rel.slice(1) : rel)
             } else {
-              setRelativePath(project.path)
+              setRelativePath(normalizedPath)
             }
           } else if (project?.path) {
-            setRelativePath(project.path)
+            setRelativePath(project.path.replace(/\\/g, '/'))
           }
         }
         setSettingsLoaded(true)
@@ -112,7 +115,9 @@ export function ProjectForm({ project, mode, formId = 'project-form', onLoadingC
       .map(p => p.trim())
       .filter(p => p.length > 0)
 
-    const fullPath = workDir && relativePath
+    // 检查 relativePath 是否已经是绝对路径（以盘符或 / 开头）
+    const isAbsolute = /^([a-zA-Z]:)?\//.test(relativePath)
+    const fullPath = workDir && relativePath && !isAbsolute
       ? `${workDir.replace(/\\/g, '/')}/${relativePath}`
       : relativePath
 
