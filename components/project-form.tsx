@@ -301,9 +301,9 @@ export function ProjectForm({ project, mode, formId = 'project-form', onLoadingC
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {credentials.length > 0 && (
-                      <div className="space-y-2">
-                        <Label>Git 凭证</Label>
+                    <div className="space-y-2">
+                      <Label>Git 凭证（私有仓库）</Label>
+                      {credentials.length > 0 ? (
                         <Select
                           value={gitCredentialId || '_none'}
                           onValueChange={(v) => setGitCredentialId(v === '_none' ? '' : v)}
@@ -320,8 +320,18 @@ export function ProjectForm({ project, mode, formId = 'project-form', onLoadingC
                             ))}
                           </SelectContent>
                         </Select>
-                      </div>
-                    )}
+                      ) : (
+                        <div className="flex items-center justify-between rounded-md border border-dashed p-2 h-9">
+                          <span className="text-xs text-muted-foreground">公开仓库可直接克隆</span>
+                          <Link href="/settings">
+                            <Button type="button" variant="ghost" size="sm" className="h-6 px-2 text-xs">
+                              <Settings className="h-3 w-3 mr-1" />
+                              配置
+                            </Button>
+                          </Link>
+                        </div>
+                      )}
+                    </div>
 
                     <div className="space-y-2">
                       <Label htmlFor="gitBranch">分支</Label>
