@@ -34,10 +34,11 @@ async function executeGitPull(
   if (project.gitCredentialId) {
     const credential = await getGitCredentialById(project.gitCredentialId)
     if (credential?.type === 'ssh' && credential.sshKey) {
-      // 将 SSH key 写入临时文件
+      // 将 SSH key 写入临时文件，统一换行符为 LF 并确保末尾有换行
       const fs = await import('fs/promises')
       tempKeyPath = path.join(os.tmpdir(), `t-build-ssh-${buildId}`)
-      await fs.writeFile(tempKeyPath, credential.sshKey, { mode: 0o600 })
+      const normalizedKey = credential.sshKey.replace(/\r\n/g, '\n').replace(/\r/g, '\n').trim() + '\n'
+      await fs.writeFile(tempKeyPath, normalizedKey, { mode: 0o600 })
       env.GIT_SSH_COMMAND = `ssh -i "${tempKeyPath}" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null`
       logLine('[T-Build] Using SSH credential')
     }
