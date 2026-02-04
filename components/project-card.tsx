@@ -48,9 +48,6 @@ export function ProjectCard({ project, onBuild, building }: ProjectCardProps) {
         </div>
       </CardHeader>
       <CardContent className="pt-0">
-        <pre className="mb-4 p-2 rounded-md bg-muted/50 text-xs font-mono overflow-hidden">
-          <code className="whitespace-pre-wrap break-all line-clamp-3">{project.buildCommand}</code>
-        </pre>
         <div className="flex gap-2">
           <Button
             size="sm"
