@@ -256,7 +256,7 @@ export default function SettingsPage() {
 ...
 -----END OPENSSH PRIVATE KEY-----"
                           rows={8}
-                          className="font-mono text-xs"
+                          className="font-mono text-xs break-all"
                         />
                         <p className="text-xs text-muted-foreground">
                           粘贴完整的 SSH 私钥内容（包含 BEGIN 和 END 行）
