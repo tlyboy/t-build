@@ -72,9 +72,10 @@ export async function POST(request: Request) {
         // URL 解析失败，使用原始 URL
       }
     } else if (credential.type === 'ssh' && credential.sshKey) {
-      // SSH 认证：将密钥写入临时文件
+      // SSH 认证：将密钥写入临时文件，统一换行符为 LF
       const tempKeyPath = path.join(os.tmpdir(), `git-ssh-key-${Date.now()}`)
-      await fs.writeFile(tempKeyPath, credential.sshKey, { mode: 0o600 })
+      const normalizedKey = credential.sshKey.replace(/\r\n/g, '\n').replace(/\r/g, '\n').trim() + '\n'
+      await fs.writeFile(tempKeyPath, normalizedKey, { mode: 0o600 })
       env.GIT_SSH_COMMAND = `ssh -i "${tempKeyPath}" -o StrictHostKeyChecking=no`
       // 克隆完成后删除临时文件
       setTimeout(() => fs.unlink(tempKeyPath).catch(() => {}), 60000)
