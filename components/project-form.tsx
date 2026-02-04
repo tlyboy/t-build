@@ -295,7 +295,7 @@ export function ProjectForm({ project, mode, formId = 'project-form', onLoadingC
                     />
                     {gitUrl && (
                       <p className="text-xs text-muted-foreground">
-                        将克隆到: <code className="bg-muted px-1 rounded">{workDir}/{getRepoNameFromUrl(gitUrl)}</code>
+                        将克隆到: <code className="bg-muted px-1 rounded">{workDir.replace(/\\/g, '/')}/{getRepoNameFromUrl(gitUrl)}</code>
                       </p>
                     )}
                   </div>
