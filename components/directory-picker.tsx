@@ -105,7 +105,7 @@ export function DirectoryPicker({ value, onChange, disabled }: DirectoryPickerPr
   }
 
   const displayPath = workDir
-    ? (currentPath === '/' ? workDir : `${workDir}/${currentPath}`)
+    ? (currentPath === '/' ? workDir : `${workDir.replace(/\\/g, '/')}/${currentPath}`)
     : currentPath
 
   return (

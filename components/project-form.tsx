@@ -113,7 +113,7 @@ export function ProjectForm({ project, mode, formId = 'project-form', onLoadingC
       .filter(p => p.length > 0)
 
     const fullPath = workDir && relativePath
-      ? `${workDir}/${relativePath}`
+      ? `${workDir.replace(/\\/g, '/')}/${relativePath}`
       : relativePath
 
     try {
