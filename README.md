@@ -17,8 +17,6 @@
 这个项目使用 [Node.js](https://nodejs.org/)（版本 24.x）和 [pnpm](https://pnpm.io/)。请确保你本地安装了它们。
 
 ```sh
-git clone https://github.com/tlyboy/t-build.git
-cd t-build
 pnpm install
 ```
 
