@@ -12,8 +12,13 @@ RUN pnpm run build
 
 FROM node:24-alpine AS production-stage
 
+# 安装构建工具：git、pnpm
+RUN apk add --no-cache git openssh-client && corepack enable
+
+WORKDIR /app
 COPY --from=build-stage /app/.next/standalone /app
 COPY --from=build-stage /app/.next/static /app/.next/static
+
 EXPOSE 3000
 
 CMD ["node", "/app/server.js"]
