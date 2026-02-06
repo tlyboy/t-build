@@ -13,7 +13,8 @@ RUN pnpm run build
 FROM node:24-alpine AS production-stage
 
 # 安装构建工具
-RUN apk add --no-cache git openssh-client openjdk17 maven && corepack enable
+RUN apk add --no-cache git openssh-client openjdk17 maven && \
+  corepack enable && npm i -g @antfu/ni
 
 WORKDIR /app
 COPY --from=build-stage /app/.next/standalone /app
