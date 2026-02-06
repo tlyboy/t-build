@@ -53,7 +53,7 @@ pnpm start
 docker compose up -d
 ```
 
-仅支持纯前端项目的构建（如 Vite、Next.js 等），不支持需要系统级依赖的项目。
+内置 Node.js、pnpm、JDK 17、Maven、Git，支持前端和 Java 项目的构建。
 
 ## 使用许可
 
