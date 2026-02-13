@@ -53,17 +53,17 @@ export default function ProjectsPage() {
 
   if (loading) {
     return (
-      <div className="max-w-6xl mx-auto">
+      <div className="mx-auto max-w-6xl">
         <PageHeader title={t('title')} description={t('description')} />
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {[1, 2, 3].map((i) => (
             <Card key={i}>
               <CardHeader className="pb-3">
                 <Skeleton className="h-5 w-32" />
-                <Skeleton className="h-3 w-48 mt-2" />
+                <Skeleton className="mt-2 h-3 w-48" />
               </CardHeader>
               <CardContent className="pt-0">
-                <Skeleton className="h-16 w-full mb-4" />
+                <Skeleton className="mb-4 h-16 w-full" />
                 <div className="flex gap-2">
                   <Skeleton className="h-8 w-20" />
                   <Skeleton className="h-8 w-16" />
@@ -77,15 +77,19 @@ export default function ProjectsPage() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto">
+    <div className="mx-auto max-w-6xl">
       <PageHeader
         title={t('title')}
-        description={projects.length > 0 ? t('count', { count: projects.length }) : t('description')}
+        description={
+          projects.length > 0
+            ? t('count', { count: projects.length })
+            : t('description')
+        }
       >
         {projects.length > 0 && (
           <Link href="/projects/new">
             <Button className="w-full sm:w-auto">
-              <Plus className="h-4 w-4 mr-2" />
+              <Plus className="mr-2 h-4 w-4" />
               {t('newProject')}
             </Button>
           </Link>
@@ -93,17 +97,17 @@ export default function ProjectsPage() {
       </PageHeader>
 
       {projects.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16 sm:py-24 border border-dashed rounded-lg">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
-            <FolderGit2 className="h-8 w-8 text-primary" />
+        <div className="flex flex-col items-center justify-center rounded-lg border border-dashed py-16 sm:py-24">
+          <div className="bg-primary/10 mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full">
+            <FolderGit2 className="text-primary h-8 w-8" />
           </div>
-          <h3 className="text-lg font-semibold mb-2">{t('noProjects')}</h3>
-          <p className="text-muted-foreground text-sm text-center mb-6 max-w-sm px-4">
+          <h3 className="mb-2 text-lg font-semibold">{t('noProjects')}</h3>
+          <p className="text-muted-foreground mb-6 max-w-sm px-4 text-center text-sm">
             {t('noProjectsDesc')}
           </p>
           <Link href="/projects/new">
             <Button>
-              <Plus className="h-4 w-4 mr-2" />
+              <Plus className="mr-2 h-4 w-4" />
               {t('newProject')}
             </Button>
           </Link>

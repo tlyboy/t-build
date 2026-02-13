@@ -5,7 +5,7 @@ import { getSettings } from '@/lib/data/settings'
 
 interface FileEntry {
   name: string
-  path: string        // 相对于工作目录的路径
+  path: string // 相对于工作目录的路径
   isDirectory: boolean
 }
 
@@ -16,7 +16,7 @@ export async function GET(request: Request) {
   if (!settings.workDir) {
     return NextResponse.json(
       { error: 'Work directory not configured. Please set it in Settings.' },
-      { status: 400 }
+      { status: 400 },
     )
   }
 
@@ -25,9 +25,7 @@ export async function GET(request: Request) {
   const relativePath = searchParams.get('path') || ''
 
   // 计算目标路径
-  const targetPath = relativePath
-    ? path.join(workDir, relativePath)
-    : workDir
+  const targetPath = relativePath ? path.join(workDir, relativePath) : workDir
 
   // 安全检查：确保目标路径在工作目录内
   const resolvedTarget = path.resolve(targetPath)
@@ -36,7 +34,7 @@ export async function GET(request: Request) {
   if (!resolvedTarget.startsWith(resolvedWorkDir)) {
     return NextResponse.json(
       { error: 'Access denied: path outside work directory' },
-      { status: 403 }
+      { status: 403 },
     )
   }
 
@@ -45,14 +43,14 @@ export async function GET(request: Request) {
     if (!stat.isDirectory()) {
       return NextResponse.json(
         { error: 'Path is not a directory' },
-        { status: 400 }
+        { status: 400 },
       )
     }
 
     const entries = await fs.readdir(resolvedTarget, { withFileTypes: true })
 
     const files: FileEntry[] = entries
-      .filter(entry => {
+      .filter((entry) => {
         // 过滤隐藏文件（以 . 开头）
         if (entry.name.startsWith('.')) return false
         // 过滤 node_modules
@@ -60,7 +58,7 @@ export async function GET(request: Request) {
         // 只显示目录
         return entry.isDirectory()
       })
-      .map(entry => ({
+      .map((entry) => ({
         name: entry.name,
         path: relativePath ? `${relativePath}/${entry.name}` : entry.name,
         isDirectory: true,
@@ -74,13 +72,13 @@ export async function GET(request: Request) {
     return NextResponse.json({
       workDir,
       currentPath: relativePath || '/',
-      parentPath: hasParent ? (parentPath || '') : null,
+      parentPath: hasParent ? parentPath || '' : null,
       entries: files,
     })
   } catch {
     return NextResponse.json(
       { error: 'Cannot access directory' },
-      { status: 400 }
+      { status: 400 },
     )
   }
 }

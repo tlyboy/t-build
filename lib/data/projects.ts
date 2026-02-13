@@ -8,9 +8,9 @@ export interface Project {
   buildCommand: string
   createdAt: string
   updatedAt: string
-  gitPullBeforeBuild?: boolean      // 构建前 git pull
-  outputPaths?: string[]            // 构建产物路径，支持目录和文件
-  gitCredentialId?: string          // Git 凭证 ID
+  gitPullBeforeBuild?: boolean // 构建前 git pull
+  outputPaths?: string[] // 构建产物路径，支持目录和文件
+  gitCredentialId?: string // Git 凭证 ID
 }
 
 const DATA_DIR = path.join(process.cwd(), 'data')
@@ -45,10 +45,12 @@ export async function getAllProjects(): Promise<Project[]> {
 
 export async function getProjectById(id: string): Promise<Project | null> {
   const projects = await readProjects()
-  return projects.find(p => p.id === id) || null
+  return projects.find((p) => p.id === id) || null
 }
 
-export async function createProject(data: Omit<Project, 'id' | 'createdAt' | 'updatedAt'>): Promise<Project> {
+export async function createProject(
+  data: Omit<Project, 'id' | 'createdAt' | 'updatedAt'>,
+): Promise<Project> {
   const projects = await readProjects()
   const now = new Date().toISOString()
   const project: Project = {
@@ -67,9 +69,12 @@ export async function createProject(data: Omit<Project, 'id' | 'createdAt' | 'up
   return project
 }
 
-export async function updateProject(id: string, data: Partial<Omit<Project, 'id' | 'createdAt'>>): Promise<Project | null> {
+export async function updateProject(
+  id: string,
+  data: Partial<Omit<Project, 'id' | 'createdAt'>>,
+): Promise<Project | null> {
   const projects = await readProjects()
-  const index = projects.findIndex(p => p.id === id)
+  const index = projects.findIndex((p) => p.id === id)
   if (index === -1) return null
 
   projects[index] = {
@@ -83,7 +88,7 @@ export async function updateProject(id: string, data: Partial<Omit<Project, 'id'
 
 export async function deleteProject(id: string): Promise<boolean> {
   const projects = await readProjects()
-  const index = projects.findIndex(p => p.id === id)
+  const index = projects.findIndex((p) => p.id === id)
   if (index === -1) return false
 
   projects.splice(index, 1)

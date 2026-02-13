@@ -43,7 +43,11 @@ interface Project {
   outputPaths?: string[]
 }
 
-export default function BuildDetailPage({ params }: { params: Promise<{ id: string }> }) {
+export default function BuildDetailPage({
+  params,
+}: {
+  params: Promise<{ id: string }>
+}) {
   const { id } = use(params)
   const router = useRouter()
   const t = useTranslations('buildDetail')
@@ -73,11 +77,14 @@ export default function BuildDetailPage({ params }: { params: Promise<{ id: stri
     fetchBuildData().finally(() => setLoading(false))
   }, [fetchBuildData])
 
-  const handleStatusChange = useCallback((status: BuildStatus) => {
-    if (status === 'success' || status === 'failed') {
-      fetchBuildData()
-    }
-  }, [fetchBuildData])
+  const handleStatusChange = useCallback(
+    (status: BuildStatus) => {
+      if (status === 'success' || status === 'failed') {
+        fetchBuildData()
+      }
+    },
+    [fetchBuildData],
+  )
 
   const handleDelete = async () => {
     setDeleting(true)
@@ -100,16 +107,16 @@ export default function BuildDetailPage({ params }: { params: Promise<{ id: stri
 
   if (loading) {
     return (
-      <div className="max-w-6xl mx-auto space-y-6">
+      <div className="mx-auto max-w-6xl space-y-6">
         <PageHeader title={t('title')} backHref="/" />
         <Card>
           <CardHeader>
             <Skeleton className="h-5 w-24" />
           </CardHeader>
-          <CardContent className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <CardContent className="grid grid-cols-2 gap-4 sm:grid-cols-4">
             {[1, 2, 3, 4].map((i) => (
               <div key={i}>
-                <Skeleton className="h-3 w-16 mb-1" />
+                <Skeleton className="mb-1 h-3 w-16" />
                 <Skeleton className="h-5 w-24" />
               </div>
             ))}
@@ -129,14 +136,14 @@ export default function BuildDetailPage({ params }: { params: Promise<{ id: stri
 
   if (!build) {
     return (
-      <div className="max-w-6xl mx-auto">
+      <div className="mx-auto max-w-6xl">
         <PageHeader title={t('notFound')} backHref="/" />
       </div>
     )
   }
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6">
+    <div className="mx-auto max-w-6xl space-y-6">
       <PageHeader
         title={t('title')}
         description={project?.name}
@@ -144,8 +151,12 @@ export default function BuildDetailPage({ params }: { params: Promise<{ id: stri
       >
         <AlertDialog>
           <AlertDialogTrigger asChild>
-            <Button variant="outline" disabled={deleting} className="text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/50">
-              <Trash2 className="h-4 w-4 mr-1" />
+            <Button
+              variant="outline"
+              disabled={deleting}
+              className="text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/50"
+            >
+              <Trash2 className="mr-1 h-4 w-4" />
               {t('delete')}
             </Button>
           </AlertDialogTrigger>
@@ -158,7 +169,9 @@ export default function BuildDetailPage({ params }: { params: Promise<{ id: stri
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>{tCommon('cancel')}</AlertDialogCancel>
-              <AlertDialogAction variant="destructive" onClick={handleDelete}>{tCommon('delete')}</AlertDialogAction>
+              <AlertDialogAction variant="destructive" onClick={handleDelete}>
+                {tCommon('delete')}
+              </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
@@ -168,41 +181,58 @@ export default function BuildDetailPage({ params }: { params: Promise<{ id: stri
         <CardHeader>
           <CardTitle className="text-lg">{t('buildInfo')}</CardTitle>
         </CardHeader>
-        <CardContent className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <CardContent className="grid grid-cols-2 gap-4 sm:grid-cols-4">
           <div>
-            <div className="text-xs text-muted-foreground">{t('startTime')}</div>
-            <div className="text-sm">{new Date(build.startedAt).toLocaleString(locale)}</div>
+            <div className="text-muted-foreground text-xs">
+              {t('startTime')}
+            </div>
+            <div className="text-sm">
+              {new Date(build.startedAt).toLocaleString(locale)}
+            </div>
           </div>
           {build.finishedAt && (
             <div>
-              <div className="text-xs text-muted-foreground">{t('endTime')}</div>
-              <div className="text-sm">{new Date(build.finishedAt).toLocaleString(locale)}</div>
+              <div className="text-muted-foreground text-xs">
+                {t('endTime')}
+              </div>
+              <div className="text-sm">
+                {new Date(build.finishedAt).toLocaleString(locale)}
+              </div>
             </div>
           )}
           {build.finishedAt && (
             <div>
-              <div className="text-xs text-muted-foreground">{t('duration')}</div>
+              <div className="text-muted-foreground text-xs">
+                {t('duration')}
+              </div>
               <div className="text-sm">
                 {Math.round(
-                  (new Date(build.finishedAt).getTime() - new Date(build.startedAt).getTime()) / 1000
-                )}s
+                  (new Date(build.finishedAt).getTime() -
+                    new Date(build.startedAt).getTime()) /
+                    1000,
+                )}
+                s
               </div>
             </div>
           )}
           {build.exitCode !== undefined && (
             <div>
-              <div className="text-xs text-muted-foreground">{t('exitCode')}</div>
+              <div className="text-muted-foreground text-xs">
+                {t('exitCode')}
+              </div>
               <div className="text-sm">{build.exitCode}</div>
             </div>
           )}
           {build.gitCommitHash && (
             <div className="col-span-2 sm:col-span-4">
-              <div className="text-xs text-muted-foreground">Git Commit</div>
-              <div className="flex items-center gap-2 mt-0.5">
-                <GitCommit className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
-                <code className="text-sm">{build.gitCommitHash.substring(0, 8)}</code>
+              <div className="text-muted-foreground text-xs">Git Commit</div>
+              <div className="mt-0.5 flex items-center gap-2">
+                <GitCommit className="text-muted-foreground h-4 w-4 flex-shrink-0" />
+                <code className="text-sm">
+                  {build.gitCommitHash.substring(0, 8)}
+                </code>
                 {build.gitCommitMessage && (
-                  <span className="text-sm text-muted-foreground truncate">
+                  <span className="text-muted-foreground truncate text-sm">
                     {build.gitCommitMessage}
                   </span>
                 )}
@@ -212,33 +242,38 @@ export default function BuildDetailPage({ params }: { params: Promise<{ id: stri
         </CardContent>
       </Card>
 
-      {build.status === 'success' && project?.outputPaths && project.outputPaths.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>{t('artifacts')}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div className="space-y-1">
-                <div className="text-sm font-medium">{t('includePaths')}</div>
-                <div className="flex flex-wrap gap-1.5">
-                  {project.outputPaths.map((p, i) => (
-                    <code key={i} className="text-xs bg-muted px-1.5 py-0.5 rounded">
-                      {p}
-                    </code>
-                  ))}
+      {build.status === 'success' &&
+        project?.outputPaths &&
+        project.outputPaths.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle>{t('artifacts')}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+                <div className="space-y-1">
+                  <div className="text-sm font-medium">{t('includePaths')}</div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {project.outputPaths.map((p, i) => (
+                      <code
+                        key={i}
+                        className="bg-muted rounded px-1.5 py-0.5 text-xs"
+                      >
+                        {p}
+                      </code>
+                    ))}
+                  </div>
                 </div>
+                <Button asChild className="flex-shrink-0">
+                  <a href={`/api/builds/${build.id}/artifact`} download>
+                    <Download className="mr-2 h-4 w-4" />
+                    {t('downloadArtifact')}
+                  </a>
+                </Button>
               </div>
-              <Button asChild className="flex-shrink-0">
-                <a href={`/api/builds/${build.id}/artifact`} download>
-                  <Download className="h-4 w-4 mr-2" />
-                  {t('downloadArtifact')}
-                </a>
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+            </CardContent>
+          </Card>
+        )}
 
       <Card>
         <CardHeader>

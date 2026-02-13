@@ -25,7 +25,7 @@ export function cleanupBuildEmitter(buildId: string) {
 async function executeGitPull(
   project: Project,
   buildId: string,
-  logLine: (line: string) => void
+  logLine: (line: string) => void,
 ): Promise<{ success: boolean; commitHash?: string; commitMessage?: string }> {
   const env = { ...process.env } as NodeJS.ProcessEnv
   let tempKeyPath: string | null = null
@@ -37,7 +37,9 @@ async function executeGitPull(
       // 将 SSH key 写入临时文件，统一换行符为 LF 并确保末尾有换行
       const fs = await import('fs/promises')
       tempKeyPath = path.join(os.tmpdir(), `t-build-ssh-${buildId}`)
-      const normalizedKey = credential.sshKey.replace(/\r\n/g, '\n').replace(/\r/g, '\n').trim() + '\n'
+      const normalizedKey =
+        credential.sshKey.replace(/\r\n/g, '\n').replace(/\r/g, '\n').trim() +
+        '\n'
       await fs.writeFile(tempKeyPath, normalizedKey, { mode: 0o600 })
       env.GIT_SSH_COMMAND = `ssh -i "${tempKeyPath}" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null`
       logLine('[T-Build] Using SSH credential')
@@ -83,14 +85,20 @@ async function executeGitPull(
       if (code === 0) {
         const gitInfo = getGitInfo(project.path)
         if (gitInfo.hash) {
-          logLine(`[T-Build] Git pull successful, commit: ${gitInfo.hash.substring(0, 8)}`)
+          logLine(
+            `[T-Build] Git pull successful, commit: ${gitInfo.hash.substring(0, 8)}`,
+          )
           if (gitInfo.message) {
             logLine(`[T-Build] Commit message: ${gitInfo.message}`)
           }
         } else {
           logLine('[T-Build] Git pull successful')
         }
-        resolve({ success: true, commitHash: gitInfo.hash, commitMessage: gitInfo.message })
+        resolve({
+          success: true,
+          commitHash: gitInfo.hash,
+          commitMessage: gitInfo.message,
+        })
       } else {
         logLine(`[T-Build] Git pull failed with exit code: ${code}`)
         resolve({ success: false })
@@ -133,7 +141,7 @@ function getGitInfo(projectPath: string): GitInfo {
 async function executeCommand(
   command: string,
   cwd: string,
-  logLine: (line: string) => void
+  logLine: (line: string) => void,
 ): Promise<{ success: boolean; exitCode: number | null }> {
   return new Promise((resolve) => {
     const child = spawn(command, [], {
@@ -249,7 +257,10 @@ export async function executeBuild(buildId: string): Promise<void> {
   }
 
   if (commitHash) {
-    await updateBuild(buildId, { gitCommitHash: commitHash, gitCommitMessage: commitMessage })
+    await updateBuild(buildId, {
+      gitCommitHash: commitHash,
+      gitCommitMessage: commitMessage,
+    })
     // 如果没有执行 git pull，才在这里显示 commit 信息（git pull 成功后已经显示过了）
     if (!project.gitPullBeforeBuild) {
       logLine(`[T-Build] Current commit: ${commitHash.substring(0, 8)}`)
@@ -262,8 +273,8 @@ export async function executeBuild(buildId: string): Promise<void> {
   // 解析多行构建命令
   const buildLines = project.buildCommand
     .split('\n')
-    .map(cmd => cmd.trim())
-    .filter(cmd => cmd.length > 0 && !cmd.startsWith('#'))
+    .map((cmd) => cmd.trim())
+    .filter((cmd) => cmd.length > 0 && !cmd.startsWith('#'))
 
   if (buildLines.length === 0) {
     logLine('[T-Build] No build commands to execute')
@@ -303,7 +314,7 @@ export async function executeBuild(buildId: string): Promise<void> {
 
       // 验证目录存在
       try {
-        const stat = await import('fs/promises').then(fs => fs.stat(newDir))
+        const stat = await import('fs/promises').then((fs) => fs.stat(newDir))
         if (!stat.isDirectory()) {
           throw new Error('Not a directory')
         }
@@ -313,7 +324,9 @@ export async function executeBuild(buildId: string): Promise<void> {
         continue
       } catch {
         logLine('')
-        logLine(`[T-Build] Failed to change directory: ${newDir} does not exist`)
+        logLine(
+          `[T-Build] Failed to change directory: ${newDir} does not exist`,
+        )
 
         if (flushTimer) {
           clearTimeout(flushTimer)
@@ -327,7 +340,10 @@ export async function executeBuild(buildId: string): Promise<void> {
         })
 
         emitter.emit('status', 'failed')
-        emitter.emit('done', { status: 'failed', error: `Directory not found: ${targetDir}` })
+        emitter.emit('done', {
+          status: 'failed',
+          error: `Directory not found: ${targetDir}`,
+        })
 
         setTimeout(() => cleanupBuildEmitter(buildId), 60000)
         return
@@ -336,7 +352,7 @@ export async function executeBuild(buildId: string): Promise<void> {
 
     // 执行普通命令
     stepCount++
-    const totalSteps = buildLines.filter(l => !l.startsWith('cd ')).length
+    const totalSteps = buildLines.filter((l) => !l.startsWith('cd ')).length
     const stepNum = totalSteps > 1 ? ` [${stepCount}/${totalSteps}]` : ''
 
     logLine('')
@@ -350,7 +366,9 @@ export async function executeBuild(buildId: string): Promise<void> {
 
     if (!result.success) {
       logLine('')
-      logLine(`[T-Build] Build failed at step ${stepCount} with exit code: ${result.exitCode}`)
+      logLine(
+        `[T-Build] Build failed at step ${stepCount} with exit code: ${result.exitCode}`,
+      )
 
       if (flushTimer) {
         clearTimeout(flushTimer)

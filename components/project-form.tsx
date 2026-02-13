@@ -15,7 +15,14 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { DirectoryPicker } from '@/components/directory-picker'
-import { Loader2, Settings, AlertCircle, GitBranch, ChevronDown, ChevronUp } from 'lucide-react'
+import {
+  Loader2,
+  Settings,
+  AlertCircle,
+  GitBranch,
+  ChevronDown,
+  ChevronUp,
+} from 'lucide-react'
 import { Link, useRouter } from '@/i18n/navigation'
 import { useTranslations } from 'next-intl'
 
@@ -44,7 +51,12 @@ interface ProjectFormProps {
   onLoadingChange?: (loading: boolean) => void
 }
 
-export function ProjectForm({ project, mode, formId = 'project-form', onLoadingChange }: ProjectFormProps) {
+export function ProjectForm({
+  project,
+  mode,
+  formId = 'project-form',
+  onLoadingChange,
+}: ProjectFormProps) {
   const router = useRouter()
   const t = useTranslations('projectForm')
   const [, setLoadingState] = useState(false)
@@ -63,19 +75,27 @@ export function ProjectForm({ project, mode, formId = 'project-form', onLoadingC
 
   const [name, setName] = useState(project?.name || '')
   const [relativePath, setRelativePath] = useState('')
-  const [buildCommand, setBuildCommand] = useState(project?.buildCommand || 'pnpm install\npnpm build')
-  const [gitPullBeforeBuild, setGitPullBeforeBuild] = useState(project?.gitPullBeforeBuild || false)
-  const [outputPaths, setOutputPaths] = useState(project?.outputPaths?.join('\n') || '')
+  const [buildCommand, setBuildCommand] = useState(
+    project?.buildCommand || 'pnpm install\npnpm build',
+  )
+  const [gitPullBeforeBuild, setGitPullBeforeBuild] = useState(
+    project?.gitPullBeforeBuild || false,
+  )
+  const [outputPaths, setOutputPaths] = useState(
+    project?.outputPaths?.join('\n') || '',
+  )
 
   const [showCloneOptions, setShowCloneOptions] = useState(false)
   const [gitUrl, setGitUrl] = useState('')
   const [gitBranch, setGitBranch] = useState('main')
-  const [gitCredentialId, setGitCredentialId] = useState(project?.gitCredentialId || '')
+  const [gitCredentialId, setGitCredentialId] = useState(
+    project?.gitCredentialId || '',
+  )
 
   useEffect(() => {
     fetch('/api/settings')
-      .then(res => res.ok ? res.json() : null)
-      .then(data => {
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
         if (data) {
           setWorkDir(data.workDir || '')
           setCredentials(data.gitCredentials || [])
@@ -109,16 +129,18 @@ export function ProjectForm({ project, mode, formId = 'project-form', onLoadingC
 
     const parsedOutputPaths = outputPaths
       .split('\n')
-      .map(p => p.trim())
-      .filter(p => p.length > 0)
+      .map((p) => p.trim())
+      .filter((p) => p.length > 0)
 
     const isAbsolute = /^([a-zA-Z]:)?\//.test(relativePath)
-    const fullPath = workDir && relativePath && !isAbsolute
-      ? `${workDir.replace(/\\/g, '/')}/${relativePath}`
-      : relativePath
+    const fullPath =
+      workDir && relativePath && !isAbsolute
+        ? `${workDir.replace(/\\/g, '/')}/${relativePath}`
+        : relativePath
 
     try {
-      const url = mode === 'create' ? '/api/projects' : `/api/projects/${project?.id}`
+      const url =
+        mode === 'create' ? '/api/projects' : `/api/projects/${project?.id}`
       const method = mode === 'create' ? 'POST' : 'PUT'
 
       const res = await fetch(url, {
@@ -129,7 +151,8 @@ export function ProjectForm({ project, mode, formId = 'project-form', onLoadingC
           path: fullPath,
           buildCommand,
           gitPullBeforeBuild,
-          outputPaths: parsedOutputPaths.length > 0 ? parsedOutputPaths : undefined,
+          outputPaths:
+            parsedOutputPaths.length > 0 ? parsedOutputPaths : undefined,
           gitCredentialId: gitCredentialId || undefined,
         }),
       })
@@ -209,14 +232,14 @@ export function ProjectForm({ project, mode, formId = 'project-form', onLoadingC
     return (
       <Card className="w-full">
         <CardContent className="flex flex-col items-center justify-center py-12">
-          <AlertCircle className="h-12 w-12 text-muted-foreground mb-4" />
-          <h3 className="text-lg font-semibold mb-2">{t('workDirRequired')}</h3>
-          <p className="text-muted-foreground text-sm text-center mb-6 max-w-sm">
+          <AlertCircle className="text-muted-foreground mb-4 h-12 w-12" />
+          <h3 className="mb-2 text-lg font-semibold">{t('workDirRequired')}</h3>
+          <p className="text-muted-foreground mb-6 max-w-sm text-center text-sm">
             {t('workDirRequiredDesc')}
           </p>
           <Link href="/settings">
             <Button>
-              <Settings className="h-4 w-4 mr-2" />
+              <Settings className="mr-2 h-4 w-4" />
               {t('goToSettings')}
             </Button>
           </Link>
@@ -230,13 +253,13 @@ export function ProjectForm({ project, mode, formId = 'project-form', onLoadingC
       <CardContent className="pt-6">
         <form id={formId} onSubmit={handleSubmit} className="space-y-6">
           {error && (
-            <div className="bg-destructive/10 text-destructive text-sm p-3 rounded-lg">
+            <div className="bg-destructive/10 text-destructive rounded-lg p-3 text-sm">
               {error}
             </div>
           )}
 
           {workDir && (
-            <div className="text-xs text-muted-foreground bg-muted/50 px-3 py-2 rounded-md font-mono">
+            <div className="text-muted-foreground bg-muted/50 rounded-md px-3 py-2 font-mono text-xs">
               {t('workDir')}: {workDir}
             </div>
           )}
@@ -269,7 +292,7 @@ export function ProjectForm({ project, mode, formId = 'project-form', onLoadingC
                   <button
                     type="button"
                     onClick={() => setShowCloneOptions(!showCloneOptions)}
-                    className="bg-card px-3 text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
+                    className="bg-card text-muted-foreground hover:text-foreground flex items-center gap-1 px-3 text-xs transition-colors"
                   >
                     <GitBranch className="h-3 w-3" />
                     {showCloneOptions ? t('collapseClone') : t('expandClone')}
@@ -283,7 +306,7 @@ export function ProjectForm({ project, mode, formId = 'project-form', onLoadingC
               </div>
 
               {showCloneOptions && (
-                <div className="space-y-4 p-4 bg-muted/30 rounded-lg">
+                <div className="bg-muted/30 space-y-4 rounded-lg p-4">
                   <div className="space-y-2">
                     <Label htmlFor="gitUrl">{t('gitUrl')}</Label>
                     <Input
@@ -293,25 +316,33 @@ export function ProjectForm({ project, mode, formId = 'project-form', onLoadingC
                       placeholder="https://github.com/user/repo.git"
                     />
                     {gitUrl && (
-                      <p className="text-xs text-muted-foreground">
-                        {t('cloneTo')}: <code className="bg-muted px-1 rounded">{workDir.replace(/\\/g, '/')}/{getRepoNameFromUrl(gitUrl)}</code>
+                      <p className="text-muted-foreground text-xs">
+                        {t('cloneTo')}:{' '}
+                        <code className="bg-muted rounded px-1">
+                          {workDir.replace(/\\/g, '/')}/
+                          {getRepoNameFromUrl(gitUrl)}
+                        </code>
                       </p>
                     )}
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                     <div className="space-y-2">
                       <Label>{t('gitCredential')}</Label>
                       {credentials.length > 0 ? (
                         <Select
                           value={gitCredentialId || '_none'}
-                          onValueChange={(v) => setGitCredentialId(v === '_none' ? '' : v)}
+                          onValueChange={(v) =>
+                            setGitCredentialId(v === '_none' ? '' : v)
+                          }
                         >
                           <SelectTrigger className="w-full">
                             <SelectValue placeholder={t('selectCredential')} />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="_none">{t('publicRepo')}</SelectItem>
+                            <SelectItem value="_none">
+                              {t('publicRepo')}
+                            </SelectItem>
                             {credentials.map((cred) => (
                               <SelectItem key={cred.id} value={cred.id}>
                                 {cred.name} ({cred.type.toUpperCase()})
@@ -320,11 +351,18 @@ export function ProjectForm({ project, mode, formId = 'project-form', onLoadingC
                           </SelectContent>
                         </Select>
                       ) : (
-                        <div className="flex items-center justify-between rounded-md border border-dashed p-2 h-9">
-                          <span className="text-xs text-muted-foreground">{t('publicRepoCanClone')}</span>
+                        <div className="flex h-9 items-center justify-between rounded-md border border-dashed p-2">
+                          <span className="text-muted-foreground text-xs">
+                            {t('publicRepoCanClone')}
+                          </span>
                           <Link href="/settings">
-                            <Button type="button" variant="ghost" size="sm" className="h-6 px-2 text-xs">
-                              <Settings className="h-3 w-3 mr-1" />
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              className="h-6 px-2 text-xs"
+                            >
+                              <Settings className="mr-1 h-3 w-3" />
                               {t('configure')}
                             </Button>
                           </Link>
@@ -352,7 +390,7 @@ export function ProjectForm({ project, mode, formId = 'project-form', onLoadingC
                   >
                     {cloning ? (
                       <>
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                         {t('cloning')}
                       </>
                     ) : cloneSuccess ? (
@@ -383,12 +421,14 @@ export function ProjectForm({ project, mode, formId = 'project-form', onLoadingC
               id="buildCommand"
               value={buildCommand}
               onChange={(e) => setBuildCommand(e.target.value)}
-              placeholder={"pnpm install\npnpm build\n# 多目录:\ncd packages/app\nbun install\nbun build"}
+              placeholder={
+                'pnpm install\npnpm build\n# 多目录:\ncd packages/app\nbun install\nbun build'
+              }
               rows={4}
               required
               className="font-mono text-sm"
             />
-            <p className="text-xs text-muted-foreground">
+            <p className="text-muted-foreground text-xs">
               {t('buildCommandHint')}
             </p>
           </div>
@@ -399,19 +439,21 @@ export function ProjectForm({ project, mode, formId = 'project-form', onLoadingC
               id="outputPaths"
               value={outputPaths}
               onChange={(e) => setOutputPaths(e.target.value)}
-              placeholder={"dist\n**/*.dmg"}
+              placeholder={'dist\n**/*.dmg'}
               rows={2}
               className="font-mono text-sm"
             />
-            <p className="text-xs text-muted-foreground">
+            <p className="text-muted-foreground text-xs">
               {t('outputPathsHint')}
             </p>
           </div>
 
           <div className="flex items-center justify-between rounded-lg border p-3">
             <div className="space-y-0.5">
-              <Label htmlFor="gitPull" className="text-sm font-medium">{t('gitPullBeforeBuild')}</Label>
-              <p className="text-xs text-muted-foreground">
+              <Label htmlFor="gitPull" className="text-sm font-medium">
+                {t('gitPullBeforeBuild')}
+              </Label>
+              <p className="text-muted-foreground text-xs">
                 {t('gitPullHint')}
               </p>
             </div>
@@ -428,7 +470,9 @@ export function ProjectForm({ project, mode, formId = 'project-form', onLoadingC
               {credentials.length > 0 ? (
                 <Select
                   value={gitCredentialId || '_none'}
-                  onValueChange={(v) => setGitCredentialId(v === '_none' ? '' : v)}
+                  onValueChange={(v) =>
+                    setGitCredentialId(v === '_none' ? '' : v)
+                  }
                 >
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder={t('selectCredential')} />
@@ -444,12 +488,12 @@ export function ProjectForm({ project, mode, formId = 'project-form', onLoadingC
                 </Select>
               ) : (
                 <div className="flex items-center justify-between rounded-md border border-dashed p-3">
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-muted-foreground text-sm">
                     {t('noCredentialHint')}
                   </p>
                   <Link href="/settings">
                     <Button type="button" variant="outline" size="sm">
-                      <Settings className="h-3 w-3 mr-1" />
+                      <Settings className="mr-1 h-3 w-3" />
                       {t('goToConfigure')}
                     </Button>
                   </Link>
@@ -457,7 +501,6 @@ export function ProjectForm({ project, mode, formId = 'project-form', onLoadingC
               )}
             </div>
           )}
-
         </form>
       </CardContent>
     </Card>

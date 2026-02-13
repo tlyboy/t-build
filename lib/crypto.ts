@@ -73,7 +73,9 @@ export async function decrypt(ciphertext: string): Promise<string> {
 // 检查字符串是否是加密格式
 export function isEncrypted(value: string): boolean {
   const parts = value.split(':')
-  return parts.length === 3 &&
+  return (
+    parts.length === 3 &&
     parts[0].length === IV_LENGTH * 2 &&
     parts[1].length === AUTH_TAG_LENGTH * 2
+  )
 }

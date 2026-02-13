@@ -6,7 +6,14 @@ import { useTranslations } from 'next-intl'
 
 type BuildStatus = 'pending' | 'running' | 'success' | 'failed'
 
-const statusConfig: Record<BuildStatus, { key: string; variant: 'default' | 'secondary' | 'destructive' | 'outline'; icon: React.ComponentType<{ className?: string }> }> = {
+const statusConfig: Record<
+  BuildStatus,
+  {
+    key: string
+    variant: 'default' | 'secondary' | 'destructive' | 'outline'
+    icon: React.ComponentType<{ className?: string }>
+  }
+> = {
   pending: {
     key: 'pending',
     variant: 'secondary',
@@ -40,7 +47,9 @@ export function BuildStatusBadge({ status }: BuildStatusBadgeProps) {
 
   return (
     <Badge variant={config.variant} className="gap-1">
-      <Icon className={`h-3 w-3 ${status === 'running' ? 'animate-spin' : ''}`} />
+      <Icon
+        className={`h-3 w-3 ${status === 'running' ? 'animate-spin' : ''}`}
+      />
       {t(config.key)}
     </Badge>
   )

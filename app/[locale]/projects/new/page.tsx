@@ -17,7 +17,7 @@ export default function NewProjectPage() {
         <Button type="submit" form="project-form" disabled={loading}>
           {loading ? (
             <>
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               {t('saving')}
             </>
           ) : (
@@ -25,7 +25,7 @@ export default function NewProjectPage() {
           )}
         </Button>
       </PageHeader>
-      <div className="max-w-lg mx-auto">
+      <div className="mx-auto max-w-lg">
         <ProjectForm mode="create" onLoadingChange={setLoading} />
       </div>
     </>

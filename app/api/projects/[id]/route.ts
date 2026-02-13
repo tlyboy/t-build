@@ -1,10 +1,14 @@
 import { NextResponse } from 'next/server'
-import { getProjectById, updateProject, deleteProject } from '@/lib/data/projects'
+import {
+  getProjectById,
+  updateProject,
+  deleteProject,
+} from '@/lib/data/projects'
 import { deleteProjectBuilds } from '@/lib/data/builds'
 
 export async function GET(
   request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params
   const project = await getProjectById(id)
@@ -18,7 +22,7 @@ export async function GET(
 
 export async function PUT(
   request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params
   const body = await request.json()
@@ -41,7 +45,7 @@ export async function PUT(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params
 

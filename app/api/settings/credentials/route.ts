@@ -5,14 +5,14 @@ export async function GET() {
   const settings = await getSettings()
   // 不返回敏感信息
   return NextResponse.json(
-    settings.gitCredentials.map(c => ({
+    settings.gitCredentials.map((c) => ({
       id: c.id,
       name: c.name,
       type: c.type,
       username: c.username,
       hasPassword: !!c.password,
       hasSshKey: !!c.sshKey,
-    }))
+    })),
   )
 }
 
@@ -22,7 +22,7 @@ export async function POST(request: Request) {
   if (!body.name || !body.type) {
     return NextResponse.json(
       { error: 'Missing required fields: name, type' },
-      { status: 400 }
+      { status: 400 },
     )
   }
 

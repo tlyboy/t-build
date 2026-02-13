@@ -37,7 +37,11 @@ interface Project {
   gitCredentialId?: string
 }
 
-export default function EditProjectPage({ params }: { params: Promise<{ id: string }> }) {
+export default function EditProjectPage({
+  params,
+}: {
+  params: Promise<{ id: string }>
+}) {
   const { id } = use(params)
   const router = useRouter()
   const t = useTranslations('projectForm')
@@ -50,7 +54,7 @@ export default function EditProjectPage({ params }: { params: Promise<{ id: stri
 
   useEffect(() => {
     fetch(`/api/projects/${id}`)
-      .then((res) => res.ok ? res.json() : null)
+      .then((res) => (res.ok ? res.json() : null))
       .then(setProject)
       .finally(() => setPageLoading(false))
   }, [id])
@@ -72,9 +76,9 @@ export default function EditProjectPage({ params }: { params: Promise<{ id: stri
     return (
       <>
         <PageHeader title={t('editProject')} backHref={`/projects/${id}`} />
-        <div className="max-w-lg mx-auto">
+        <div className="mx-auto max-w-lg">
           <Card>
-            <CardContent className="pt-6 space-y-4">
+            <CardContent className="space-y-4 pt-6">
               {[1, 2, 3, 4].map((i) => (
                 <div key={i} className="space-y-2">
                   <Skeleton className="h-4 w-20" />
@@ -106,7 +110,7 @@ export default function EditProjectPage({ params }: { params: Promise<{ id: stri
               disabled={deleting}
               className="text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/50"
             >
-              <Trash2 className="h-4 w-4 mr-2" />
+              <Trash2 className="mr-2 h-4 w-4" />
               {tCommon('delete')}
             </Button>
           </AlertDialogTrigger>
@@ -128,7 +132,7 @@ export default function EditProjectPage({ params }: { params: Promise<{ id: stri
         <Button type="submit" form="project-form" disabled={formLoading}>
           {formLoading ? (
             <>
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               {t('saving')}
             </>
           ) : (
@@ -136,8 +140,12 @@ export default function EditProjectPage({ params }: { params: Promise<{ id: stri
           )}
         </Button>
       </PageHeader>
-      <div className="max-w-lg mx-auto">
-        <ProjectForm project={project} mode="edit" onLoadingChange={setFormLoading} />
+      <div className="mx-auto max-w-lg">
+        <ProjectForm
+          project={project}
+          mode="edit"
+          onLoadingChange={setFormLoading}
+        />
       </div>
     </>
   )

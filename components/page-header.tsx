@@ -18,24 +18,24 @@ export function PageHeader({
   children,
 }: PageHeaderProps) {
   return (
-    <div className="flex items-start gap-3 mb-6">
+    <div className="mb-6 flex items-start gap-3">
       {backHref && (
         <Link href={backHref} className="mt-1">
-          <Button variant="ghost" size="icon" className="shrink-0 h-8 w-8">
+          <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0">
             <ArrowLeft className="h-4 w-4" />
           </Button>
         </Link>
       )}
-      <div className="flex-1 min-w-0">
-        <h1 className="text-2xl font-bold truncate">{title}</h1>
+      <div className="min-w-0 flex-1">
+        <h1 className="truncate text-2xl font-bold">{title}</h1>
         {description && (
-          <p className="text-muted-foreground text-sm truncate">
+          <p className="text-muted-foreground truncate text-sm">
             {description}
           </p>
         )}
       </div>
       {children && (
-        <div className="flex flex-wrap items-center gap-2 shrink-0">
+        <div className="flex shrink-0 flex-wrap items-center gap-2">
           {children}
         </div>
       )}

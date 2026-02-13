@@ -11,7 +11,7 @@ export interface Build {
   finishedAt?: string
   logs: string[]
   exitCode?: number
-  gitCommitHash?: string    // 构建时的 commit hash
+  gitCommitHash?: string // 构建时的 commit hash
   gitCommitMessage?: string // commit 提交信息
 }
 
@@ -46,7 +46,9 @@ async function writeBuilds(builds: Build[]) {
 async function withLock<T>(fn: () => Promise<T>): Promise<T> {
   const previousLock = writeLock
   let resolve: () => void
-  writeLock = new Promise((r) => { resolve = r })
+  writeLock = new Promise((r) => {
+    resolve = r
+  })
 
   try {
     await previousLock
@@ -62,12 +64,14 @@ export async function getAllBuilds(): Promise<Build[]> {
 
 export async function getBuildById(id: string): Promise<Build | null> {
   const builds = await readBuilds()
-  return builds.find(b => b.id === id) || null
+  return builds.find((b) => b.id === id) || null
 }
 
-export async function getBuildsByProjectId(projectId: string): Promise<Build[]> {
+export async function getBuildsByProjectId(
+  projectId: string,
+): Promise<Build[]> {
   const builds = await readBuilds()
-  return builds.filter(b => b.projectId === projectId)
+  return builds.filter((b) => b.projectId === projectId)
 }
 
 export async function createBuild(projectId: string): Promise<Build> {
@@ -86,10 +90,13 @@ export async function createBuild(projectId: string): Promise<Build> {
   })
 }
 
-export async function updateBuild(id: string, data: Partial<Omit<Build, 'id' | 'projectId' | 'startedAt'>>): Promise<Build | null> {
+export async function updateBuild(
+  id: string,
+  data: Partial<Omit<Build, 'id' | 'projectId' | 'startedAt'>>,
+): Promise<Build | null> {
   return withLock(async () => {
     const builds = await readBuilds()
-    const index = builds.findIndex(b => b.id === id)
+    const index = builds.findIndex((b) => b.id === id)
     if (index === -1) return null
 
     builds[index] = {
@@ -101,10 +108,13 @@ export async function updateBuild(id: string, data: Partial<Omit<Build, 'id' | '
   })
 }
 
-export async function appendBuildLog(id: string, log: string): Promise<Build | null> {
+export async function appendBuildLog(
+  id: string,
+  log: string,
+): Promise<Build | null> {
   return withLock(async () => {
     const builds = await readBuilds()
-    const index = builds.findIndex(b => b.id === id)
+    const index = builds.findIndex((b) => b.id === id)
     if (index === -1) return null
 
     builds[index].logs.push(log)
@@ -113,10 +123,13 @@ export async function appendBuildLog(id: string, log: string): Promise<Build | n
   })
 }
 
-export async function appendBuildLogs(id: string, logs: string[]): Promise<Build | null> {
+export async function appendBuildLogs(
+  id: string,
+  logs: string[],
+): Promise<Build | null> {
   return withLock(async () => {
     const builds = await readBuilds()
-    const index = builds.findIndex(b => b.id === id)
+    const index = builds.findIndex((b) => b.id === id)
     if (index === -1) return null
 
     builds[index].logs.push(...logs)
@@ -128,7 +141,7 @@ export async function appendBuildLogs(id: string, logs: string[]): Promise<Build
 export async function deleteBuild(id: string): Promise<boolean> {
   return withLock(async () => {
     const builds = await readBuilds()
-    const index = builds.findIndex(b => b.id === id)
+    const index = builds.findIndex((b) => b.id === id)
     if (index === -1) return false
 
     builds.splice(index, 1)
@@ -140,7 +153,7 @@ export async function deleteBuild(id: string): Promise<boolean> {
 export async function deleteProjectBuilds(projectId: string): Promise<number> {
   return withLock(async () => {
     const builds = await readBuilds()
-    const filtered = builds.filter(b => b.projectId !== projectId)
+    const filtered = builds.filter((b) => b.projectId !== projectId)
     const deletedCount = builds.length - filtered.length
     await writeBuilds(filtered)
     return deletedCount

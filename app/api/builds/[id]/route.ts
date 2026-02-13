@@ -3,7 +3,7 @@ import { getBuildById, deleteBuild } from '@/lib/data/builds'
 
 export async function GET(
   request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params
   const build = await getBuildById(id)
@@ -17,7 +17,7 @@ export async function GET(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params
   const deleted = await deleteBuild(id)

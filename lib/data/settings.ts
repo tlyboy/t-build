@@ -8,9 +8,9 @@ export interface GitCredential {
   type: 'https' | 'ssh'
   // HTTPS
   username?: string
-  password?: string        // 加密存储
+  password?: string // 加密存储
   // SSH - 存储私钥内容
-  sshKey?: string          // 加密存储
+  sshKey?: string // 加密存储
 }
 
 // 用于 API 返回的安全凭证类型（不包含敏感信息）
@@ -19,13 +19,13 @@ export interface SafeGitCredential {
   name: string
   type: 'https' | 'ssh'
   username?: string
-  hasPassword?: boolean    // 是否已配置密码
-  hasSshKey?: boolean      // 是否已配置 SSH 密钥
+  hasPassword?: boolean // 是否已配置密码
+  hasSshKey?: boolean // 是否已配置 SSH 密钥
 }
 
 export interface Settings {
-  workDir: string                    // 工作目录
-  gitCredentials: GitCredential[]    // Git 认证配置
+  workDir: string // 工作目录
+  gitCredentials: GitCredential[] // Git 认证配置
 }
 
 const DATA_DIR = path.join(process.cwd(), 'data')
@@ -54,7 +54,9 @@ export async function getSettings(): Promise<Settings> {
   }
 }
 
-export async function updateSettings(data: Partial<Settings>): Promise<Settings> {
+export async function updateSettings(
+  data: Partial<Settings>,
+): Promise<Settings> {
   await ensureDataDir()
   const current = await getSettings()
   const updated = { ...current, ...data }
@@ -63,7 +65,9 @@ export async function updateSettings(data: Partial<Settings>): Promise<Settings>
 }
 
 // 加密凭证中的敏感信息
-async function encryptCredential(credential: Omit<GitCredential, 'id'>): Promise<Omit<GitCredential, 'id'>> {
+async function encryptCredential(
+  credential: Omit<GitCredential, 'id'>,
+): Promise<Omit<GitCredential, 'id'>> {
   const encrypted = { ...credential }
 
   if (encrypted.password) {
@@ -77,7 +81,9 @@ async function encryptCredential(credential: Omit<GitCredential, 'id'>): Promise
 }
 
 // 解密凭证中的敏感信息
-async function decryptCredential(credential: GitCredential): Promise<GitCredential> {
+async function decryptCredential(
+  credential: GitCredential,
+): Promise<GitCredential> {
   const decrypted = { ...credential }
 
   if (decrypted.password && isEncrypted(decrypted.password)) {
@@ -103,7 +109,10 @@ function toSafeCredential(credential: GitCredential): SafeGitCredential {
 }
 
 // 获取安全的设置（用于 API 返回）
-export async function getSafeSettings(): Promise<{ workDir: string; gitCredentials: SafeGitCredential[] }> {
+export async function getSafeSettings(): Promise<{
+  workDir: string
+  gitCredentials: SafeGitCredential[]
+}> {
   const settings = await getSettings()
   return {
     workDir: settings.workDir,
@@ -111,7 +120,9 @@ export async function getSafeSettings(): Promise<{ workDir: string; gitCredentia
   }
 }
 
-export async function addGitCredential(credential: Omit<GitCredential, 'id'>): Promise<SafeGitCredential> {
+export async function addGitCredential(
+  credential: Omit<GitCredential, 'id'>,
+): Promise<SafeGitCredential> {
   const settings = await getSettings()
   const encrypted = await encryptCredential(credential)
   const newCredential: GitCredential = {
@@ -123,9 +134,12 @@ export async function addGitCredential(credential: Omit<GitCredential, 'id'>): P
   return toSafeCredential(newCredential)
 }
 
-export async function updateGitCredential(id: string, data: Partial<Omit<GitCredential, 'id'>>): Promise<SafeGitCredential | null> {
+export async function updateGitCredential(
+  id: string,
+  data: Partial<Omit<GitCredential, 'id'>>,
+): Promise<SafeGitCredential | null> {
   const settings = await getSettings()
-  const index = settings.gitCredentials.findIndex(c => c.id === id)
+  const index = settings.gitCredentials.findIndex((c) => c.id === id)
   if (index === -1) return null
 
   // 加密敏感字段
@@ -141,7 +155,7 @@ export async function updateGitCredential(id: string, data: Partial<Omit<GitCred
 
 export async function deleteGitCredential(id: string): Promise<boolean> {
   const settings = await getSettings()
-  const index = settings.gitCredentials.findIndex(c => c.id === id)
+  const index = settings.gitCredentials.findIndex((c) => c.id === id)
   if (index === -1) return false
 
   settings.gitCredentials.splice(index, 1)
@@ -150,9 +164,11 @@ export async function deleteGitCredential(id: string): Promise<boolean> {
 }
 
 // 获取完整凭证（包含解密后的敏感信息，仅用于内部使用）
-export async function getGitCredentialById(id: string): Promise<GitCredential | null> {
+export async function getGitCredentialById(
+  id: string,
+): Promise<GitCredential | null> {
   const settings = await getSettings()
-  const credential = settings.gitCredentials.find(c => c.id === id)
+  const credential = settings.gitCredentials.find((c) => c.id === id)
   if (!credential) return null
   return decryptCredential(credential)
 }

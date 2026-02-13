@@ -1,9 +1,13 @@
 import { NextResponse } from 'next/server'
-import { getGitCredentialById, updateGitCredential, deleteGitCredential } from '@/lib/data/settings'
+import {
+  getGitCredentialById,
+  updateGitCredential,
+  deleteGitCredential,
+} from '@/lib/data/settings'
 
 export async function GET(
   request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params
   const credential = await getGitCredentialById(id)
@@ -25,7 +29,7 @@ export async function GET(
 
 export async function PUT(
   request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params
   const body = await request.json()
@@ -48,7 +52,7 @@ export async function PUT(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params
   const deleted = await deleteGitCredential(id)

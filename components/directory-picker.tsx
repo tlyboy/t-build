@@ -33,7 +33,11 @@ interface DirectoryPickerProps {
   disabled?: boolean
 }
 
-export function DirectoryPicker({ value, onChange, disabled }: DirectoryPickerProps) {
+export function DirectoryPicker({
+  value,
+  onChange,
+  disabled,
+}: DirectoryPickerProps) {
   const t = useTranslations('common')
   const [open, setOpen] = useState(false)
   const [workDir, setWorkDir] = useState('')
@@ -77,8 +81,8 @@ export function DirectoryPicker({ value, onChange, disabled }: DirectoryPickerPr
   }, [open])
 
   const filteredEntries = search
-    ? entries.filter(entry =>
-        entry.name.toLowerCase().includes(search.toLowerCase())
+    ? entries.filter((entry) =>
+        entry.name.toLowerCase().includes(search.toLowerCase()),
       )
     : entries
 
@@ -105,14 +109,16 @@ export function DirectoryPicker({ value, onChange, disabled }: DirectoryPickerPr
   }
 
   const displayPath = workDir
-    ? (currentPath === '/' ? workDir : `${workDir.replace(/\\/g, '/')}/${currentPath}`)
+    ? currentPath === '/'
+      ? workDir
+      : `${workDir.replace(/\\/g, '/')}/${currentPath}`
     : currentPath
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button type="button" variant="outline" size="sm" disabled={disabled}>
-          <FolderOpen className="h-4 w-4 mr-2" />
+          <FolderOpen className="mr-2 h-4 w-4" />
           {t('select')}
         </Button>
       </DialogTrigger>
@@ -133,13 +139,13 @@ export function DirectoryPicker({ value, onChange, disabled }: DirectoryPickerPr
             >
               <ChevronUp className="h-4 w-4" />
             </Button>
-            <div className="flex-1 text-sm text-muted-foreground truncate font-mono bg-muted px-2 py-1 rounded">
+            <div className="text-muted-foreground bg-muted flex-1 truncate rounded px-2 py-1 font-mono text-sm">
               {displayPath}
             </div>
           </div>
 
           <div className="relative">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Search className="text-muted-foreground absolute top-2.5 left-2.5 h-4 w-4" />
             <Input
               type="text"
               placeholder={t('searchDir')}
@@ -150,18 +156,18 @@ export function DirectoryPicker({ value, onChange, disabled }: DirectoryPickerPr
           </div>
 
           {error && (
-            <div className="bg-destructive/10 text-destructive text-sm p-3 rounded-md">
+            <div className="bg-destructive/10 text-destructive rounded-md p-3 text-sm">
               {error}
             </div>
           )}
 
-          <ScrollArea className="h-64 border rounded-md">
+          <ScrollArea className="h-64 rounded-md border">
             {loading ? (
-              <div className="p-4 text-center text-muted-foreground">
+              <div className="text-muted-foreground p-4 text-center">
                 {t('loading')}
               </div>
             ) : filteredEntries.length === 0 ? (
-              <div className="p-4 text-center text-muted-foreground">
+              <div className="text-muted-foreground p-4 text-center">
                 {search ? t('noMatch') : t('emptyDir')}
               </div>
             ) : (
@@ -169,21 +175,21 @@ export function DirectoryPicker({ value, onChange, disabled }: DirectoryPickerPr
                 {filteredEntries.map((entry) => (
                   <div
                     key={entry.path}
-                    className="flex items-center justify-between hover:bg-muted rounded-md group"
+                    className="hover:bg-muted group flex items-center justify-between rounded-md"
                   >
                     <button
                       type="button"
-                      className="flex-1 flex items-center gap-2 px-3 py-2 text-left"
+                      className="flex flex-1 items-center gap-2 px-3 py-2 text-left"
                       onClick={() => handleNavigate(entry.path)}
                     >
-                      <Folder className="h-4 w-4 text-blue-500 flex-shrink-0" />
+                      <Folder className="h-4 w-4 flex-shrink-0 text-blue-500" />
                       <span className="truncate text-sm">{entry.name}</span>
                     </button>
                     <Button
                       type="button"
                       variant="ghost"
                       size="sm"
-                      className="opacity-0 group-hover:opacity-100 mr-1"
+                      className="mr-1 opacity-0 group-hover:opacity-100"
                       onClick={() => handleSelect(entry.path)}
                     >
                       {t('select')}
@@ -198,9 +204,7 @@ export function DirectoryPicker({ value, onChange, disabled }: DirectoryPickerPr
             <Button variant="outline" onClick={() => setOpen(false)}>
               {t('cancel')}
             </Button>
-            <Button onClick={handleSelectCurrent}>
-              {t('selectCurrent')}
-            </Button>
+            <Button onClick={handleSelectCurrent}>{t('selectCurrent')}</Button>
           </div>
         </div>
       </DialogContent>

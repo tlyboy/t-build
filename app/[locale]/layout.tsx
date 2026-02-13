@@ -59,42 +59,57 @@ export default async function LocaleLayout({
             enableSystem
             disableTransitionOnChange
           >
-            <div className="min-h-screen flex flex-col">
-              <header className="border-b sticky top-0 bg-background z-50">
-                <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
+            <div className="flex min-h-screen flex-col">
+              <header className="bg-background sticky top-0 z-50 border-b">
+                <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
                   <div className="flex items-center gap-2 sm:gap-6">
-                    <Link href="/" className="flex items-center gap-2 font-bold">
+                    <Link
+                      href="/"
+                      className="flex items-center gap-2 font-bold"
+                    >
                       <Hammer className="h-5 w-5" />
                       <span className="hidden sm:inline">T-Build</span>
                     </Link>
                     <nav className="flex items-center">
                       <Link href="/">
-                        <Button variant="ghost" size="icon" className="sm:w-auto sm:px-3">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="sm:w-auto sm:px-3"
+                        >
                           <Home className="h-4 w-4 sm:mr-1" />
                           <span className="hidden sm:inline">{t('home')}</span>
                         </Button>
                       </Link>
                       <Link href="/projects">
-                        <Button variant="ghost" size="icon" className="sm:w-auto sm:px-3">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="sm:w-auto sm:px-3"
+                        >
                           <FolderGit2 className="h-4 w-4 sm:mr-1" />
-                          <span className="hidden sm:inline">{t('projects')}</span>
+                          <span className="hidden sm:inline">
+                            {t('projects')}
+                          </span>
                         </Button>
                       </Link>
                       <Link href="/settings">
-                        <Button variant="ghost" size="icon" className="sm:w-auto sm:px-3">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="sm:w-auto sm:px-3"
+                        >
                           <Settings className="h-4 w-4 sm:mr-1" />
-                          <span className="hidden sm:inline">{t('settings')}</span>
+                          <span className="hidden sm:inline">
+                            {t('settings')}
+                          </span>
                         </Button>
                       </Link>
                     </nav>
                   </div>
 
                   <div className="flex items-center gap-1">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      asChild
-                    >
+                    <Button variant="ghost" size="icon" asChild>
                       <a
                         href="https://github.com/tlyboy/t-build"
                         target="_blank"
@@ -114,12 +129,12 @@ export default async function LocaleLayout({
                 </div>
               </header>
 
-              <main className="flex-1 max-w-6xl mx-auto px-4 py-8 w-full">
+              <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8">
                 {children}
               </main>
 
               <footer className="border-t py-4">
-                <div className="max-w-6xl mx-auto px-4 text-center text-sm text-muted-foreground">
+                <div className="text-muted-foreground mx-auto max-w-6xl px-4 text-center text-sm">
                   {tFooter('text')}
                 </div>
               </footer>

@@ -5,7 +5,13 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
 import { PageHeader } from '@/components/page-header'
 import {
   Dialog,
@@ -56,7 +62,10 @@ export default function SettingsPage() {
   const t = useTranslations('settings')
   const tCommon = useTranslations('common')
   const tDelete = useTranslations('deleteCredential')
-  const [settings, setSettings] = useState<Settings>({ workDir: '', gitCredentials: [] })
+  const [settings, setSettings] = useState<Settings>({
+    workDir: '',
+    gitCredentials: [],
+  })
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [workDir, setWorkDir] = useState('')
@@ -69,7 +78,9 @@ export default function SettingsPage() {
   const [credentialPassword, setCredentialPassword] = useState('')
   const [credentialSshKey, setCredentialSshKey] = useState('')
   const [savingCredential, setSavingCredential] = useState(false)
-  const [deleteCredentialId, setDeleteCredentialId] = useState<string | null>(null)
+  const [deleteCredentialId, setDeleteCredentialId] = useState<string | null>(
+    null,
+  )
 
   useEffect(() => {
     fetchSettings()
@@ -133,7 +144,9 @@ export default function SettingsPage() {
   const handleDeleteCredential = async () => {
     if (!deleteCredentialId) return
 
-    await fetch(`/api/settings/credentials/${deleteCredentialId}`, { method: 'DELETE' })
+    await fetch(`/api/settings/credentials/${deleteCredentialId}`, {
+      method: 'DELETE',
+    })
     setDeleteCredentialId(null)
     fetchSettings()
   }
@@ -148,7 +161,7 @@ export default function SettingsPage() {
 
   if (loading) {
     return (
-      <div className="max-w-6xl mx-auto">
+      <div className="mx-auto max-w-6xl">
         <PageHeader title={t('title')} description={t('description')} />
         <div className="flex items-center justify-center py-12">
           <div className="text-muted-foreground">{t('loading')}</div>
@@ -158,7 +171,7 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6">
+    <div className="mx-auto max-w-6xl space-y-6">
       <PageHeader title={t('title')} description={t('description')} />
 
       <Card>
@@ -167,24 +180,26 @@ export default function SettingsPage() {
             <FolderOpen className="h-5 w-5" />
             {t('workDir')}
           </CardTitle>
-          <CardDescription>
-            {t('workDirDesc')}
-          </CardDescription>
+          <CardDescription>{t('workDirDesc')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex flex-col sm:flex-row gap-2">
+          <div className="flex flex-col gap-2 sm:flex-row">
             <Input
               value={workDir}
               onChange={(e) => setWorkDir(e.target.value)}
               placeholder={t('workDirPlaceholder')}
               className="flex-1 font-mono"
             />
-            <Button onClick={handleSaveWorkDir} disabled={saving} className="sm:w-auto">
+            <Button
+              onClick={handleSaveWorkDir}
+              disabled={saving}
+              className="sm:w-auto"
+            >
               {saving ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : message ? (
                 <>
-                  <Check className="h-4 w-4 mr-1" />
+                  <Check className="mr-1 h-4 w-4" />
                   {t('saved')}
                 </>
               ) : (
@@ -192,9 +207,7 @@ export default function SettingsPage() {
               )}
             </Button>
           </div>
-          <p className="text-xs text-muted-foreground">
-            {t('workDirHint')}
-          </p>
+          <p className="text-muted-foreground text-xs">{t('workDirHint')}</p>
         </CardContent>
       </Card>
 
@@ -206,14 +219,15 @@ export default function SettingsPage() {
                 <Key className="h-5 w-5" />
                 {t('gitCredentials')}
               </CardTitle>
-              <CardDescription>
-                {t('gitCredentialsDesc')}
-              </CardDescription>
+              <CardDescription>{t('gitCredentialsDesc')}</CardDescription>
             </div>
-            <Dialog open={credentialDialogOpen} onOpenChange={setCredentialDialogOpen}>
+            <Dialog
+              open={credentialDialogOpen}
+              onOpenChange={setCredentialDialogOpen}
+            >
               <DialogTrigger asChild>
                 <Button size="sm">
-                  <Plus className="h-4 w-4 mr-1" />
+                  <Plus className="mr-1 h-4 w-4" />
                   {t('add')}
                 </Button>
               </DialogTrigger>
@@ -235,7 +249,12 @@ export default function SettingsPage() {
                     />
                   </div>
 
-                  <Tabs value={credentialType} onValueChange={(v) => setCredentialType(v as 'https' | 'ssh')}>
+                  <Tabs
+                    value={credentialType}
+                    onValueChange={(v) =>
+                      setCredentialType(v as 'https' | 'ssh')
+                    }
+                  >
                     <TabsList className="grid w-full grid-cols-2">
                       <TabsTrigger value="ssh" className="gap-2">
                         <KeyRound className="h-4 w-4" />
@@ -247,7 +266,7 @@ export default function SettingsPage() {
                       </TabsTrigger>
                     </TabsList>
 
-                    <TabsContent value="ssh" className="space-y-4 mt-4">
+                    <TabsContent value="ssh" className="mt-4 space-y-4">
                       <div className="space-y-2">
                         <Label>{t('sshPrivateKey')}</Label>
                         <Textarea
@@ -259,18 +278,20 @@ export default function SettingsPage() {
                           rows={8}
                           className="font-mono text-xs break-all"
                         />
-                        <p className="text-xs text-muted-foreground">
+                        <p className="text-muted-foreground text-xs">
                           {t('sshKeyHint')}
                         </p>
                       </div>
                     </TabsContent>
 
-                    <TabsContent value="https" className="space-y-4 mt-4">
+                    <TabsContent value="https" className="mt-4 space-y-4">
                       <div className="space-y-2">
                         <Label>{t('username')}</Label>
                         <Input
                           value={credentialUsername}
-                          onChange={(e) => setCredentialUsername(e.target.value)}
+                          onChange={(e) =>
+                            setCredentialUsername(e.target.value)
+                          }
                           placeholder={t('usernamePlaceholder')}
                         />
                       </div>
@@ -279,10 +300,12 @@ export default function SettingsPage() {
                         <Input
                           type="password"
                           value={credentialPassword}
-                          onChange={(e) => setCredentialPassword(e.target.value)}
+                          onChange={(e) =>
+                            setCredentialPassword(e.target.value)
+                          }
                           placeholder={t('passwordPlaceholder')}
                         />
-                        <p className="text-xs text-muted-foreground">
+                        <p className="text-muted-foreground text-xs">
                           {t('passwordHint')}
                         </p>
                       </div>
@@ -290,12 +313,19 @@ export default function SettingsPage() {
                   </Tabs>
 
                   <div className="flex justify-end gap-2 pt-4">
-                    <Button variant="outline" onClick={() => setCredentialDialogOpen(false)}>
+                    <Button
+                      variant="outline"
+                      onClick={() => setCredentialDialogOpen(false)}
+                    >
                       {tCommon('cancel')}
                     </Button>
                     <Button
                       onClick={handleAddCredential}
-                      disabled={savingCredential || !credentialName || (credentialType === 'ssh' && !credentialSshKey)}
+                      disabled={
+                        savingCredential ||
+                        !credentialName ||
+                        (credentialType === 'ssh' && !credentialSshKey)
+                      }
                     >
                       {savingCredential ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
@@ -311,7 +341,7 @@ export default function SettingsPage() {
         </CardHeader>
         <CardContent>
           {settings.gitCredentials.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground text-sm">
+            <div className="text-muted-foreground py-8 text-center text-sm">
               {t('noCredentials')}
             </div>
           ) : (
@@ -319,17 +349,17 @@ export default function SettingsPage() {
               {settings.gitCredentials.map((cred) => (
                 <div
                   key={cred.id}
-                  className="flex items-center justify-between p-3 rounded-lg border"
+                  className="flex items-center justify-between rounded-lg border p-3"
                 >
                   <div className="flex items-center gap-3">
                     {cred.type === 'https' ? (
-                      <User className="h-4 w-4 text-muted-foreground" />
+                      <User className="text-muted-foreground h-4 w-4" />
                     ) : (
-                      <KeyRound className="h-4 w-4 text-muted-foreground" />
+                      <KeyRound className="text-muted-foreground h-4 w-4" />
                     )}
                     <div>
-                      <div className="font-medium text-sm">{cred.name}</div>
-                      <div className="text-xs text-muted-foreground">
+                      <div className="text-sm font-medium">{cred.name}</div>
+                      <div className="text-muted-foreground text-xs">
                         {cred.type === 'https'
                           ? `HTTPS · ${cred.username || t('httpsNotConfiguredUsername')}${cred.hasPassword ? ` · ${t('httpsPasswordConfigured')}` : ''}`
                           : `SSH · ${cred.hasSshKey ? t('sshKeyConfigured') : t('sshKeyNotConfigured')}`}
@@ -339,7 +369,7 @@ export default function SettingsPage() {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                    className="text-destructive hover:text-destructive hover:bg-destructive/10 h-8 w-8"
                     onClick={() => setDeleteCredentialId(cred.id)}
                   >
                     <Trash2 className="h-4 w-4" />
@@ -351,7 +381,10 @@ export default function SettingsPage() {
         </CardContent>
       </Card>
 
-      <AlertDialog open={!!deleteCredentialId} onOpenChange={(open) => !open && setDeleteCredentialId(null)}>
+      <AlertDialog
+        open={!!deleteCredentialId}
+        onOpenChange={(open) => !open && setDeleteCredentialId(null)}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>{tDelete('title')}</AlertDialogTitle>
@@ -361,7 +394,10 @@ export default function SettingsPage() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>{tCommon('cancel')}</AlertDialogCancel>
-            <AlertDialogAction variant="destructive" onClick={handleDeleteCredential}>
+            <AlertDialogAction
+              variant="destructive"
+              onClick={handleDeleteCredential}
+            >
               {tCommon('delete')}
             </AlertDialogAction>
           </AlertDialogFooter>

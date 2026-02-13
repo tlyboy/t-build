@@ -8,7 +8,7 @@ import fg from 'fast-glob'
 
 export async function GET(
   request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params
 
@@ -20,7 +20,7 @@ export async function GET(
   if (build.status !== 'success') {
     return NextResponse.json(
       { error: 'Can only download artifacts from successful builds' },
-      { status: 400 }
+      { status: 400 },
     )
   }
 
@@ -32,19 +32,26 @@ export async function GET(
   if (!project.outputPaths || project.outputPaths.length === 0) {
     return NextResponse.json(
       { error: 'Project has no output paths configured' },
-      { status: 400 }
+      { status: 400 },
     )
   }
 
   // 收集所有匹配的文件/目录
-  const validPaths: { fullPath: string; archiveName: string; isDirectory: boolean }[] = []
+  const validPaths: {
+    fullPath: string
+    archiveName: string
+    isDirectory: boolean
+  }[] = []
 
   for (const pattern of project.outputPaths) {
     // 统一使用正斜杠（fast-glob 要求 POSIX 风格路径）
     const normalizedPattern = pattern.replace(/\\/g, '/')
 
     // 检查是否是 glob 模式
-    const isGlob = normalizedPattern.includes('*') || normalizedPattern.includes('?') || normalizedPattern.includes('[')
+    const isGlob =
+      normalizedPattern.includes('*') ||
+      normalizedPattern.includes('?') ||
+      normalizedPattern.includes('[')
 
     if (isGlob) {
       // 使用 fast-glob 匹配
@@ -92,7 +99,7 @@ export async function GET(
   if (validPaths.length === 0) {
     return NextResponse.json(
       { error: 'No valid output paths found' },
-      { status: 404 }
+      { status: 404 },
     )
   }
 
@@ -149,7 +156,7 @@ export async function GET(
             'Content-Disposition': `attachment; filename="${encodeURIComponent(filename)}"`,
             'Content-Length': buffer.length.toString(),
           },
-        })
+        }),
       )
     })
 
@@ -157,8 +164,8 @@ export async function GET(
       resolve(
         NextResponse.json(
           { error: `Archive error: ${err.message}` },
-          { status: 500 }
-        )
+          { status: 500 },
+        ),
       )
     })
 

@@ -12,7 +12,7 @@ export async function POST(request: Request) {
   if (!body.name || !body.path || !body.buildCommand) {
     return NextResponse.json(
       { error: 'Missing required fields: name, path, buildCommand' },
-      { status: 400 }
+      { status: 400 },
     )
   }
 

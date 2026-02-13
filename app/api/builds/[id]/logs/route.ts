@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic'
 
 export async function GET(
   request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params
   const build = await getBuildById(id)
@@ -21,10 +21,22 @@ export async function GET(
       // 如果构建已完成，发送日志后关闭
       if (build.status === 'success' || build.status === 'failed') {
         for (const log of build.logs) {
-          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'log', data: log })}\n\n`))
+          controller.enqueue(
+            encoder.encode(
+              `data: ${JSON.stringify({ type: 'log', data: log })}\n\n`,
+            ),
+          )
         }
-        controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'status', data: build.status })}\n\n`))
-        controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'done', data: { status: build.status, exitCode: build.exitCode } })}\n\n`))
+        controller.enqueue(
+          encoder.encode(
+            `data: ${JSON.stringify({ type: 'status', data: build.status })}\n\n`,
+          ),
+        )
+        controller.enqueue(
+          encoder.encode(
+            `data: ${JSON.stringify({ type: 'done', data: { status: build.status, exitCode: build.exitCode } })}\n\n`,
+          ),
+        )
         controller.close()
         return
       }
@@ -36,7 +48,11 @@ export async function GET(
 
       const onLog = (log: string) => {
         if (initialLogsSent) {
-          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'log', data: log })}\n\n`))
+          controller.enqueue(
+            encoder.encode(
+              `data: ${JSON.stringify({ type: 'log', data: log })}\n\n`,
+            ),
+          )
         } else {
           // 在发送初始日志前先缓冲
           bufferedLogs.push(log)
@@ -44,11 +60,21 @@ export async function GET(
       }
 
       const onStatus = (status: string) => {
-        controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'status', data: status })}\n\n`))
+        controller.enqueue(
+          encoder.encode(
+            `data: ${JSON.stringify({ type: 'status', data: status })}\n\n`,
+          ),
+        )
       }
 
-      const onDone = (data: { status: string; exitCode?: number; error?: string }) => {
-        controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'done', data })}\n\n`))
+      const onDone = (data: {
+        status: string
+        exitCode?: number
+        error?: string
+      }) => {
+        controller.enqueue(
+          encoder.encode(`data: ${JSON.stringify({ type: 'done', data })}\n\n`),
+        )
         cleanup()
         controller.close()
       }
@@ -69,13 +95,28 @@ export async function GET(
       const latestBuild = await getBuildById(id)
       if (latestBuild) {
         for (const log of latestBuild.logs) {
-          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'log', data: log })}\n\n`))
+          controller.enqueue(
+            encoder.encode(
+              `data: ${JSON.stringify({ type: 'log', data: log })}\n\n`,
+            ),
+          )
         }
-        controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'status', data: latestBuild.status })}\n\n`))
+        controller.enqueue(
+          encoder.encode(
+            `data: ${JSON.stringify({ type: 'status', data: latestBuild.status })}\n\n`,
+          ),
+        )
 
         // 如果在此期间构建已完成
-        if (latestBuild.status === 'success' || latestBuild.status === 'failed') {
-          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'done', data: { status: latestBuild.status, exitCode: latestBuild.exitCode } })}\n\n`))
+        if (
+          latestBuild.status === 'success' ||
+          latestBuild.status === 'failed'
+        ) {
+          controller.enqueue(
+            encoder.encode(
+              `data: ${JSON.stringify({ type: 'done', data: { status: latestBuild.status, exitCode: latestBuild.exitCode } })}\n\n`,
+            ),
+          )
           cleanup()
           controller.close()
           return
@@ -84,7 +125,11 @@ export async function GET(
 
       // 发送缓冲的日志
       for (const log of bufferedLogs) {
-        controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'log', data: log })}\n\n`))
+        controller.enqueue(
+          encoder.encode(
+            `data: ${JSON.stringify({ type: 'log', data: log })}\n\n`,
+          ),
+        )
       }
       initialLogsSent = true
     },

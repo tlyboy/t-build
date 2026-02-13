@@ -1,7 +1,13 @@
 'use client'
 
 import { useEffect, useState, use } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { BuildStatusBadge } from '@/components/build-status'
@@ -27,7 +33,11 @@ interface Build {
   finishedAt?: string
 }
 
-export default function ProjectDetailPage({ params }: { params: Promise<{ id: string }> }) {
+export default function ProjectDetailPage({
+  params,
+}: {
+  params: Promise<{ id: string }>
+}) {
   const { id } = use(params)
   const router = useRouter()
   const t = useTranslations('projectDetail')
@@ -39,14 +49,17 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
 
   useEffect(() => {
     Promise.all([
-      fetch(`/api/projects/${id}`).then((res) => res.ok ? res.json() : null),
+      fetch(`/api/projects/${id}`).then((res) => (res.ok ? res.json() : null)),
       fetch(`/api/builds?projectId=${id}`).then((res) => res.json()),
     ])
       .then(([proj, blds]) => {
         setProject(proj)
-        setBuilds(blds.sort((a: Build, b: Build) =>
-          new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime()
-        ))
+        setBuilds(
+          blds.sort(
+            (a: Build, b: Build) =>
+              new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime(),
+          ),
+        )
       })
       .finally(() => setLoading(false))
   }, [id])
@@ -71,7 +84,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
 
   if (loading) {
     return (
-      <div className="max-w-6xl mx-auto space-y-6">
+      <div className="mx-auto max-w-6xl space-y-6">
         <PageHeader title={t('title')} backHref="/projects" />
         <Card>
           <CardHeader>
@@ -103,14 +116,14 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
 
   if (!project) {
     return (
-      <div className="max-w-6xl mx-auto">
+      <div className="mx-auto max-w-6xl">
         <PageHeader title={t('notFound')} backHref="/projects" />
       </div>
     )
   }
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6">
+    <div className="mx-auto max-w-6xl space-y-6">
       <PageHeader
         title={project.name}
         description={project.path}
@@ -118,12 +131,12 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
       >
         <Link href={`/projects/${id}/edit`}>
           <Button variant="outline">
-            <Settings className="h-4 w-4 mr-2" />
+            <Settings className="mr-2 h-4 w-4" />
             {t('edit')}
           </Button>
         </Link>
         <Button onClick={handleBuild} disabled={building}>
-          <Play className="h-4 w-4 mr-2" />
+          <Play className="mr-2 h-4 w-4" />
           {building ? t('starting') : t('startBuild')}
         </Button>
       </PageHeader>
@@ -134,19 +147,29 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <div className="text-sm text-muted-foreground mb-1.5">{t('buildCommand')}</div>
-            <pre className="text-sm font-mono bg-muted/50 rounded-md p-3 overflow-x-auto whitespace-pre-wrap break-all">
+            <div className="text-muted-foreground mb-1.5 text-sm">
+              {t('buildCommand')}
+            </div>
+            <pre className="bg-muted/50 overflow-x-auto rounded-md p-3 font-mono text-sm break-all whitespace-pre-wrap">
               {project.buildCommand}
             </pre>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <div className="text-sm text-muted-foreground">{t('createdAt')}</div>
-              <div className="text-sm">{new Date(project.createdAt).toLocaleString(locale)}</div>
+              <div className="text-muted-foreground text-sm">
+                {t('createdAt')}
+              </div>
+              <div className="text-sm">
+                {new Date(project.createdAt).toLocaleString(locale)}
+              </div>
             </div>
             <div>
-              <div className="text-sm text-muted-foreground">{t('updatedAt')}</div>
-              <div className="text-sm">{new Date(project.updatedAt).toLocaleString(locale)}</div>
+              <div className="text-muted-foreground text-sm">
+                {t('updatedAt')}
+              </div>
+              <div className="text-sm">
+                {new Date(project.updatedAt).toLocaleString(locale)}
+              </div>
             </div>
           </div>
         </CardContent>
@@ -166,17 +189,23 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
                 <Link
                   key={build.id}
                   href={`/builds/${build.id}`}
-                  className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 rounded-md border hover:bg-muted transition-colors"
+                  className="hover:bg-muted flex flex-col justify-between gap-2 rounded-md border p-3 transition-colors sm:flex-row sm:items-center"
                 >
                   <div className="flex items-center gap-3">
                     <BuildStatusBadge status={build.status} />
-                    <span className="text-sm text-muted-foreground">
+                    <span className="text-muted-foreground text-sm">
                       {new Date(build.startedAt).toLocaleString(locale)}
                     </span>
                   </div>
                   {build.finishedAt && (
-                    <span className="text-xs text-muted-foreground sm:text-right">
-                      {t('duration', { seconds: Math.round((new Date(build.finishedAt).getTime() - new Date(build.startedAt).getTime()) / 1000) })}
+                    <span className="text-muted-foreground text-xs sm:text-right">
+                      {t('duration', {
+                        seconds: Math.round(
+                          (new Date(build.finishedAt).getTime() -
+                            new Date(build.startedAt).getTime()) /
+                            1000,
+                        ),
+                      })}
                     </span>
                   )}
                 </Link>

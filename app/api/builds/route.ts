@@ -1,5 +1,9 @@
 import { NextResponse } from 'next/server'
-import { getAllBuilds, getBuildsByProjectId, createBuild } from '@/lib/data/builds'
+import {
+  getAllBuilds,
+  getBuildsByProjectId,
+  createBuild,
+} from '@/lib/data/builds'
 import { getProjectById } from '@/lib/data/projects'
 import { executeBuild } from '@/lib/build-executor'
 
@@ -22,7 +26,7 @@ export async function POST(request: Request) {
   if (!body.projectId) {
     return NextResponse.json(
       { error: 'Missing required field: projectId' },
-      { status: 400 }
+      { status: 400 },
     )
   }
 

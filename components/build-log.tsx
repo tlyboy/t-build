@@ -24,7 +24,11 @@ function stripAnsi(str: string): string {
   return str.replace(/\x1B\[[0-9;]*[A-Za-z]/g, '')
 }
 
-export function BuildLog({ buildId, initialStatus = 'pending', onStatusChange }: BuildLogProps) {
+export function BuildLog({
+  buildId,
+  initialStatus = 'pending',
+  onStatusChange,
+}: BuildLogProps) {
   const t = useTranslations('buildLog')
   const [logs, setLogs] = useState<string[]>([])
   const [status, setStatus] = useState<BuildStatus>(initialStatus)
@@ -68,7 +72,7 @@ export function BuildLog({ buildId, initialStatus = 'pending', onStatusChange }:
 
         if (build.logs.length > lastLogCountRef.current) {
           const newLogs = build.logs.slice(lastLogCountRef.current)
-          setLogs(prev => [...prev, ...newLogs.map(stripAnsi)])
+          setLogs((prev) => [...prev, ...newLogs.map(stripAnsi)])
           lastLogCountRef.current = build.logs.length
         }
 
@@ -112,14 +116,14 @@ export function BuildLog({ buildId, initialStatus = 'pending', onStatusChange }:
       <div className="flex items-center gap-4">
         <BuildStatusBadge status={status} />
         {isRunning && isPolling && (
-          <span className="text-xs text-muted-foreground flex items-center gap-1">
-            <span className="h-2 w-2 bg-green-500 rounded-full animate-pulse" />
+          <span className="text-muted-foreground flex items-center gap-1 text-xs">
+            <span className="h-2 w-2 animate-pulse rounded-full bg-green-500" />
             {t('liveUpdating')}
           </span>
         )}
       </div>
 
-      <ScrollArea className="h-[500px] rounded-md border bg-muted/30">
+      <ScrollArea className="bg-muted/30 h-[500px] rounded-md border">
         <div className="p-4 font-mono text-sm">
           {logs.length === 0 ? (
             <div className="text-muted-foreground">
