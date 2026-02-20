@@ -2,11 +2,9 @@
 
 import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader } from '@/components/ui/card'
-import { Skeleton } from '@/components/ui/skeleton'
 import { ProjectCard } from '@/components/project-card'
 import { PageHeader } from '@/components/page-header'
-import { Plus, FolderGit2 } from 'lucide-react'
+import { Plus } from 'lucide-react'
 import { Link, useRouter } from '@/i18n/navigation'
 import { useTranslations } from 'next-intl'
 
@@ -55,23 +53,6 @@ export default function ProjectsPage() {
     return (
       <div className="mx-auto max-w-6xl">
         <PageHeader title={t('title')} description={t('description')} />
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {[1, 2, 3].map((i) => (
-            <Card key={i}>
-              <CardHeader className="pb-3">
-                <Skeleton className="h-5 w-32" />
-                <Skeleton className="mt-2 h-3 w-48" />
-              </CardHeader>
-              <CardContent className="pt-0">
-                <Skeleton className="mb-4 h-16 w-full" />
-                <div className="flex gap-2">
-                  <Skeleton className="h-8 w-20" />
-                  <Skeleton className="h-8 w-16" />
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
       </div>
     )
   }
@@ -97,12 +78,8 @@ export default function ProjectsPage() {
       </PageHeader>
 
       {projects.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-lg border border-dashed py-16 sm:py-24">
-          <div className="bg-primary/10 mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full">
-            <FolderGit2 className="text-primary h-8 w-8" />
-          </div>
-          <h3 className="mb-2 text-lg font-semibold">{t('noProjects')}</h3>
-          <p className="text-muted-foreground mb-6 max-w-sm px-4 text-center text-sm">
+        <div className="py-12 text-center sm:py-20">
+          <p className="text-muted-foreground mb-4 text-sm">
             {t('noProjectsDesc')}
           </p>
           <Link href="/projects/new">

@@ -1,3 +1,6 @@
+'use client'
+
+import { useState, useEffect } from 'react'
 import {
   Card,
   CardContent,
@@ -8,7 +11,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Link } from '@/i18n/navigation'
-import { getTranslations, setRequestLocale, getLocale } from 'next-intl/server'
+import { useTranslations, useLocale } from 'next-intl'
 import {
   FolderGit2,
   Plus,
@@ -19,59 +22,26 @@ import {
   ArrowRight,
 } from 'lucide-react'
 
-async function getStats() {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
+interface Stats {
+  projectCount: number
+  totalBuilds: number
+  successBuilds: number
+  failedBuilds: number
+  successRate: number
+  recentBuilds: Build[]
+  projects: Project[]
+}
 
-  try {
-    const [projectsRes, buildsRes] = await Promise.all([
-      fetch(`${baseUrl}/api/projects`, { cache: 'no-store' }),
-      fetch(`${baseUrl}/api/builds`, { cache: 'no-store' }),
-    ])
+interface Build {
+  id: string
+  projectId: string
+  status: string
+  startedAt: string
+}
 
-    const projects = projectsRes.ok ? await projectsRes.json() : []
-    const builds = buildsRes.ok ? await buildsRes.json() : []
-
-    const recentBuilds = builds
-      .sort(
-        (a: { startedAt: string }, b: { startedAt: string }) =>
-          new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime(),
-      )
-      .slice(0, 5)
-
-    const successRate =
-      builds.length > 0
-        ? Math.round(
-            (builds.filter((b: { status: string }) => b.status === 'success')
-              .length /
-              builds.length) *
-              100,
-          )
-        : 0
-
-    return {
-      projectCount: projects.length,
-      totalBuilds: builds.length,
-      successBuilds: builds.filter(
-        (b: { status: string }) => b.status === 'success',
-      ).length,
-      failedBuilds: builds.filter(
-        (b: { status: string }) => b.status === 'failed',
-      ).length,
-      successRate,
-      recentBuilds,
-      projects,
-    }
-  } catch {
-    return {
-      projectCount: 0,
-      totalBuilds: 0,
-      successBuilds: 0,
-      failedBuilds: 0,
-      successRate: 0,
-      recentBuilds: [],
-      projects: [],
-    }
-  }
+interface Project {
+  id: string
+  name: string
 }
 
 function formatRelativeTime(
@@ -110,16 +80,96 @@ function formatRelativeTime(
   return date.toLocaleDateString(locale)
 }
 
-export default async function Home() {
-  const locale = await getLocale()
-  setRequestLocale(locale)
-  const stats = await getStats()
-  const t = await getTranslations('dashboard')
+export default function Home() {
+  const locale = useLocale()
+  const t = useTranslations('dashboard')
+  const tProjects = useTranslations('projects')
+  const [stats, setStats] = useState<Stats | null>(null)
+  const [loading, setLoading] = useState(true)
+
   const relativeTimeTranslations = {
     justNow: t('justNow'),
     minutesAgo: t.raw('minutesAgo') as string,
     hoursAgo: t.raw('hoursAgo') as string,
     daysAgo: t.raw('daysAgo') as string,
+  }
+
+  useEffect(() => {
+    Promise.all([
+      fetch('/api/projects').then((res) => (res.ok ? res.json() : [])),
+      fetch('/api/builds').then((res) => (res.ok ? res.json() : [])),
+    ])
+      .then(([projects, builds]) => {
+        const recentBuilds = builds
+          .sort(
+            (a: Build, b: Build) =>
+              new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime(),
+          )
+          .slice(0, 5)
+
+        const successRate =
+          builds.length > 0
+            ? Math.round(
+                (builds.filter((b: Build) => b.status === 'success').length /
+                  builds.length) *
+                  100,
+              )
+            : 0
+
+        setStats({
+          projectCount: projects.length,
+          totalBuilds: builds.length,
+          successBuilds: builds.filter((b: Build) => b.status === 'success')
+            .length,
+          failedBuilds: builds.filter((b: Build) => b.status === 'failed')
+            .length,
+          successRate,
+          recentBuilds,
+          projects,
+        })
+      })
+      .finally(() => setLoading(false))
+  }, [])
+
+  if (loading) {
+    return (
+      <div className="mx-auto max-w-6xl space-y-6 sm:space-y-8">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h1 className="text-2xl font-bold sm:text-3xl">{t('title')}</h1>
+            <p className="text-muted-foreground text-sm sm:text-base">
+              {t('description')}
+            </p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (!stats || stats.projectCount === 0) {
+    return (
+      <div className="mx-auto max-w-6xl space-y-6 sm:space-y-8">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h1 className="text-2xl font-bold sm:text-3xl">{t('title')}</h1>
+            <p className="text-muted-foreground text-sm sm:text-base">
+              {t('description')}
+            </p>
+          </div>
+        </div>
+        <div className="py-12 text-center sm:py-20">
+          <p className="text-muted-foreground mb-4 text-sm">
+            {tProjects('noProjectsDesc')}
+          </p>
+          <Link href="/projects/new">
+            <Button>
+              <Plus className="mr-2 h-4 w-4" />
+              {tProjects('newProject')}
+            </Button>
+          </Link>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -131,14 +181,12 @@ export default async function Home() {
             {t('description')}
           </p>
         </div>
-        {stats.projectCount > 0 && (
-          <Link href="/projects/new">
-            <Button className="w-full sm:w-auto">
-              <Plus className="mr-2 h-4 w-4" />
-              {t('newProject')}
-            </Button>
-          </Link>
-        )}
+        <Link href="/projects/new">
+          <Button className="w-full sm:w-auto">
+            <Plus className="mr-2 h-4 w-4" />
+            {t('newProject')}
+          </Button>
+        </Link>
       </div>
 
       <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
@@ -237,109 +285,72 @@ export default async function Home() {
         </CardHeader>
         <CardContent>
           {stats.recentBuilds.length === 0 ? (
-            <div className="py-8 text-center sm:py-12">
-              <div className="bg-muted mb-4 inline-flex h-12 w-12 items-center justify-center rounded-full">
-                <Layers className="text-muted-foreground h-6 w-6" />
-              </div>
-              <p className="text-muted-foreground mb-4 text-sm">
-                {t('noBuilds')}
-              </p>
-              <Link href="/projects">
-                <Button variant="outline" size="sm">
-                  {t('triggerBuild')}
-                </Button>
-              </Link>
-            </div>
+            <p className="text-muted-foreground py-6 text-center text-sm">
+              {t('noBuilds')}
+            </p>
           ) : (
             <div className="space-y-1">
-              {stats.recentBuilds.map(
-                (build: {
-                  id: string
-                  projectId: string
-                  status: string
-                  startedAt: string
-                }) => {
-                  const project = stats.projects.find(
-                    (p: { id: string }) => p.id === build.projectId,
-                  )
-                  return (
-                    <Link
-                      key={build.id}
-                      href={`/builds/${build.id}`}
-                      className="hover:bg-muted/50 group flex cursor-pointer items-center justify-between rounded-lg p-2.5 transition-colors sm:p-3"
-                    >
-                      <div className="flex min-w-0 items-center gap-2 sm:gap-3">
-                        <div
-                          className={`h-2 w-2 flex-shrink-0 rounded-full ${
-                            build.status === 'success'
-                              ? 'bg-green-500'
-                              : build.status === 'failed'
-                                ? 'bg-red-500'
-                                : build.status === 'running'
-                                  ? 'animate-pulse bg-yellow-500'
-                                  : 'bg-gray-400'
-                          }`}
-                        />
-                        <span className="truncate text-sm font-medium">
-                          {project?.name || 'Unknown'}
-                        </span>
-                        <Badge
-                          variant={
-                            build.status === 'success'
-                              ? 'outline'
-                              : build.status === 'failed'
-                                ? 'destructive'
-                                : 'secondary'
-                          }
-                          className="hidden text-xs sm:inline-flex"
-                        >
-                          {build.status === 'success'
-                            ? t('statusSuccess')
+              {stats.recentBuilds.map((build) => {
+                const project = stats.projects.find(
+                  (p) => p.id === build.projectId,
+                )
+                return (
+                  <Link
+                    key={build.id}
+                    href={`/builds/${build.id}`}
+                    className="hover:bg-muted/50 group flex cursor-pointer items-center justify-between rounded-lg p-2.5 transition-colors sm:p-3"
+                  >
+                    <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+                      <div
+                        className={`h-2 w-2 flex-shrink-0 rounded-full ${
+                          build.status === 'success'
+                            ? 'bg-green-500'
                             : build.status === 'failed'
-                              ? t('statusFailed')
+                              ? 'bg-red-500'
                               : build.status === 'running'
-                                ? t('statusRunning')
-                                : t('statusPending')}
-                        </Badge>
-                      </div>
-                      <div className="flex flex-shrink-0 items-center gap-2">
-                        <span className="text-muted-foreground text-xs">
-                          {formatRelativeTime(
-                            build.startedAt,
-                            locale,
-                            relativeTimeTranslations,
-                          )}
-                        </span>
-                        <ArrowRight className="text-muted-foreground hidden h-4 w-4 opacity-0 transition-opacity group-hover:opacity-100 sm:block" />
-                      </div>
-                    </Link>
-                  )
-                },
-              )}
+                                ? 'animate-pulse bg-yellow-500'
+                                : 'bg-gray-400'
+                        }`}
+                      />
+                      <span className="truncate text-sm font-medium">
+                        {project?.name || 'Unknown'}
+                      </span>
+                      <Badge
+                        variant={
+                          build.status === 'success'
+                            ? 'outline'
+                            : build.status === 'failed'
+                              ? 'destructive'
+                              : 'secondary'
+                        }
+                        className="hidden text-xs sm:inline-flex"
+                      >
+                        {build.status === 'success'
+                          ? t('statusSuccess')
+                          : build.status === 'failed'
+                            ? t('statusFailed')
+                            : build.status === 'running'
+                              ? t('statusRunning')
+                              : t('statusPending')}
+                      </Badge>
+                    </div>
+                    <div className="flex flex-shrink-0 items-center gap-2">
+                      <span className="text-muted-foreground text-xs">
+                        {formatRelativeTime(
+                          build.startedAt,
+                          locale,
+                          relativeTimeTranslations,
+                        )}
+                      </span>
+                      <ArrowRight className="text-muted-foreground hidden h-4 w-4 opacity-0 transition-opacity group-hover:opacity-100 sm:block" />
+                    </div>
+                  </Link>
+                )
+              })}
             </div>
           )}
         </CardContent>
       </Card>
-
-      {stats.projectCount === 0 && (
-        <Card className="border-dashed">
-          <CardContent className="flex flex-col items-center justify-center py-10 sm:py-16">
-            <div className="bg-primary/10 mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full">
-              <FolderGit2 className="text-primary h-8 w-8" />
-            </div>
-            <h3 className="mb-2 text-lg font-semibold">{t('getStarted')}</h3>
-            <p className="text-muted-foreground mb-6 max-w-sm text-center text-sm">
-              {t('getStartedDesc')}
-            </p>
-            <Link href="/projects/new">
-              <Button>
-                <Plus className="mr-2 h-4 w-4" />
-                {t('createFirst')}
-              </Button>
-            </Link>
-          </CardContent>
-        </Card>
-      )}
     </div>
   )
 }

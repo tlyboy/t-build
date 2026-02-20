@@ -4,8 +4,6 @@ import { useEffect, useState, use } from 'react'
 import { ProjectForm } from '@/components/project-form'
 import { PageHeader } from '@/components/page-header'
 import { Button } from '@/components/ui/button'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Card, CardContent } from '@/components/ui/card'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -73,23 +71,7 @@ export default function EditProjectPage({
   }
 
   if (pageLoading) {
-    return (
-      <>
-        <PageHeader title={t('editProject')} backHref={`/projects/${id}`} />
-        <div className="mx-auto max-w-lg">
-          <Card>
-            <CardContent className="space-y-4 pt-6">
-              {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="space-y-2">
-                  <Skeleton className="h-4 w-20" />
-                  <Skeleton className="h-10 w-full" />
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-        </div>
-      </>
-    )
+    return <PageHeader title={t('editProject')} backHref={`/projects/${id}`} />
   }
 
   if (!project) {

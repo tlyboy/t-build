@@ -163,9 +163,6 @@ export default function SettingsPage() {
     return (
       <div className="mx-auto max-w-6xl">
         <PageHeader title={t('title')} description={t('description')} />
-        <div className="flex items-center justify-center py-12">
-          <div className="text-muted-foreground">{t('loading')}</div>
-        </div>
       </div>
     )
   }
