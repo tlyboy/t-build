@@ -33,13 +33,11 @@ import {
 } from '@/components/ui/alert-dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
-  FolderOpen,
   Plus,
   Trash2,
   Key,
   User,
   Loader2,
-  Check,
   KeyRound,
 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
@@ -53,23 +51,12 @@ interface GitCredential {
   hasSshKey?: boolean
 }
 
-interface Settings {
-  workDir: string
-  gitCredentials: GitCredential[]
-}
-
 export default function SettingsPage() {
   const t = useTranslations('settings')
   const tCommon = useTranslations('common')
   const tDelete = useTranslations('deleteCredential')
-  const [settings, setSettings] = useState<Settings>({
-    workDir: '',
-    gitCredentials: [],
-  })
+  const [credentials, setCredentials] = useState<GitCredential[]>([])
   const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
-  const [workDir, setWorkDir] = useState('')
-  const [message, setMessage] = useState('')
 
   const [credentialDialogOpen, setCredentialDialogOpen] = useState(false)
   const [credentialType, setCredentialType] = useState<'https' | 'ssh'>('ssh')
@@ -91,29 +78,10 @@ export default function SettingsPage() {
       const res = await fetch('/api/settings')
       if (res.ok) {
         const data = await res.json()
-        setSettings(data)
-        setWorkDir(data.workDir || '')
+        setCredentials(data.gitCredentials || [])
       }
     } finally {
       setLoading(false)
-    }
-  }
-
-  const handleSaveWorkDir = async () => {
-    setSaving(true)
-    setMessage('')
-    try {
-      const res = await fetch('/api/settings', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ workDir }),
-      })
-      if (res.ok) {
-        setMessage(t('saved'))
-        setTimeout(() => setMessage(''), 2000)
-      }
-    } finally {
-      setSaving(false)
     }
   }
 
@@ -170,43 +138,6 @@ export default function SettingsPage() {
   return (
     <div className="mx-auto max-w-6xl space-y-6">
       <PageHeader title={t('title')} description={t('description')} />
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <FolderOpen className="h-5 w-5" />
-            {t('workDir')}
-          </CardTitle>
-          <CardDescription>{t('workDirDesc')}</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex flex-col gap-2 sm:flex-row">
-            <Input
-              value={workDir}
-              onChange={(e) => setWorkDir(e.target.value)}
-              placeholder={t('workDirPlaceholder')}
-              className="flex-1 font-mono"
-            />
-            <Button
-              onClick={handleSaveWorkDir}
-              disabled={saving}
-              className="sm:w-auto"
-            >
-              {saving ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : message ? (
-                <>
-                  <Check className="mr-1 h-4 w-4" />
-                  {t('saved')}
-                </>
-              ) : (
-                t('save')
-              )}
-            </Button>
-          </div>
-          <p className="text-muted-foreground text-xs">{t('workDirHint')}</p>
-        </CardContent>
-      </Card>
 
       <Card>
         <CardHeader>
@@ -337,13 +268,13 @@ export default function SettingsPage() {
           </div>
         </CardHeader>
         <CardContent>
-          {settings.gitCredentials.length === 0 ? (
+          {credentials.length === 0 ? (
             <div className="text-muted-foreground py-8 text-center text-sm">
               {t('noCredentials')}
             </div>
           ) : (
             <div className="space-y-2">
-              {settings.gitCredentials.map((cred) => (
+              {credentials.map((cred) => (
                 <div
                   key={cred.id}
                   className="flex items-center justify-between rounded-lg border p-3"

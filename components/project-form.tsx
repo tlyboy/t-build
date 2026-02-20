@@ -18,7 +18,6 @@ import { DirectoryPicker } from '@/components/directory-picker'
 import {
   Loader2,
   Settings,
-  AlertCircle,
   GitBranch,
   ChevronDown,
   ChevronUp,
@@ -71,12 +70,11 @@ export function ProjectForm({
 
   const [workDir, setWorkDir] = useState('')
   const [credentials, setCredentials] = useState<GitCredential[]>([])
-  const [settingsLoaded, setSettingsLoaded] = useState(false)
 
   const [name, setName] = useState(project?.name || '')
   const [relativePath, setRelativePath] = useState('')
   const [buildCommand, setBuildCommand] = useState(
-    project?.buildCommand || 'ni && nr build',
+    project?.buildCommand || 'ni\nnr build',
   )
   const [gitPullBeforeBuild, setGitPullBeforeBuild] = useState(
     project?.gitPullBeforeBuild || false,
@@ -113,7 +111,6 @@ export function ProjectForm({
             setRelativePath(project.path.replace(/\\/g, '/'))
           }
         }
-        setSettingsLoaded(true)
       })
   }, [project?.path])
 
@@ -228,26 +225,6 @@ export function ProjectForm({
     }
   }
 
-  if (settingsLoaded && !workDir) {
-    return (
-      <Card className="w-full">
-        <CardContent className="flex flex-col items-center justify-center py-12">
-          <AlertCircle className="text-muted-foreground mb-4 h-12 w-12" />
-          <h3 className="mb-2 text-lg font-semibold">{t('workDirRequired')}</h3>
-          <p className="text-muted-foreground mb-6 max-w-sm text-center text-sm">
-            {t('workDirRequiredDesc')}
-          </p>
-          <Link href="/settings">
-            <Button>
-              <Settings className="mr-2 h-4 w-4" />
-              {t('goToSettings')}
-            </Button>
-          </Link>
-        </CardContent>
-      </Card>
-    )
-  }
-
   return (
     <Card className="w-full">
       <CardContent className="pt-6">
@@ -255,12 +232,6 @@ export function ProjectForm({
           {error && (
             <div className="bg-destructive/10 text-destructive rounded-lg p-3 text-sm">
               {error}
-            </div>
-          )}
-
-          {workDir && (
-            <div className="text-muted-foreground bg-muted/50 rounded-md px-3 py-2 font-mono text-xs">
-              {t('workDir')}: {workDir}
             </div>
           )}
 
