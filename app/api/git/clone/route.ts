@@ -19,10 +19,7 @@ export async function POST(request: Request) {
 
   // Validate branch name to prevent argument injection
   if (branch && !/^[\w.\-/]+$/.test(branch)) {
-    return NextResponse.json(
-      { error: 'Invalid branch name' },
-      { status: 400 },
-    )
+    return NextResponse.json({ error: 'Invalid branch name' }, { status: 400 })
   }
 
   // 解析目标路径

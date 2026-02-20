@@ -66,7 +66,9 @@ export async function DELETE(
     if (settings.workDir) {
       const projectDir = path.join(settings.workDir, project.path)
       if (projectDir.startsWith(settings.workDir)) {
-        await fs.rm(projectDir, { recursive: true, force: true }).catch(() => {})
+        await fs
+          .rm(projectDir, { recursive: true, force: true })
+          .catch(() => {})
       }
     }
   }

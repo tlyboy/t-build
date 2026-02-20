@@ -32,14 +32,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import {
-  Plus,
-  Trash2,
-  Key,
-  User,
-  Loader2,
-  KeyRound,
-} from 'lucide-react'
+import { Plus, Trash2, Key, User, Loader2, KeyRound } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
 interface GitCredential {

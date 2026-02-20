@@ -271,7 +271,12 @@ export async function executeBuild(buildId: string): Promise<void> {
   // 如果配置了构建前 git pull
   if (project.gitPullBeforeBuild) {
     logLine('')
-    const gitResult = await executeGitPull(project, projectDir, buildId, logLine)
+    const gitResult = await executeGitPull(
+      project,
+      projectDir,
+      buildId,
+      logLine,
+    )
     if (!gitResult.success) {
       logLine('')
       logLine('[T-Build] Build aborted due to git pull failure')
