@@ -3,27 +3,42 @@ import path from 'path'
 import os from 'os'
 import { updateBuild, appendBuildLogs, getBuildById } from './data/builds'
 import { getProjectById, Project } from './data/projects'
-import { getGitCredentialById } from './data/settings'
+import { getGitCredentialById, getSettings } from './data/settings'
 import { EventEmitter } from 'events'
 
-const buildEmitters = new Map<string, EventEmitter>()
-const runningProcesses = new Map<string, ChildProcess>()
+// globalThis ensures shared state across Next.js route bundles
+const g = globalThis as {
+  __tbuild?: {
+    emitters: Map<string, EventEmitter>
+    processes: Map<string, ChildProcess>
+  }
+}
+const state = (g.__tbuild ??= {
+  emitters: new Map<string, EventEmitter>(),
+  processes: new Map<string, ChildProcess>(),
+})
 
 export function getBuildEmitter(buildId: string): EventEmitter {
-  let emitter = buildEmitters.get(buildId)
+  let emitter = state.emitters.get(buildId)
   if (!emitter) {
     emitter = new EventEmitter()
-    buildEmitters.set(buildId, emitter)
+    state.emitters.set(buildId, emitter)
   }
   return emitter
 }
 
 export function cleanupBuildEmitter(buildId: string) {
-  buildEmitters.delete(buildId)
+  state.emitters.delete(buildId)
+}
+
+function resolveProjectPath(workDir: string, projectPath: string): string {
+  if (path.isAbsolute(projectPath)) return projectPath
+  return path.join(workDir, projectPath)
 }
 
 async function executeGitPull(
   project: Project,
+  projectDir: string,
   buildId: string,
   logLine: (line: string) => void,
 ): Promise<{ success: boolean; commitHash?: string; commitMessage?: string }> {
@@ -60,11 +75,27 @@ async function executeGitPull(
   return new Promise((resolve) => {
     logLine('[T-Build] Executing git pull...')
 
+    // Prevent any credential helper / SSH from hanging
+    if (!env.GIT_SSH_COMMAND) {
+      env.GIT_SSH_COMMAND =
+        'ssh -o ConnectTimeout=10 -o StrictHostKeyChecking=no'
+    }
+
     const child = spawn('git', ['pull'], {
-      cwd: project.path,
+      cwd: projectDir,
       shell: true,
-      env,
+      env: {
+        ...env,
+        GIT_TERMINAL_PROMPT: '0',
+        GIT_ASKPASS: '/bin/echo',
+        GIT_CONFIG_NOSYSTEM: '1',
+      },
     })
+
+    const timer = setTimeout(() => {
+      child.kill('SIGTERM')
+      logLine('[T-Build] Git pull timed out (30s limit)')
+    }, 30 * 1000)
 
     child.stdout?.on('data', (data: Buffer) => {
       const lines = data.toString().split('\n')
@@ -81,9 +112,10 @@ async function executeGitPull(
     })
 
     child.on('close', async (code) => {
+      clearTimeout(timer)
       await cleanup()
       if (code === 0) {
-        const gitInfo = getGitInfo(project.path)
+        const gitInfo = getGitInfo(projectDir)
         if (gitInfo.hash) {
           logLine(
             `[T-Build] Git pull successful, commit: ${gitInfo.hash.substring(0, 8)}`,
@@ -106,6 +138,7 @@ async function executeGitPull(
     })
 
     child.on('error', async (error) => {
+      clearTimeout(timer)
       await cleanup()
       logLine(`[T-Build] Git pull error: ${error.message}`)
       resolve({ success: false })
@@ -189,6 +222,10 @@ export async function executeBuild(buildId: string): Promise<void> {
     throw new Error(`Project ${build.projectId} not found`)
   }
 
+  // Resolve relative project path to absolute using workDir
+  const settings = await getSettings()
+  const projectDir = resolveProjectPath(settings.workDir, project.path)
+
   const emitter = getBuildEmitter(buildId)
 
   await updateBuild(buildId, { status: 'running' })
@@ -205,8 +242,17 @@ export async function executeBuild(buildId: string): Promise<void> {
   }
 
   const logLine = (line: string) => {
-    pendingLogs.push(line)
-    emitter.emit('log', line)
+    // Strip project absolute path from all output
+    let sanitized = line
+      .replaceAll(projectDir + '/', '')
+      .replaceAll(projectDir, '.')
+    if (settings.workDir) {
+      sanitized = sanitized
+        .replaceAll(settings.workDir + '/', '')
+        .replaceAll(settings.workDir, '.')
+    }
+    pendingLogs.push(sanitized)
+    emitter.emit('log', sanitized)
 
     if (!flushTimer) {
       flushTimer = setTimeout(async () => {
@@ -217,7 +263,7 @@ export async function executeBuild(buildId: string): Promise<void> {
   }
 
   logLine(`[T-Build] Starting build for project: ${project.name}`)
-  logLine(`[T-Build] Working directory: ${project.path}`)
+  logLine(`[T-Build] Working directory: ${projectDir}`)
 
   let commitHash: string | undefined
   let commitMessage: string | undefined
@@ -225,7 +271,7 @@ export async function executeBuild(buildId: string): Promise<void> {
   // 如果配置了构建前 git pull
   if (project.gitPullBeforeBuild) {
     logLine('')
-    const gitResult = await executeGitPull(project, buildId, logLine)
+    const gitResult = await executeGitPull(project, projectDir, buildId, logLine)
     if (!gitResult.success) {
       logLine('')
       logLine('[T-Build] Build aborted due to git pull failure')
@@ -251,7 +297,7 @@ export async function executeBuild(buildId: string): Promise<void> {
     commitMessage = gitResult.commitMessage
   } else {
     // 即使不 pull，也尝试获取当前 commit 信息
-    const gitInfo = getGitInfo(project.path)
+    const gitInfo = getGitInfo(projectDir)
     commitHash = gitInfo.hash
     commitMessage = gitInfo.message
   }
@@ -299,7 +345,7 @@ export async function executeBuild(buildId: string): Promise<void> {
 
   // 顺序执行每个构建命令，支持 cd 切换目录
   let lastExitCode: number | null = 0
-  let currentDir = project.path
+  let currentDir = projectDir
   let stepCount = 0
 
   for (let i = 0; i < buildLines.length; i++) {
@@ -357,7 +403,7 @@ export async function executeBuild(buildId: string): Promise<void> {
 
     logLine('')
     logLine(`[T-Build]${stepNum} Executing: ${line}`)
-    if (currentDir !== project.path) {
+    if (currentDir !== projectDir) {
       logLine(`[T-Build] Working directory: ${currentDir}`)
     }
 
@@ -413,9 +459,9 @@ export async function executeBuild(buildId: string): Promise<void> {
 }
 
 export function cancelBuild(buildId: string): boolean {
-  const process = runningProcesses.get(buildId)
-  if (process) {
-    process.kill('SIGTERM')
+  const proc = state.processes.get(buildId)
+  if (proc) {
+    proc.kill('SIGTERM')
     return true
   }
   return false

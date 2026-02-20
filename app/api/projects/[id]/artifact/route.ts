@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server'
-import { getBuildById } from '@/lib/data/builds'
 import { getProjectById } from '@/lib/data/projects'
 import { getSettings } from '@/lib/data/settings'
 import archiver from 'archiver'
@@ -13,19 +12,7 @@ export async function GET(
 ) {
   const { id } = await params
 
-  const build = await getBuildById(id)
-  if (!build) {
-    return NextResponse.json({ error: 'Build not found' }, { status: 404 })
-  }
-
-  if (build.status !== 'success') {
-    return NextResponse.json(
-      { error: 'Can only download artifacts from successful builds' },
-      { status: 400 },
-    )
-  }
-
-  const project = await getProjectById(build.projectId)
+  const project = await getProjectById(id)
   if (!project) {
     return NextResponse.json({ error: 'Project not found' }, { status: 404 })
   }
@@ -51,17 +38,14 @@ export async function GET(
   }[] = []
 
   for (const pattern of project.outputPaths) {
-    // 统一使用正斜杠（fast-glob 要求 POSIX 风格路径）
     const normalizedPattern = pattern.replace(/\\/g, '/')
 
-    // 检查是否是 glob 模式
     const isGlob =
       normalizedPattern.includes('*') ||
       normalizedPattern.includes('?') ||
       normalizedPattern.includes('[')
 
     if (isGlob) {
-      // 使用 fast-glob 匹配
       const matches = await fg(normalizedPattern, {
         cwd: projectDir,
         absolute: true,
@@ -73,7 +57,6 @@ export async function GET(
       for (const match of matches) {
         const fullPath = match.endsWith('/') ? match.slice(0, -1) : match
         const resolvedFull = path.resolve(fullPath)
-        // Path traversal guard
         if (
           !resolvedFull.startsWith(resolvedProjectDir + path.sep) &&
           resolvedFull !== resolvedProjectDir
@@ -94,12 +77,10 @@ export async function GET(
         }
       }
     } else {
-      // 普通路径
       const fullPath = path.isAbsolute(normalizedPattern)
         ? normalizedPattern
         : path.join(projectDir, normalizedPattern)
 
-      // Path traversal guard
       const resolvedFull = path.resolve(fullPath)
       const resolvedProjectDir = path.resolve(projectDir)
       if (
@@ -129,13 +110,12 @@ export async function GET(
     )
   }
 
-  // 如果只有一个文件（非目录），直接流式返回该文件
+  // 如果只有一个文件（非目录），直接流式返回
   if (validPaths.length === 1 && !validPaths[0].isDirectory) {
     const { fullPath } = validPaths[0]
     const filename = path.basename(fullPath)
     const stat = fs.statSync(fullPath)
 
-    // 根据扩展名设置 MIME 类型
     const ext = path.extname(filename).toLowerCase()
     const mimeTypes: Record<string, string> = {
       '.dmg': 'application/x-apple-diskimage',
@@ -183,7 +163,6 @@ export async function GET(
     },
   })
 
-  // 添加所有有效路径
   for (const { fullPath, archiveName, isDirectory } of validPaths) {
     if (isDirectory) {
       archive.directory(fullPath, archiveName)

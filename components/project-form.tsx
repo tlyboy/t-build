@@ -21,6 +21,7 @@ import {
   GitBranch,
   ChevronDown,
   ChevronUp,
+  AlertCircle,
 } from 'lucide-react'
 import { Link, useRouter } from '@/i18n/navigation'
 import { useTranslations } from 'next-intl'
@@ -70,6 +71,7 @@ export function ProjectForm({
 
   const [workDir, setWorkDir] = useState('')
   const [credentials, setCredentials] = useState<GitCredential[]>([])
+  const [settingsLoaded, setSettingsLoaded] = useState(false)
 
   const [name, setName] = useState(project?.name || '')
   const [relativePath, setRelativePath] = useState('')
@@ -98,19 +100,11 @@ export function ProjectForm({
           setWorkDir(data.workDir || '')
           setCredentials(data.gitCredentials || [])
 
-          if (project?.path && data.workDir) {
-            const normalizedPath = project.path.replace(/\\/g, '/')
-            const normalizedWorkDir = data.workDir.replace(/\\/g, '/')
-            if (normalizedPath.startsWith(normalizedWorkDir)) {
-              const rel = normalizedPath.slice(normalizedWorkDir.length)
-              setRelativePath(rel.startsWith('/') ? rel.slice(1) : rel)
-            } else {
-              setRelativePath(normalizedPath)
-            }
-          } else if (project?.path) {
+          if (project?.path) {
             setRelativePath(project.path.replace(/\\/g, '/'))
           }
         }
+        setSettingsLoaded(true)
       })
   }, [project?.path])
 
@@ -129,12 +123,6 @@ export function ProjectForm({
       .map((p) => p.trim())
       .filter((p) => p.length > 0)
 
-    const isAbsolute = /^([a-zA-Z]:)?\//.test(relativePath)
-    const fullPath =
-      workDir && relativePath && !isAbsolute
-        ? `${workDir.replace(/\\/g, '/')}/${relativePath}`
-        : relativePath
-
     try {
       const url =
         mode === 'create' ? '/api/projects' : `/api/projects/${project?.id}`
@@ -145,7 +133,7 @@ export function ProjectForm({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name,
-          path: fullPath,
+          path: relativePath,
           buildCommand,
           gitPullBeforeBuild,
           outputPaths:
@@ -225,6 +213,26 @@ export function ProjectForm({
     }
   }
 
+  if (settingsLoaded && !workDir) {
+    return (
+      <Card className="w-full">
+        <CardContent className="flex flex-col items-center justify-center py-12">
+          <AlertCircle className="text-muted-foreground mb-4 h-12 w-12" />
+          <h3 className="mb-2 text-lg font-semibold">{t('workDirRequired')}</h3>
+          <p className="text-muted-foreground mb-6 max-w-sm text-center text-sm">
+            {t('workDirRequiredDesc')}
+          </p>
+          <Link href="/settings">
+            <Button>
+              <Settings className="mr-2 h-4 w-4" />
+              {t('goToSettings')}
+            </Button>
+          </Link>
+        </CardContent>
+      </Card>
+    )
+  }
+
   return (
     <Card className="w-full">
       <CardContent className="pt-6">
@@ -290,7 +298,6 @@ export function ProjectForm({
                       <p className="text-muted-foreground text-xs">
                         {t('cloneTo')}:{' '}
                         <code className="bg-muted rounded px-1">
-                          {workDir.replace(/\\/g, '/')}/
                           {getRepoNameFromUrl(gitUrl)}
                         </code>
                       </p>

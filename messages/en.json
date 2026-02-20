@@ -60,9 +60,7 @@
     "recentBuilds": "Recent build records",
     "noBuilds": "No build records yet",
     "duration": "Duration {seconds}s",
-    "artifacts": "Build Artifacts",
-    "includePaths": "Include Paths:",
-    "downloadArtifact": "Download Artifact"
+    "download": "Download Artifact"
   },
   "projectForm": {
     "newProject": "New Project",
@@ -96,7 +94,10 @@
     "noCredentialHint": "No credentials yet, public repos can be used directly",
     "goToConfigure": "Configure",
     "enterGitUrl": "Please enter a Git repository URL",
-    "cannotParseRepoName": "Cannot parse repository name from URL"
+    "cannotParseRepoName": "Cannot parse repository name from URL",
+    "workDirRequired": "Please configure working directory first",
+    "workDirRequiredDesc": "You need to configure the working directory in settings. All projects will be stored under this directory",
+    "goToSettings": "Go to Settings"
   },
   "projectCard": {
     "building": "Building...",

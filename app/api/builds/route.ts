@@ -6,6 +6,7 @@ import {
 } from '@/lib/data/builds'
 import { getProjectById } from '@/lib/data/projects'
 import { executeBuild } from '@/lib/build-executor'
+import { updateBuild } from '@/lib/data/builds'
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
@@ -37,7 +38,18 @@ export async function POST(request: Request) {
 
   const build = await createBuild(body.projectId)
 
-  executeBuild(build.id).catch(console.error)
+  try {
+    executeBuild(build.id).catch(console.error)
+  } catch {
+    await updateBuild(build.id, {
+      status: 'failed',
+      finishedAt: new Date().toISOString(),
+    })
+    return NextResponse.json(
+      { error: 'Build failed to start' },
+      { status: 503 },
+    )
+  }
 
   return NextResponse.json(build, { status: 201 })
 }

@@ -28,7 +28,6 @@ interface Build {
   status: 'pending' | 'running' | 'success' | 'failed'
   startedAt: string
   finishedAt?: string
-  logs: string[]
   exitCode?: number
   gitCommitHash?: string
   gitCommitMessage?: string
@@ -108,7 +107,7 @@ export default function BuildDetailPage({
 
   if (loading) {
     return (
-      <div className="mx-auto max-w-6xl space-y-6">
+      <div className="mx-auto max-w-6xl">
         <PageHeader title={t('title')} backHref="/" />
       </div>
     )

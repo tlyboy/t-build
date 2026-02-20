@@ -105,6 +105,14 @@ export default function ProjectDetailPage({
         description={project.path}
         backHref="/projects"
       >
+        {project.outputPaths && project.outputPaths.length > 0 && (
+          <Button variant="outline" asChild>
+            <a href={`/api/projects/${id}/artifact`} download>
+              <Download className="mr-2 h-4 w-4" />
+              {t('download')}
+            </a>
+          </Button>
+        )}
         <Link href={`/projects/${id}/edit`}>
           <Button variant="outline">
             <Settings className="mr-2 h-4 w-4" />
@@ -150,40 +158,6 @@ export default function ProjectDetailPage({
           </div>
         </CardContent>
       </Card>
-
-      {project.outputPaths && project.outputPaths.length > 0 && (() => {
-        const latestSuccessBuild = builds.find((b) => b.status === 'success')
-        return latestSuccessBuild ? (
-          <Card>
-            <CardHeader>
-              <CardTitle>{t('artifacts')}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-                <div className="space-y-1">
-                  <div className="text-sm font-medium">{t('includePaths')}</div>
-                  <div className="flex flex-wrap gap-1.5">
-                    {project.outputPaths!.map((p, i) => (
-                      <code
-                        key={i}
-                        className="bg-muted rounded px-1.5 py-0.5 text-xs"
-                      >
-                        {p}
-                      </code>
-                    ))}
-                  </div>
-                </div>
-                <Button asChild className="flex-shrink-0">
-                  <a href={`/api/builds/${latestSuccessBuild.id}/artifact`} download>
-                    <Download className="mr-2 h-4 w-4" />
-                    {t('downloadArtifact')}
-                  </a>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        ) : null
-      })()}
 
       <Card>
         <CardHeader>

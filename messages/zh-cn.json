@@ -60,9 +60,7 @@
     "recentBuilds": "最近的构建记录",
     "noBuilds": "暂无构建记录",
     "duration": "耗时 {seconds}s",
-    "artifacts": "构建产物",
-    "includePaths": "包含路径:",
-    "downloadArtifact": "下载产物"
+    "download": "下载产物"
   },
   "projectForm": {
     "newProject": "新建项目",
@@ -96,7 +94,10 @@
     "noCredentialHint": "暂无凭证，公开仓库可直接使用",
     "goToConfigure": "去配置",
     "enterGitUrl": "请输入 Git 仓库地址",
-    "cannotParseRepoName": "无法从 URL 解析仓库名"
+    "cannotParseRepoName": "无法从 URL 解析仓库名",
+    "workDirRequired": "请先配置工作目录",
+    "workDirRequiredDesc": "需要先在设置中配置工作目录，所有项目都将存放在该目录下",
+    "goToSettings": "前往设置"
   },
   "projectCard": {
     "building": "构建中...",

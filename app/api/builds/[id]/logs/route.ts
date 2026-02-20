@@ -1,4 +1,4 @@
-import { getBuildById } from '@/lib/data/builds'
+import { getBuildById, getBuildLogs } from '@/lib/data/builds'
 import { getBuildEmitter } from '@/lib/build-executor'
 
 export const dynamic = 'force-dynamic'
@@ -20,7 +20,8 @@ export async function GET(
     async start(controller) {
       // 如果构建已完成，发送日志后关闭
       if (build.status === 'success' || build.status === 'failed') {
-        for (const log of build.logs) {
+        const logs = await getBuildLogs(id)
+        for (const log of logs) {
           controller.enqueue(
             encoder.encode(
               `data: ${JSON.stringify({ type: 'log', data: log })}\n\n`,
@@ -94,7 +95,8 @@ export async function GET(
       // 重新读取最新状态，发送已有日志
       const latestBuild = await getBuildById(id)
       if (latestBuild) {
-        for (const log of latestBuild.logs) {
+        const latestLogs = await getBuildLogs(id)
+        for (const log of latestLogs) {
           controller.enqueue(
             encoder.encode(
               `data: ${JSON.stringify({ type: 'log', data: log })}\n\n`,

@@ -26,12 +26,10 @@ interface Project {
   buildCommand: string
   createdAt: string
   updatedAt: string
-  sourceType: 'local' | 'git'
   gitUrl?: string
   gitBranch?: string
   gitPullBeforeBuild?: boolean
   outputPaths?: string[]
-  installCommand?: string
   gitCredentialId?: string
 }
 

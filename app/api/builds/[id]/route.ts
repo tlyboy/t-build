@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { getBuildById, deleteBuild } from '@/lib/data/builds'
+import { getBuildById, getBuildLogs, deleteBuild } from '@/lib/data/builds'
 
 export async function GET(
   request: Request,
@@ -12,7 +12,8 @@ export async function GET(
     return NextResponse.json({ error: 'Build not found' }, { status: 404 })
   }
 
-  return NextResponse.json(build)
+  const logs = await getBuildLogs(id)
+  return NextResponse.json({ ...build, logs })
 }
 
 export async function DELETE(

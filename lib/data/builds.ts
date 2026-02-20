@@ -1,5 +1,6 @@
 import fs from 'fs/promises'
 import path from 'path'
+import os from 'os'
 
 export type BuildStatus = 'pending' | 'running' | 'success' | 'failed'
 
@@ -9,7 +10,6 @@ export interface Build {
   status: BuildStatus
   startedAt: string
   finishedAt?: string
-  logs: string[]
   exitCode?: number
   gitCommitHash?: string // 构建时的 commit hash
   gitCommitMessage?: string // commit 提交信息
@@ -17,6 +17,7 @@ export interface Build {
 
 const DATA_DIR = path.join(process.cwd(), 'data')
 const BUILDS_FILE = path.join(DATA_DIR, 'builds.json')
+const LOGS_DIR = path.join(os.homedir(), '.t-build', 'logs')
 
 let writeLock: Promise<void> = Promise.resolve()
 
@@ -25,6 +26,14 @@ async function ensureDataDir() {
     await fs.access(DATA_DIR)
   } catch {
     await fs.mkdir(DATA_DIR, { recursive: true })
+  }
+}
+
+async function ensureLogsDir() {
+  try {
+    await fs.access(LOGS_DIR)
+  } catch {
+    await fs.mkdir(LOGS_DIR, { recursive: true })
   }
 }
 
@@ -82,7 +91,6 @@ export async function createBuild(projectId: string): Promise<Build> {
       projectId,
       status: 'pending',
       startedAt: new Date().toISOString(),
-      logs: [],
     }
     builds.push(build)
     await writeBuilds(builds)
@@ -108,34 +116,35 @@ export async function updateBuild(
   })
 }
 
-export async function appendBuildLog(
-  id: string,
-  log: string,
-): Promise<Build | null> {
-  return withLock(async () => {
-    const builds = await readBuilds()
-    const index = builds.findIndex((b) => b.id === id)
-    if (index === -1) return null
-
-    builds[index].logs.push(log)
-    await writeBuilds(builds)
-    return builds[index]
-  })
+// File-based log operations
+export async function appendBuildLog(id: string, log: string): Promise<void> {
+  await ensureLogsDir()
+  const logFile = path.join(LOGS_DIR, `${id}.jsonl`)
+  await fs.appendFile(logFile, JSON.stringify(log) + '\n')
 }
 
 export async function appendBuildLogs(
   id: string,
   logs: string[],
-): Promise<Build | null> {
-  return withLock(async () => {
-    const builds = await readBuilds()
-    const index = builds.findIndex((b) => b.id === id)
-    if (index === -1) return null
+): Promise<void> {
+  await ensureLogsDir()
+  const logFile = path.join(LOGS_DIR, `${id}.jsonl`)
+  const content = logs.map((log) => JSON.stringify(log)).join('\n') + '\n'
+  await fs.appendFile(logFile, content)
+}
 
-    builds[index].logs.push(...logs)
-    await writeBuilds(builds)
-    return builds[index]
-  })
+export async function getBuildLogs(id: string): Promise<string[]> {
+  try {
+    const logFile = path.join(LOGS_DIR, `${id}.jsonl`)
+    const content = await fs.readFile(logFile, 'utf-8')
+    return content
+      .trim()
+      .split('\n')
+      .filter(Boolean)
+      .map((line) => JSON.parse(line))
+  } catch {
+    return []
+  }
 }
 
 export async function deleteBuild(id: string): Promise<boolean> {
@@ -146,6 +155,14 @@ export async function deleteBuild(id: string): Promise<boolean> {
 
     builds.splice(index, 1)
     await writeBuilds(builds)
+
+    // Also delete log file
+    try {
+      await fs.unlink(path.join(LOGS_DIR, `${id}.jsonl`))
+    } catch {
+      // ignore
+    }
+
     return true
   })
 }
@@ -153,9 +170,20 @@ export async function deleteBuild(id: string): Promise<boolean> {
 export async function deleteProjectBuilds(projectId: string): Promise<number> {
   return withLock(async () => {
     const builds = await readBuilds()
+    const toDelete = builds.filter((b) => b.projectId === projectId)
     const filtered = builds.filter((b) => b.projectId !== projectId)
-    const deletedCount = builds.length - filtered.length
+    const deletedCount = toDelete.length
     await writeBuilds(filtered)
+
+    // Clean up log files
+    for (const build of toDelete) {
+      try {
+        await fs.unlink(path.join(LOGS_DIR, `${build.id}.jsonl`))
+      } catch {
+        // ignore
+      }
+    }
+
     return deletedCount
   })
 }

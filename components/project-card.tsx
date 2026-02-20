@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Play, Settings, Folder, Loader2 } from 'lucide-react'
+import { Play, Settings, Loader2 } from 'lucide-react'
 import { Link } from '@/i18n/navigation'
 import { useTranslations } from 'next-intl'
 
@@ -32,12 +32,6 @@ export function ProjectCard({ project, onBuild, building }: ProjectCardProps) {
             <CardTitle className="truncate text-base sm:text-lg">
               {project.name}
             </CardTitle>
-            <div className="text-muted-foreground mt-1.5 flex items-center gap-1.5 text-xs">
-              <Folder className="h-3 w-3 flex-shrink-0" />
-              <span className="truncate" title={project.path}>
-                {project.path}
-              </span>
-            </div>
           </div>
           <Link href={`/projects/${project.id}/edit`}>
             <Button
