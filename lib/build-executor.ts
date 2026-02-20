@@ -276,9 +276,10 @@ export async function executeBuild(buildId: string): Promise<void> {
     p.startsWith(workDir) ? p.slice(workDir.length + 1) || '/' : p
 
   const logLine = (line: string) => {
-    // Strip workspace absolute path from all output
+    // Strip workspace absolute path from all output (handle both / and \ separators)
     const sanitized = line
       .replaceAll(workDir + '/', '')
+      .replaceAll(workDir + '\\', '')
       .replaceAll(workDir, '.')
     pendingLogs.push(sanitized)
     emitter.emit('log', sanitized)
