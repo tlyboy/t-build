@@ -11,7 +11,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { BuildStatusBadge } from '@/components/build-status'
 import { PageHeader } from '@/components/page-header'
-import { Play, Settings } from 'lucide-react'
+import { Download, Play, Settings } from 'lucide-react'
 import { Link, useRouter } from '@/i18n/navigation'
 import { useTranslations, useLocale } from 'next-intl'
 
@@ -22,6 +22,7 @@ interface Project {
   buildCommand: string
   createdAt: string
   updatedAt: string
+  outputPaths?: string[]
 }
 
 interface Build {
@@ -149,6 +150,40 @@ export default function ProjectDetailPage({
           </div>
         </CardContent>
       </Card>
+
+      {project.outputPaths && project.outputPaths.length > 0 && (() => {
+        const latestSuccessBuild = builds.find((b) => b.status === 'success')
+        return latestSuccessBuild ? (
+          <Card>
+            <CardHeader>
+              <CardTitle>{t('artifacts')}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+                <div className="space-y-1">
+                  <div className="text-sm font-medium">{t('includePaths')}</div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {project.outputPaths!.map((p, i) => (
+                      <code
+                        key={i}
+                        className="bg-muted rounded px-1.5 py-0.5 text-xs"
+                      >
+                        {p}
+                      </code>
+                    ))}
+                  </div>
+                </div>
+                <Button asChild className="flex-shrink-0">
+                  <a href={`/api/builds/${latestSuccessBuild.id}/artifact`} download>
+                    <Download className="mr-2 h-4 w-4" />
+                    {t('downloadArtifact')}
+                  </a>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        ) : null
+      })()}
 
       <Card>
         <CardHeader>

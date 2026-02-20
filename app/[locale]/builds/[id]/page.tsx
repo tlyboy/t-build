@@ -16,7 +16,7 @@ import {
 } from '@/components/ui/alert-dialog'
 import { BuildLog } from '@/components/build-log'
 import { PageHeader } from '@/components/page-header'
-import { Download, GitCommit, Trash2 } from 'lucide-react'
+import { GitCommit, Trash2 } from 'lucide-react'
 import { useRouter } from '@/i18n/navigation'
 import { useTranslations, useLocale } from 'next-intl'
 
@@ -39,7 +39,6 @@ interface Project {
   name: string
   path: string
   buildCommand: string
-  outputPaths?: string[]
 }
 
 export default function BuildDetailPage({
@@ -219,39 +218,6 @@ export default function BuildDetailPage({
           )}
         </CardContent>
       </Card>
-
-      {build.status === 'success' &&
-        project?.outputPaths &&
-        project.outputPaths.length > 0 && (
-          <Card>
-            <CardHeader>
-              <CardTitle>{t('artifacts')}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-                <div className="space-y-1">
-                  <div className="text-sm font-medium">{t('includePaths')}</div>
-                  <div className="flex flex-wrap gap-1.5">
-                    {project.outputPaths.map((p, i) => (
-                      <code
-                        key={i}
-                        className="bg-muted rounded px-1.5 py-0.5 text-xs"
-                      >
-                        {p}
-                      </code>
-                    ))}
-                  </div>
-                </div>
-                <Button asChild className="flex-shrink-0">
-                  <a href={`/api/builds/${build.id}/artifact`} download>
-                    <Download className="mr-2 h-4 w-4" />
-                    {t('downloadArtifact')}
-                  </a>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        )}
 
       <Card>
         <CardHeader>

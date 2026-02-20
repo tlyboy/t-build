@@ -59,7 +59,10 @@
     "buildHistory": "Build History",
     "recentBuilds": "Recent build records",
     "noBuilds": "No build records yet",
-    "duration": "Duration {seconds}s"
+    "duration": "Duration {seconds}s",
+    "artifacts": "Build Artifacts",
+    "includePaths": "Include Paths:",
+    "downloadArtifact": "Download Artifact"
   },
   "projectForm": {
     "newProject": "New Project",
@@ -119,9 +122,6 @@
     "endTime": "End Time",
     "duration": "Duration",
     "exitCode": "Exit Code",
-    "artifacts": "Build Artifacts",
-    "includePaths": "Include Paths:",
-    "downloadArtifact": "Download Artifact",
     "buildLog": "Build Log"
   },
   "buildLog": {

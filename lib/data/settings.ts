@@ -1,4 +1,5 @@
 import fs from 'fs/promises'
+import os from 'os'
 import path from 'path'
 import { encrypt, decrypt, isEncrypted } from '../crypto'
 
@@ -32,7 +33,7 @@ const DATA_DIR = path.join(process.cwd(), 'data')
 const SETTINGS_FILE = path.join(DATA_DIR, 'settings.json')
 
 const defaultSettings: Settings = {
-  workDir: '',
+  workDir: path.join(os.homedir(), '.t-build'),
   gitCredentials: [],
 }
 

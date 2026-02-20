@@ -59,7 +59,10 @@
     "buildHistory": "构建历史",
     "recentBuilds": "最近的构建记录",
     "noBuilds": "暂无构建记录",
-    "duration": "耗时 {seconds}s"
+    "duration": "耗时 {seconds}s",
+    "artifacts": "构建产物",
+    "includePaths": "包含路径:",
+    "downloadArtifact": "下载产物"
   },
   "projectForm": {
     "newProject": "新建项目",
@@ -119,9 +122,6 @@
     "endTime": "完成时间",
     "duration": "耗时",
     "exitCode": "退出码",
-    "artifacts": "构建产物",
-    "includePaths": "包含路径:",
-    "downloadArtifact": "下载产物",
     "buildLog": "构建日志"
   },
   "buildLog": {

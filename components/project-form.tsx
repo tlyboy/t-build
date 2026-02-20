@@ -76,13 +76,13 @@ export function ProjectForm({
   const [name, setName] = useState(project?.name || '')
   const [relativePath, setRelativePath] = useState('')
   const [buildCommand, setBuildCommand] = useState(
-    project?.buildCommand || 'pnpm install\npnpm build',
+    project?.buildCommand || 'ni && nr build',
   )
   const [gitPullBeforeBuild, setGitPullBeforeBuild] = useState(
     project?.gitPullBeforeBuild || false,
   )
   const [outputPaths, setOutputPaths] = useState(
-    project?.outputPaths?.join('\n') || '',
+    project?.outputPaths?.join('\n') || 'dist',
   )
 
   const [showCloneOptions, setShowCloneOptions] = useState(false)
