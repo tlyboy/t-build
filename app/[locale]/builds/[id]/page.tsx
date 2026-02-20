@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, use, useCallback } from 'react'
+import { useEffect, useState, use, useCallback, useRef } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import {
@@ -57,19 +57,22 @@ export default function BuildDetailPage({
   const [loading, setLoading] = useState(true)
   const [deleting, setDeleting] = useState(false)
 
+  const projectFetched = useRef(false)
+
   const fetchBuildData = useCallback(async () => {
     const res = await fetch(`/api/builds/${id}`)
     if (res.ok) {
       const buildData = await res.json()
       setBuild(buildData)
-      if (buildData?.projectId && !project) {
+      if (buildData?.projectId && !projectFetched.current) {
+        projectFetched.current = true
         const projRes = await fetch(`/api/projects/${buildData.projectId}`)
         if (projRes.ok) {
           setProject(await projRes.json())
         }
       }
     }
-  }, [id, project])
+  }, [id])
 
   useEffect(() => {
     fetchBuildData().finally(() => setLoading(false))

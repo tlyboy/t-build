@@ -131,31 +131,27 @@ export default function Home() {
       .finally(() => setLoading(false))
   }, [])
 
-  if (loading) {
+  if (loading || !stats) {
     return (
       <div className="mx-auto max-w-6xl space-y-6 sm:space-y-8">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h1 className="text-2xl font-bold sm:text-3xl">{t('title')}</h1>
-            <p className="text-muted-foreground text-sm sm:text-base">
-              {t('description')}
-            </p>
-          </div>
+        <div>
+          <h1 className="text-2xl font-bold sm:text-3xl">{t('title')}</h1>
+          <p className="text-muted-foreground text-sm sm:text-base">
+            {t('description')}
+          </p>
         </div>
       </div>
     )
   }
 
-  if (!stats || stats.projectCount === 0) {
+  if (stats.projectCount === 0) {
     return (
       <div className="mx-auto max-w-6xl space-y-6 sm:space-y-8">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h1 className="text-2xl font-bold sm:text-3xl">{t('title')}</h1>
-            <p className="text-muted-foreground text-sm sm:text-base">
-              {t('description')}
-            </p>
-          </div>
+        <div>
+          <h1 className="text-2xl font-bold sm:text-3xl">{t('title')}</h1>
+          <p className="text-muted-foreground text-sm sm:text-base">
+            {t('description')}
+          </p>
         </div>
         <div className="py-12 text-center sm:py-20">
           <p className="text-muted-foreground mb-4 text-sm">

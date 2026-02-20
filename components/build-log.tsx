@@ -13,13 +13,6 @@ interface BuildLogProps {
   onStatusChange?: (status: BuildStatus) => void
 }
 
-interface Build {
-  id: string
-  status: BuildStatus
-  logs: string[]
-  exitCode?: number
-}
-
 function stripAnsi(str: string): string {
   return str.replace(/\x1B\[[0-9;]*[A-Za-z]/g, '')
 }
@@ -32,10 +25,8 @@ export function BuildLog({
   const t = useTranslations('buildLog')
   const [logs, setLogs] = useState<string[]>([])
   const [status, setStatus] = useState<BuildStatus>(initialStatus)
-  const [isPolling, setIsPolling] = useState(true)
+  const [isLive, setIsLive] = useState(true)
   const bottomRef = useRef<HTMLDivElement>(null)
-  const lastLogCountRef = useRef(0)
-  const lastStatusRef = useRef<BuildStatus>(initialStatus)
   const onStatusChangeRef = useRef(onStatusChange)
 
   useEffect(() => {
@@ -43,67 +34,61 @@ export function BuildLog({
   }, [onStatusChange])
 
   useEffect(() => {
-    setLogs([]) // eslint-disable-line react-hooks/set-state-in-effect
-    lastLogCountRef.current = 0
-    lastStatusRef.current = initialStatus
-    setIsPolling(true)
+    setLogs([])
     setStatus(initialStatus)
+    setIsLive(true)
 
-    let active = true
+    const es = new EventSource(`/api/builds/${buildId}/logs`)
 
-    const fetchLogs = async (): Promise<boolean> => {
-      if (!active) return false
+    let logCount = 0
 
+    es.onmessage = (event) => {
       try {
-        const res = await fetch(`/api/builds/${buildId}`)
-        if (!res.ok) {
-          console.error('Failed to fetch build:', res.status)
-          return true
+        const msg = JSON.parse(event.data) as
+          | { type: 'log'; data: string }
+          | { type: 'status'; data: string }
+          | { type: 'done'; data: { status: string; exitCode?: number } }
+
+        switch (msg.type) {
+          case 'log':
+            logCount++
+            setLogs((prev) => {
+              // On reconnect, server resends all stored logs; skip duplicates
+              if (logCount <= prev.length) return prev
+              return [...prev, stripAnsi(msg.data)]
+            })
+            break
+          case 'status': {
+            const newStatus = msg.data as BuildStatus
+            setStatus(newStatus)
+            onStatusChangeRef.current?.(newStatus)
+            break
+          }
+          case 'done': {
+            const doneStatus = msg.data.status as BuildStatus
+            setStatus(doneStatus)
+            onStatusChangeRef.current?.(doneStatus)
+            setIsLive(false)
+            es.close()
+            break
+          }
         }
-        if (!active) return false
-
-        const build: Build = await res.json()
-
-        if (build.status !== lastStatusRef.current) {
-          lastStatusRef.current = build.status
-          setStatus(build.status)
-          onStatusChangeRef.current?.(build.status)
-        }
-
-        if (build.logs.length > lastLogCountRef.current) {
-          const newLogs = build.logs.slice(lastLogCountRef.current)
-          setLogs((prev) => [...prev, ...newLogs.map(stripAnsi)])
-          lastLogCountRef.current = build.logs.length
-        }
-
-        if (build.status === 'success' || build.status === 'failed') {
-          setIsPolling(false)
-          return false
-        }
-
-        return true
-      } catch (error) {
-        console.error('Failed to fetch logs:', error)
-        return true
+      } catch {
+        // ignore malformed messages
       }
     }
 
-    fetchLogs()
-
-    const poll = async () => {
-      const shouldContinue = await fetchLogs()
-      if (shouldContinue && active) {
-        setTimeout(poll, 800)
+    es.onerror = () => {
+      // EventSource auto-reconnects on error; only give up if build is done
+      if (es.readyState === EventSource.CLOSED) {
+        setIsLive(false)
       }
     }
-
-    const timer = setTimeout(poll, 800)
 
     return () => {
-      active = false
-      clearTimeout(timer)
+      es.close()
     }
-  }, [buildId, initialStatus])
+  }, [buildId]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -115,7 +100,7 @@ export function BuildLog({
     <div className="space-y-4">
       <div className="flex items-center gap-4">
         <BuildStatusBadge status={status} />
-        {isRunning && isPolling && (
+        {isRunning && isLive && (
           <span className="text-muted-foreground flex items-center gap-1 text-xs">
             <span className="h-2 w-2 animate-pulse rounded-full bg-green-500" />
             {t('liveUpdating')}

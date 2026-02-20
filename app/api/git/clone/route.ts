@@ -17,6 +17,14 @@ export async function POST(request: Request) {
     )
   }
 
+  // Validate branch name to prevent argument injection
+  if (branch && !/^[\w.\-/]+$/.test(branch)) {
+    return NextResponse.json(
+      { error: 'Invalid branch name' },
+      { status: 400 },
+    )
+  }
+
   // 解析目标路径
   let resolvedTargetPath = targetPath
   if (targetPath.startsWith('~')) {
@@ -31,6 +39,18 @@ export async function POST(request: Request) {
     !targetPath.startsWith('~')
   ) {
     resolvedTargetPath = path.join(settings.workDir, targetPath)
+  }
+
+  // 安全检查：确保目标路径在工作目录内
+  if (settings.workDir) {
+    const resolved = path.resolve(resolvedTargetPath)
+    const workDir = path.resolve(settings.workDir)
+    if (!resolved.startsWith(workDir + path.sep) && resolved !== workDir) {
+      return NextResponse.json(
+        { error: 'Target path must be within work directory' },
+        { status: 400 },
+      )
+    }
   }
 
   // 检查目标目录是否已存在
