@@ -5,7 +5,7 @@ import {
   createBuild,
 } from '@/lib/data/builds'
 import { getProjectById } from '@/lib/data/projects'
-import { executeBuild } from '@/lib/build-executor'
+import { enqueueBuild } from '@/lib/build-executor'
 import { updateBuild } from '@/lib/data/builds'
 
 export async function GET(request: Request) {
@@ -39,14 +39,14 @@ export async function POST(request: Request) {
   const build = await createBuild(body.projectId)
 
   try {
-    executeBuild(build.id).catch(console.error)
+    enqueueBuild(build.id)
   } catch {
     await updateBuild(build.id, {
       status: 'failed',
       finishedAt: new Date().toISOString(),
     })
     return NextResponse.json(
-      { error: 'Build failed to start' },
+      { error: 'Build queue is full, please try again later' },
       { status: 503 },
     )
   }

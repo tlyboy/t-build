@@ -29,11 +29,11 @@ export interface Settings {
   gitCredentials: GitCredential[] // Git 认证配置
 }
 
-const DATA_DIR = path.join(process.cwd(), 'data')
+const DATA_DIR = path.join(os.homedir(), '.t-build')
 const SETTINGS_FILE = path.join(DATA_DIR, 'settings.json')
 
 const defaultSettings: Settings = {
-  workDir: path.join(os.homedir(), '.t-build'),
+  workDir: path.join(DATA_DIR, 'workspace'),
   gitCredentials: [],
 }
 

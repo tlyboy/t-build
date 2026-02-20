@@ -11,12 +11,42 @@ const g = globalThis as {
   __tbuild?: {
     emitters: Map<string, EventEmitter>
     processes: Map<string, ChildProcess>
+    queue: string[]
+    processing: boolean
   }
 }
 const state = (g.__tbuild ??= {
   emitters: new Map<string, EventEmitter>(),
   processes: new Map<string, ChildProcess>(),
+  queue: [] as string[],
+  processing: false,
 })
+
+const MAX_QUEUE_LENGTH = 50
+
+export function enqueueBuild(buildId: string): void {
+  if (state.queue.length >= MAX_QUEUE_LENGTH) {
+    throw new Error('Build queue is full')
+  }
+  state.queue.push(buildId)
+  processQueue()
+}
+
+async function processQueue(): Promise<void> {
+  if (state.processing || state.queue.length === 0) return
+
+  const nextBuildId = state.queue.shift()!
+  state.processing = true
+
+  try {
+    await executeBuild(nextBuildId)
+  } catch (error) {
+    console.error(`Build ${nextBuildId} failed:`, error)
+  } finally {
+    state.processing = false
+    processQueue()
+  }
+}
 
 export function getBuildEmitter(buildId: string): EventEmitter {
   let emitter = state.emitters.get(buildId)
@@ -241,16 +271,15 @@ export async function executeBuild(buildId: string): Promise<void> {
     await appendBuildLogs(buildId, logsToWrite)
   }
 
+  const workDir = settings.workDir
+  const shortPath = (p: string) =>
+    p.startsWith(workDir) ? p.slice(workDir.length + 1) || '/' : p
+
   const logLine = (line: string) => {
-    // Strip project absolute path from all output
-    let sanitized = line
-      .replaceAll(projectDir + '/', '')
-      .replaceAll(projectDir, '.')
-    if (settings.workDir) {
-      sanitized = sanitized
-        .replaceAll(settings.workDir + '/', '')
-        .replaceAll(settings.workDir, '.')
-    }
+    // Strip workspace absolute path from all output
+    const sanitized = line
+      .replaceAll(workDir + '/', '')
+      .replaceAll(workDir, '.')
     pendingLogs.push(sanitized)
     emitter.emit('log', sanitized)
 
@@ -263,7 +292,7 @@ export async function executeBuild(buildId: string): Promise<void> {
   }
 
   logLine(`[T-Build] Starting build for project: ${project.name}`)
-  logLine(`[T-Build] Working directory: ${projectDir}`)
+  logLine(`[T-Build] Working directory: ${shortPath(projectDir)}`)
 
   let commitHash: string | undefined
   let commitMessage: string | undefined
@@ -371,7 +400,7 @@ export async function executeBuild(buildId: string): Promise<void> {
         }
         currentDir = newDir
         logLine('')
-        logLine(`[T-Build] Changed directory to: ${currentDir}`)
+        logLine(`[T-Build] Changed directory to: ${shortPath(currentDir)}`)
         continue
       } catch {
         logLine('')
@@ -409,7 +438,7 @@ export async function executeBuild(buildId: string): Promise<void> {
     logLine('')
     logLine(`[T-Build]${stepNum} Executing: ${line}`)
     if (currentDir !== projectDir) {
-      logLine(`[T-Build] Working directory: ${currentDir}`)
+      logLine(`[T-Build] Working directory: ${shortPath(currentDir)}`)
     }
 
     const result = await executeCommand(line, currentDir, logLine)

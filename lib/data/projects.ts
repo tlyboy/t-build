@@ -1,4 +1,5 @@
 import fs from 'fs/promises'
+import os from 'os'
 import path from 'path'
 
 export interface Project {
@@ -13,7 +14,7 @@ export interface Project {
   gitCredentialId?: string // Git 凭证 ID
 }
 
-const DATA_DIR = path.join(process.cwd(), 'data')
+const DATA_DIR = path.join(os.homedir(), '.t-build')
 const PROJECTS_FILE = path.join(DATA_DIR, 'projects.json')
 
 async function ensureDataDir() {

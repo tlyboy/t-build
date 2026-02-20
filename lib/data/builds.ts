@@ -1,6 +1,6 @@
 import fs from 'fs/promises'
-import path from 'path'
 import os from 'os'
+import path from 'path'
 
 export type BuildStatus = 'pending' | 'running' | 'success' | 'failed'
 
@@ -15,9 +15,9 @@ export interface Build {
   gitCommitMessage?: string // commit 提交信息
 }
 
-const DATA_DIR = path.join(process.cwd(), 'data')
+const DATA_DIR = path.join(os.homedir(), '.t-build')
 const BUILDS_FILE = path.join(DATA_DIR, 'builds.json')
-const LOGS_DIR = path.join(os.homedir(), '.t-build', 'logs')
+const LOGS_DIR = path.join(DATA_DIR, 'logs')
 
 let writeLock: Promise<void> = Promise.resolve()
 
