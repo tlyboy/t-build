@@ -39,6 +39,9 @@ export async function GET(request: Request) {
   }
 
   try {
+    // 确保工作目录存在
+    await fs.mkdir(resolvedWorkDir, { recursive: true })
+
     const stat = await fs.stat(resolvedTarget)
     if (!stat.isDirectory()) {
       return NextResponse.json(
