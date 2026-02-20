@@ -40,7 +40,6 @@ export function DirectoryPicker({
 }: DirectoryPickerProps) {
   const t = useTranslations('common')
   const [open, setOpen] = useState(false)
-  const [workDir, setWorkDir] = useState('')
   const [currentPath, setCurrentPath] = useState('')
   const [parentPath, setParentPath] = useState<string | null>(null)
   const [entries, setEntries] = useState<FileEntry[]>([])
@@ -61,7 +60,7 @@ export function DirectoryPicker({
         throw new Error(data.error || 'Failed to browse directory')
       }
       const data: BrowseResponse = await res.json()
-      setWorkDir(data.workDir)
+
       setCurrentPath(data.currentPath)
       setParentPath(data.parentPath)
       setEntries(data.entries)
@@ -73,12 +72,32 @@ export function DirectoryPicker({
   }
 
   useEffect(() => {
-    if (open) {
-      fetchDirectory(value || '')
-      setSearch('')
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open])
+    if (!open) return
+    setSearch('')
+    const relativePath = value || ''
+    setLoading(true)
+    setError('')
+    const url = relativePath
+      ? `/api/filesystem/browse?path=${encodeURIComponent(relativePath)}`
+      : '/api/filesystem/browse'
+    fetch(url)
+      .then((res) =>
+        res.ok
+          ? res.json()
+          : res.json().then((d) => {
+              throw new Error(d.error || 'Failed to browse directory')
+            }),
+      )
+      .then((data: BrowseResponse) => {
+        setCurrentPath(data.currentPath)
+        setParentPath(data.parentPath)
+        setEntries(data.entries)
+      })
+      .catch((err) =>
+        setError(err instanceof Error ? err.message : 'Unknown error'),
+      )
+      .finally(() => setLoading(false))
+  }, [open, value])
 
   const filteredEntries = search
     ? entries.filter((entry) =>
@@ -108,11 +127,7 @@ export function DirectoryPicker({
     setOpen(false)
   }
 
-  const displayPath = workDir
-    ? currentPath === '/'
-      ? workDir
-      : `${workDir.replace(/\\/g, '/')}/${currentPath}`
-    : currentPath
+  const displayPath = currentPath === '/' ? '/' : `/${currentPath}`
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -122,24 +137,24 @@ export function DirectoryPicker({
           {t('select')}
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="max-w-lg overflow-hidden">
         <DialogHeader>
           <DialogTitle>{t('selectDir')}</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4">
-          <div className="flex items-center gap-2">
+        <div className="space-y-4 overflow-hidden">
+          <div className="flex min-w-0 items-center gap-2">
             <Button
               type="button"
               variant="outline"
               size="icon"
               onClick={handleGoUp}
               disabled={parentPath === null}
-              className="h-8 w-8"
+              className="h-8 w-8 shrink-0"
             >
               <ChevronUp className="h-4 w-4" />
             </Button>
-            <div className="text-muted-foreground bg-muted flex-1 truncate rounded px-2 py-1 font-mono text-sm">
+            <div className="text-muted-foreground bg-muted min-w-0 flex-1 truncate rounded px-2 py-1 font-mono text-sm">
               {displayPath}
             </div>
           </div>
