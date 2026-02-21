@@ -272,13 +272,14 @@ export async function executeBuild(buildId: string): Promise<void> {
   }
 
   const workDir = settings.workDir
-  // Forward-slash variant for tools that normalize paths (e.g. Vite/Rollup on Windows)
-  const workDirFwd = workDir.replaceAll('\\', '/')
+  // Path variants for different tool output formats on Windows
+  const workDirFwd = workDir.replaceAll('\\', '/') // Vite/Rollup: C:/Users/...
+  const workDirEsc = workDir.replaceAll('\\', '\\\\') // Rust Debug: C:\\Users\\...
   const shortPath = (p: string) =>
     p.startsWith(workDir) ? p.slice(workDir.length + 1) || '/' : p
 
   const logLine = (line: string) => {
-    // Strip workspace absolute path from all output (handle both / and \ separators)
+    // Strip workspace absolute path from all output
     let sanitized = line
       .replaceAll(workDir + '/', '')
       .replaceAll(workDir + '\\', '')
@@ -287,6 +288,11 @@ export async function executeBuild(buildId: string): Promise<void> {
       sanitized = sanitized
         .replaceAll(workDirFwd + '/', '')
         .replaceAll(workDirFwd, '.')
+    }
+    if (workDirEsc !== workDir) {
+      sanitized = sanitized
+        .replaceAll(workDirEsc + '\\\\', '')
+        .replaceAll(workDirEsc, '.')
     }
     pendingLogs.push(sanitized)
     emitter.emit('log', sanitized)
