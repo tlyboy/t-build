@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { BuildStatusBadge } from './build-status'
 import { useTranslations } from 'next-intl'
@@ -26,17 +26,42 @@ export function BuildLog({
   const [logs, setLogs] = useState<string[]>([])
   const [status, setStatus] = useState<BuildStatus>(initialStatus)
   const [isLive, setIsLive] = useState(true)
+  const scrollAreaRef = useRef<HTMLDivElement>(null)
   const bottomRef = useRef<HTMLDivElement>(null)
+  const stickToBottomRef = useRef(true)
   const onStatusChangeRef = useRef(onStatusChange)
+
+  const getViewport = useCallback(
+    () =>
+      scrollAreaRef.current?.querySelector(
+        '[data-slot="scroll-area-viewport"]',
+      ) as HTMLElement | null,
+    [],
+  )
 
   useEffect(() => {
     onStatusChangeRef.current = onStatusChange
   }, [onStatusChange])
 
+  // Track user scroll to toggle sticky behavior
+  useEffect(() => {
+    const viewport = getViewport()
+    if (!viewport) return
+
+    const handleScroll = () => {
+      const { scrollTop, scrollHeight, clientHeight } = viewport
+      stickToBottomRef.current = scrollHeight - scrollTop - clientHeight < 50
+    }
+
+    viewport.addEventListener('scroll', handleScroll)
+    return () => viewport.removeEventListener('scroll', handleScroll)
+  }, [getViewport, logs.length > 0]) // re-attach when viewport appears
+
   useEffect(() => {
     setLogs([])
     setStatus(initialStatus)
     setIsLive(true)
+    stickToBottomRef.current = true
 
     const es = new EventSource(`/api/builds/${buildId}/logs`)
 
@@ -90,12 +115,15 @@ export function BuildLog({
     }
   }, [buildId]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Only auto-scroll during live builds
+  // Smart auto-scroll: only when user is at the bottom
   useEffect(() => {
-    if (isLive) {
-      bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+    if (stickToBottomRef.current) {
+      const viewport = getViewport()
+      if (viewport) {
+        viewport.scrollTop = viewport.scrollHeight
+      }
     }
-  }, [logs, isLive])
+  }, [logs, getViewport])
 
   const isRunning = status === 'running' || status === 'pending'
 
@@ -111,7 +139,7 @@ export function BuildLog({
         )}
       </div>
 
-      <ScrollArea className="bg-muted/30 h-[500px] rounded-md border">
+      <ScrollArea ref={scrollAreaRef} className="bg-muted/30 h-[500px] rounded-md border">
         <div className="p-4 font-mono text-sm">
           {logs.length === 0 ? (
             <div className="text-muted-foreground">
