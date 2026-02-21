@@ -57,6 +57,7 @@ export default function BuildDetailPage({
   const [deleting, setDeleting] = useState(false)
 
   const projectFetched = useRef(false)
+  const logCardRef = useRef<HTMLDivElement>(null)
 
   const fetchBuildData = useCallback(async () => {
     const res = await fetch(`/api/builds/${id}`)
@@ -76,6 +77,15 @@ export default function BuildDetailPage({
   useEffect(() => {
     fetchBuildData().finally(() => setLoading(false))
   }, [fetchBuildData])
+
+  // 页面加载后自动滚动到日志区域
+  useEffect(() => {
+    if (!loading && build) {
+      requestAnimationFrame(() => {
+        logCardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      })
+    }
+  }, [loading, build])
 
   const handleStatusChange = useCallback(
     (status: BuildStatus) => {
@@ -221,7 +231,7 @@ export default function BuildDetailPage({
         </CardContent>
       </Card>
 
-      <Card>
+      <Card ref={logCardRef}>
         <CardHeader>
           <CardTitle>{t('buildLog')}</CardTitle>
         </CardHeader>
