@@ -12,6 +12,7 @@ const g = globalThis as {
   __tbuild?: {
     emitters: Map<string, EventEmitter>
     processes: Map<string, ChildProcess>
+    buildLogs: Map<string, string[]>
     queue: string[]
     processing: boolean
   }
@@ -19,6 +20,7 @@ const g = globalThis as {
 const state = (g.__tbuild ??= {
   emitters: new Map<string, EventEmitter>(),
   processes: new Map<string, ChildProcess>(),
+  buildLogs: new Map<string, string[]>(),
   queue: [] as string[],
   processing: false,
 })
@@ -60,6 +62,11 @@ export function getBuildEmitter(buildId: string): EventEmitter {
 
 export function cleanupBuildEmitter(buildId: string) {
   state.emitters.delete(buildId)
+  state.buildLogs.delete(buildId)
+}
+
+export function getBuildMemoryLogs(buildId: string): string[] {
+  return state.buildLogs.get(buildId) || []
 }
 
 function resolveProjectPath(workDir: string, projectPath: string): string {
@@ -260,6 +267,7 @@ export async function executeBuild(buildId: string): Promise<void> {
   const projectDir = resolveProjectPath(settings.workDir, project.path)
 
   const emitter = getBuildEmitter(buildId)
+  state.buildLogs.set(buildId, [])
 
   await updateBuild(buildId, { status: 'running' })
   emitter.emit('status', 'running')
@@ -302,6 +310,7 @@ export async function executeBuild(buildId: string): Promise<void> {
     for (const secret of secretValues) {
       sanitized = sanitized.replaceAll(secret, '***')
     }
+    state.buildLogs.get(buildId)?.push(sanitized)
     pendingLogs.push(sanitized)
     emitter.emit('log', sanitized)
 

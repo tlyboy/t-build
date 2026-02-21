@@ -1,5 +1,5 @@
 import { getBuildById, getBuildLogs } from '@/lib/data/builds'
-import { getBuildEmitter } from '@/lib/build-executor'
+import { getBuildEmitter, getBuildMemoryLogs } from '@/lib/build-executor'
 
 export const dynamic = 'force-dynamic'
 
@@ -92,10 +92,11 @@ export async function GET(
 
       request.signal.addEventListener('abort', cleanup)
 
-      // 重新读取最新状态，发送已有日志
+      // 重新读取最新状态，发送已有日志（优先内存，避免刷盘延迟丢日志）
       const latestBuild = await getBuildById(id)
       if (latestBuild) {
-        const latestLogs = await getBuildLogs(id)
+        const memoryLogs = getBuildMemoryLogs(id)
+        const latestLogs = memoryLogs.length > 0 ? memoryLogs : await getBuildLogs(id)
         for (const log of latestLogs) {
           controller.enqueue(
             encoder.encode(

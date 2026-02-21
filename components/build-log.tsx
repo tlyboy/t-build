@@ -117,12 +117,14 @@ export function BuildLog({
 
   // Smart auto-scroll: only when user is at the bottom
   useEffect(() => {
-    if (stickToBottomRef.current) {
+    if (!stickToBottomRef.current) return
+    const raf = requestAnimationFrame(() => {
       const viewport = getViewport()
       if (viewport) {
         viewport.scrollTop = viewport.scrollHeight
       }
-    }
+    })
+    return () => cancelAnimationFrame(raf)
   }, [logs, getViewport])
 
   const isRunning = status === 'running' || status === 'pending'
