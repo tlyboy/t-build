@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { BuildStatusBadge } from '@/components/build-status'
+import { EnvEditor } from '@/components/env-editor'
 import { PageHeader } from '@/components/page-header'
 import { Download, Play, Settings } from 'lucide-react'
 import { Link, useRouter } from '@/i18n/navigation'
@@ -156,6 +157,16 @@ export default function ProjectDetailPage({
               </div>
             </div>
           </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>{t('envVars')}</CardTitle>
+          <CardDescription>{t('envVarsDesc')}</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <EnvEditor projectId={id} />
         </CardContent>
       </Card>
 

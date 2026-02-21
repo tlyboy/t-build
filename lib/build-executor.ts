@@ -4,6 +4,7 @@ import os from 'os'
 import { updateBuild, appendBuildLogs, getBuildById } from './data/builds'
 import { getProjectById, Project } from './data/projects'
 import { getGitCredentialById, getSettings } from './data/settings'
+import { getEnvVarsForBuild } from './data/env-vars'
 import { EventEmitter } from 'events'
 
 // globalThis ensures shared state across Next.js route bundles
@@ -205,6 +206,7 @@ async function executeCommand(
   command: string,
   cwd: string,
   logLine: (line: string) => void,
+  extraEnv?: Record<string, string>,
 ): Promise<{ success: boolean; exitCode: number | null }> {
   return new Promise((resolve) => {
     const child = spawn(command, [], {
@@ -213,6 +215,7 @@ async function executeCommand(
       env: {
         ...process.env,
         FORCE_COLOR: '1',
+        ...extraEnv,
       },
     })
 
@@ -271,6 +274,8 @@ export async function executeBuild(buildId: string): Promise<void> {
     await appendBuildLogs(buildId, logsToWrite)
   }
 
+  let secretValues: string[] = []
+
   const workDir = settings.workDir
   // Path variants for different tool output formats on Windows
   const workDirFwd = workDir.replaceAll('\\', '/') // Vite/Rollup: C:/Users/...
@@ -293,6 +298,9 @@ export async function executeBuild(buildId: string): Promise<void> {
       sanitized = sanitized
         .replaceAll(workDirEsc + '\\\\', '')
         .replaceAll(workDirEsc, '.')
+    }
+    for (const secret of secretValues) {
+      sanitized = sanitized.replaceAll(secret, '***')
     }
     pendingLogs.push(sanitized)
     emitter.emit('log', sanitized)
@@ -362,6 +370,20 @@ export async function executeBuild(buildId: string): Promise<void> {
         logLine(`[T-Build] Commit message: ${commitMessage}`)
       }
     }
+  }
+
+  // 加载环境变量
+  let projectEnv: Record<string, string> = {}
+  try {
+    projectEnv = await getEnvVarsForBuild(project.id)
+    secretValues = Object.values(projectEnv).filter((v) => v.length >= 4)
+    if (Object.keys(projectEnv).length > 0) {
+      logLine(
+        `[T-Build] Loaded ${Object.keys(projectEnv).length} environment variable(s)`,
+      )
+    }
+  } catch {
+    logLine('[T-Build] Warning: Failed to load environment variables')
   }
 
   // 解析多行构建命令
@@ -455,7 +477,7 @@ export async function executeBuild(buildId: string): Promise<void> {
       logLine(`[T-Build] Working directory: ${shortPath(currentDir)}`)
     }
 
-    const result = await executeCommand(line, currentDir, logLine)
+    const result = await executeCommand(line, currentDir, logLine, projectEnv)
     lastExitCode = result.exitCode
 
     if (!result.success) {

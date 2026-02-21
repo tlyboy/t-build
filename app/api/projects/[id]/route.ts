@@ -7,6 +7,7 @@ import {
   deleteProject,
 } from '@/lib/data/projects'
 import { deleteProjectBuilds } from '@/lib/data/builds'
+import { deleteEnvVarsByProjectId } from '@/lib/data/env-vars'
 import { getSettings } from '@/lib/data/settings'
 
 export async function GET(
@@ -58,6 +59,7 @@ export async function DELETE(
   }
 
   await deleteProjectBuilds(id)
+  await deleteEnvVarsByProjectId(id)
   await deleteProject(id)
 
   // Delete project directory on disk if inside workDir

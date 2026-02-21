@@ -1,5 +1,6 @@
 import crypto from 'crypto'
 import fs from 'fs/promises'
+import os from 'os'
 import path from 'path'
 
 const ALGORITHM = 'aes-256-gcm'
@@ -7,7 +8,7 @@ const KEY_LENGTH = 32
 const IV_LENGTH = 16
 const AUTH_TAG_LENGTH = 16
 
-const DATA_DIR = path.join(process.cwd(), 'data')
+const DATA_DIR = path.join(os.homedir(), '.t-build')
 const KEY_FILE = path.join(DATA_DIR, '.encryption-key')
 
 let encryptionKey: Buffer | null = null
