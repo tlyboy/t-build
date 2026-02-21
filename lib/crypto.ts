@@ -11,8 +11,6 @@ const AUTH_TAG_LENGTH = 16
 const DATA_DIR = path.join(os.homedir(), '.t-build')
 const KEY_FILE = path.join(DATA_DIR, '.encryption-key')
 
-let encryptionKey: Buffer | null = null
-
 async function ensureDataDir() {
   try {
     await fs.access(DATA_DIR)
@@ -22,20 +20,17 @@ async function ensureDataDir() {
 }
 
 async function getOrCreateKey(): Promise<Buffer> {
-  if (encryptionKey) return encryptionKey
-
   await ensureDataDir()
 
   try {
     const keyHex = await fs.readFile(KEY_FILE, 'utf-8')
-    encryptionKey = Buffer.from(keyHex.trim(), 'hex')
+    return Buffer.from(keyHex.trim(), 'hex')
   } catch {
     // 生成新密钥
-    encryptionKey = crypto.randomBytes(KEY_LENGTH)
-    await fs.writeFile(KEY_FILE, encryptionKey.toString('hex'), { mode: 0o600 })
+    const key = crypto.randomBytes(KEY_LENGTH)
+    await fs.writeFile(KEY_FILE, key.toString('hex'), { mode: 0o600 })
+    return key
   }
-
-  return encryptionKey
 }
 
 export async function encrypt(plaintext: string): Promise<string> {
