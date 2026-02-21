@@ -382,8 +382,10 @@ export async function executeBuild(buildId: string): Promise<void> {
         `[T-Build] Loaded ${Object.keys(projectEnv).length} environment variable(s)`,
       )
     }
-  } catch {
-    logLine('[T-Build] Warning: Failed to load environment variables')
+  } catch (error) {
+    logLine(
+      `[T-Build] Warning: Failed to load environment variables: ${error instanceof Error ? error.message : error}`,
+    )
   }
 
   // 解析多行构建命令
