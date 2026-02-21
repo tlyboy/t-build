@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import { BuildStatusBadge } from './build-status'
 import { useTranslations } from 'next-intl'
 
@@ -25,7 +26,7 @@ export function BuildLog({
   const [logs, setLogs] = useState<string[]>([])
   const [status, setStatus] = useState<BuildStatus>(initialStatus)
   const [isLive, setIsLive] = useState(true)
-  const containerRef = useRef<HTMLDivElement>(null)
+  const bottomRef = useRef<HTMLDivElement>(null)
   const onStatusChangeRef = useRef(onStatusChange)
 
   useEffect(() => {
@@ -91,10 +92,8 @@ export function BuildLog({
 
   // Only auto-scroll during live builds
   useEffect(() => {
-    if (!isLive) return
-    const el = containerRef.current
-    if (el) {
-      el.scrollTop = el.scrollHeight
+    if (isLive) {
+      bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
     }
   }, [logs, isLive])
 
@@ -112,10 +111,7 @@ export function BuildLog({
         )}
       </div>
 
-      <div
-        ref={containerRef}
-        className="bg-muted/30 h-[500px] overflow-y-auto rounded-md border"
-      >
+      <ScrollArea className="bg-muted/30 h-[500px] rounded-md border">
         <div className="p-4 font-mono text-sm">
           {logs.length === 0 ? (
             <div className="text-muted-foreground">
@@ -135,8 +131,9 @@ export function BuildLog({
               </div>
             ))
           )}
+          <div ref={bottomRef} />
         </div>
-      </div>
+      </ScrollArea>
     </div>
   )
 }
