@@ -29,22 +29,12 @@ pnpm start
 
 ### 部署
 
-#### Node.js 部署
-
 ```sh
 pnpm build
 pnpm start
 ```
 
 支持所有类型项目的构建，包括 Tauri、Electron 等桌面应用（需要本机已安装相应的构建环境）。
-
-#### Docker 部署
-
-```sh
-docker compose up -d
-```
-
-内置 Node.js、pnpm、JDK 17、Maven、Git，支持前端和 Java 项目的构建。
 
 ## 使用许可
 

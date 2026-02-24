@@ -29,22 +29,12 @@ pnpm start
 
 ### Deployment
 
-#### Node.js Deployment
-
 ```sh
 pnpm build
 pnpm start
 ```
 
 Supports building all types of projects, including desktop applications like Tauri and Electron (requires the corresponding build environment installed on the host machine).
-
-#### Docker Deployment
-
-```sh
-docker compose up -d
-```
-
-Includes Node.js, pnpm, JDK 17, Maven, and Git, supporting builds for frontend and Java projects.
 
 ## License
 
