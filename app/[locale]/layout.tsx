@@ -1,13 +1,12 @@
 import type { Metadata } from 'next'
 import { Inter, Fira_Code } from 'next/font/google'
-import { hasLocale } from 'next-intl'
-import { getTranslations, setRequestLocale } from 'next-intl/server'
+import { hasLocale, NextIntlClientProvider } from 'next-intl'
+import {
+  getTranslations,
+  setRequestLocale,
+  getMessages,
+} from 'next-intl/server'
 import { notFound } from 'next/navigation'
-import { NextIntlClientProvider } from 'next-intl'
-import { getMessages } from 'next-intl/server'
-
-const inter = Inter({ subsets: ['latin'], variable: '--font-sans' })
-const firaCode = Fira_Code({ subsets: ['latin'], variable: '--font-mono' })
 import { ThemeProvider } from '@/components/theme-provider'
 import { ModeToggle } from '@/components/mode-toggle'
 import { LocaleSwitcher } from '@/components/locale-switcher'
@@ -16,6 +15,9 @@ import { Home, FolderGit2, Hammer, Settings } from 'lucide-react'
 import { Toaster } from '@/components/ui/sonner'
 import { Link } from '@/i18n/navigation'
 import { routing } from '@/i18n/routing'
+
+const inter = Inter({ subsets: ['latin'], variable: '--font-sans' })
+const firaCode = Fira_Code({ subsets: ['latin'], variable: '--font-mono' })
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }))
@@ -56,7 +58,9 @@ export default async function LocaleLayout({
   return (
     <html lang={locale} suppressHydrationWarning>
       <head />
-      <body className={`${inter.variable} ${firaCode.variable} font-sans antialiased`}>
+      <body
+        className={`${inter.variable} ${firaCode.variable} font-sans antialiased`}
+      >
         <NextIntlClientProvider messages={messages}>
           <ThemeProvider
             attribute="class"
