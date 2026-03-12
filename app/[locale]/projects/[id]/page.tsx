@@ -107,11 +107,13 @@ export default function ProjectDetailPage({
         backHref="/projects"
       >
         {project.outputPaths && project.outputPaths.length > 0 && (
-          <Button variant="outline" asChild>
-            <a href={`/api/projects/${id}/artifact`} download>
-              <Download className="mr-2 h-4 w-4" />
-              {t('download')}
-            </a>
+          <Button
+            variant="outline"
+            nativeButton={false}
+            render={<a href={`/api/projects/${id}/artifact`} download />}
+          >
+            <Download className="mr-2 h-4 w-4" />
+            {t('download')}
           </Button>
         )}
         <Link href={`/projects/${id}/edit`}>

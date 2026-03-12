@@ -84,15 +84,17 @@ export default function EditProjectPage({
     <>
       <PageHeader title={t('editProject')} backHref={`/projects/${id}`}>
         <AlertDialog>
-          <AlertDialogTrigger asChild>
-            <Button
-              variant="outline"
-              disabled={deleting}
-              className="text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/50"
-            >
-              <Trash2 className="mr-2 h-4 w-4" />
-              {tCommon('delete')}
-            </Button>
+          <AlertDialogTrigger
+            render={
+              <Button
+                variant="outline"
+                disabled={deleting}
+                className="text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/50"
+              />
+            }
+          >
+            <Trash2 className="mr-2 h-4 w-4" />
+            {tCommon('delete')}
           </AlertDialogTrigger>
           <AlertDialogContent>
             <AlertDialogHeader>

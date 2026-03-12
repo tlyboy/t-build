@@ -96,7 +96,8 @@ export async function GET(
       const latestBuild = await getBuildById(id)
       if (latestBuild) {
         const memoryLogs = getBuildMemoryLogs(id)
-        const latestLogs = memoryLogs.length > 0 ? memoryLogs : await getBuildLogs(id)
+        const latestLogs =
+          memoryLogs.length > 0 ? memoryLogs : await getBuildLogs(id)
         for (const log of latestLogs) {
           controller.enqueue(
             encoder.encode(

@@ -82,7 +82,10 @@ export default function BuildDetailPage({
   useEffect(() => {
     if (!loading && build) {
       requestAnimationFrame(() => {
-        logCardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        logCardRef.current?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start',
+        })
       })
     }
   }, [loading, build])
@@ -139,15 +142,17 @@ export default function BuildDetailPage({
         backHref={backHref}
       >
         <AlertDialog>
-          <AlertDialogTrigger asChild>
-            <Button
-              variant="outline"
-              disabled={deleting}
-              className="text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/50"
-            >
-              <Trash2 className="mr-1 h-4 w-4" />
-              {t('delete')}
-            </Button>
+          <AlertDialogTrigger
+            render={
+              <Button
+                variant="outline"
+                disabled={deleting}
+                className="text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/50"
+              />
+            }
+          >
+            <Trash2 className="mr-1 h-4 w-4" />
+            {t('delete')}
           </AlertDialogTrigger>
           <AlertDialogContent>
             <AlertDialogHeader>

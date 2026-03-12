@@ -146,11 +146,9 @@ export default function SettingsPage() {
               open={credentialDialogOpen}
               onOpenChange={setCredentialDialogOpen}
             >
-              <DialogTrigger asChild>
-                <Button size="sm">
-                  <Plus className="mr-1 h-4 w-4" />
-                  {t('add')}
-                </Button>
+              <DialogTrigger render={<Button size="sm" />}>
+                <Plus className="mr-1 h-4 w-4" />
+                {t('add')}
               </DialogTrigger>
               <DialogContent className="max-w-lg">
                 <DialogHeader>

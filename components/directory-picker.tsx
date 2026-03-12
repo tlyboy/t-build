@@ -131,11 +131,18 @@ export function DirectoryPicker({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button type="button" variant="outline" size="sm" disabled={disabled}>
-          <FolderOpen className="mr-2 h-4 w-4" />
-          {t('select')}
-        </Button>
+      <DialogTrigger
+        render={
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            disabled={disabled}
+          />
+        }
+      >
+        <FolderOpen className="mr-2 h-4 w-4" />
+        {t('select')}
       </DialogTrigger>
       <DialogContent className="max-w-lg overflow-hidden">
         <DialogHeader>

@@ -311,8 +311,19 @@ export function ProjectForm({
                         <Select
                           value={gitCredentialId || '_none'}
                           onValueChange={(v) =>
-                            setGitCredentialId(v === '_none' ? '' : v)
+                            setGitCredentialId(
+                              v === '_none' || v === null ? '' : v,
+                            )
                           }
+                          items={{
+                            _none: t('publicRepo'),
+                            ...Object.fromEntries(
+                              credentials.map((cred) => [
+                                cred.id,
+                                `${cred.name} (${cred.type.toUpperCase()})`,
+                              ]),
+                            ),
+                          }}
                         >
                           <SelectTrigger className="w-full">
                             <SelectValue placeholder={t('selectCredential')} />
@@ -449,8 +460,17 @@ export function ProjectForm({
                 <Select
                   value={gitCredentialId || '_none'}
                   onValueChange={(v) =>
-                    setGitCredentialId(v === '_none' ? '' : v)
+                    setGitCredentialId(v === '_none' || v === null ? '' : v)
                   }
+                  items={{
+                    _none: t('noCredential'),
+                    ...Object.fromEntries(
+                      credentials.map((cred) => [
+                        cred.id,
+                        `${cred.name} (${cred.type.toUpperCase()})`,
+                      ]),
+                    ),
+                  }}
                 >
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder={t('selectCredential')} />
