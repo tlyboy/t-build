@@ -56,11 +56,13 @@ export default async function LocaleLayout({
   const tFooter = await getTranslations({ locale, namespace: 'footer' })
 
   return (
-    <html lang={locale} suppressHydrationWarning>
+    <html
+      lang={locale}
+      suppressHydrationWarning
+      className={`${inter.variable} ${firaCode.variable} font-sans antialiased`}
+    >
       <head />
-      <body
-        className={`${inter.variable} ${firaCode.variable} font-sans antialiased`}
-      >
+      <body>
         <NextIntlClientProvider messages={messages}>
           <ThemeProvider
             attribute="class"
