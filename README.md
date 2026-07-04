@@ -13,7 +13,7 @@ A project build management tool based on Next.js, supporting multi-project manag
 ## Install
 
 ```bash
-git clone https://github.com/tlyboys/t-build.git
+git clone https://github.com/tlyboy/t-build.git
 ```
 
 ## Usage
