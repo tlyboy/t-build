@@ -124,7 +124,7 @@ export default async function LocaleLayout({
                   <div className="flex items-center gap-1">
                     <Button variant="ghost" size="icon" asChild>
                       <a
-                        href="https://github.com/tlyboys/t-build"
+                        href="https://github.com/tlyboy/t-build"
                         target="_blank"
                         rel="noopener noreferrer"
                       >

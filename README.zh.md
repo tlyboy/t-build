@@ -13,7 +13,7 @@
 ## 安装
 
 ```bash
-git clone https://github.com/tlyboys/t-build.git
+git clone https://github.com/tlyboy/t-build.git
 ```
 
 ## 使用说明
