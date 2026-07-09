@@ -86,14 +86,17 @@ export default async function Home({
   // 单次遍历统计构建结果，避免多次 filter
   let successBuilds = 0
   let failedBuilds = 0
+  let skippedBuilds = 0
   for (const build of builds) {
     if (build.status === 'success') successBuilds++
     else if (build.status === 'failed') failedBuilds++
+    else if (build.status === 'skipped') skippedBuilds++
   }
 
   const totalBuilds = builds.length
+  const executedBuilds = totalBuilds - skippedBuilds
   const successRate =
-    totalBuilds > 0 ? Math.round((successBuilds / totalBuilds) * 100) : 0
+    executedBuilds > 0 ? Math.round((successBuilds / executedBuilds) * 100) : 0
 
   // 以项目为维度聚合：每个项目只保留其最新一次构建
   const latestBuildByProject = new Map<string, Build>()
@@ -282,7 +285,9 @@ export default async function Home({
                             ? 'bg-red-500'
                             : build.status === 'running'
                               ? 'animate-pulse bg-yellow-500'
-                              : 'bg-gray-400'
+                              : build.status === 'skipped'
+                                ? 'bg-slate-400'
+                                : 'bg-gray-400'
                       }`}
                     />
                     <span className="truncate text-sm font-medium">
@@ -304,7 +309,9 @@ export default async function Home({
                           ? t('statusFailed')
                           : build.status === 'running'
                             ? t('statusRunning')
-                            : t('statusPending')}
+                            : build.status === 'skipped'
+                              ? t('statusSkipped')
+                              : t('statusPending')}
                     </Badge>
                   </div>
                   <div className="flex flex-shrink-0 items-center gap-2">

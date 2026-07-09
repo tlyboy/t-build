@@ -4,6 +4,10 @@ import { requireApiSession } from '@/lib/auth/api'
 
 export const dynamic = 'force-dynamic'
 
+function isTerminalBuildStatus(status: string) {
+  return status === 'success' || status === 'failed' || status === 'skipped'
+}
+
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
@@ -23,7 +27,7 @@ export async function GET(
   const stream = new ReadableStream({
     async start(controller) {
       // 如果构建已完成，发送日志后关闭
-      if (build.status === 'success' || build.status === 'failed') {
+      if (isTerminalBuildStatus(build.status)) {
         const logs = await getBuildLogs(id)
         for (const log of logs) {
           controller.enqueue(
@@ -116,10 +120,7 @@ export async function GET(
         )
 
         // 如果在此期间构建已完成
-        if (
-          latestBuild.status === 'success' ||
-          latestBuild.status === 'failed'
-        ) {
+        if (isTerminalBuildStatus(latestBuild.status)) {
           controller.enqueue(
             encoder.encode(
               `data: ${JSON.stringify({ type: 'done', data: { status: latestBuild.status, exitCode: latestBuild.exitCode } })}\n\n`,

@@ -51,7 +51,8 @@
     "statusSuccess": "Success",
     "statusFailed": "Failed",
     "statusRunning": "Running",
-    "statusPending": "Pending"
+    "statusPending": "Pending",
+    "statusSkipped": "Skipped"
   },
   "projects": {
     "title": "Projects",
@@ -141,7 +142,8 @@
     "pending": "Pending",
     "running": "Building",
     "success": "Success",
-    "failed": "Failed"
+    "failed": "Failed",
+    "skipped": "Skipped"
   },
   "buildDetail": {
     "title": "Build Details",

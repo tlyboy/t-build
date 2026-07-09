@@ -6,7 +6,7 @@ import { BuildLog } from '@/components/build-log'
 import { useRouter } from '@/i18n/navigation'
 import { useTranslations } from 'next-intl'
 
-type BuildStatus = 'pending' | 'running' | 'success' | 'failed'
+type BuildStatus = 'pending' | 'running' | 'success' | 'failed' | 'skipped'
 
 interface BuildLogSectionProps {
   buildId: string
@@ -30,7 +30,7 @@ export function BuildLogSection({
 
   const handleStatusChange = (status: BuildStatus) => {
     // 构建结束后刷新服务端数据，更新结束时间、退出码等信息
-    if (status === 'success' || status === 'failed') {
+    if (status === 'success' || status === 'failed' || status === 'skipped') {
       router.refresh()
     }
   }

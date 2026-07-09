@@ -159,7 +159,7 @@ export async function handleWebhookDelivery(
   const build = await createBuild(project.id)
 
   try {
-    enqueueBuild(build.id)
+    await enqueueBuild(build.id)
   } catch {
     await updateBuild(build.id, {
       status: 'failed',

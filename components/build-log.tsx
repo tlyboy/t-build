@@ -5,7 +5,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { BuildStatusBadge } from './build-status'
 import { useTranslations } from 'next-intl'
 
-type BuildStatus = 'pending' | 'running' | 'success' | 'failed'
+type BuildStatus = 'pending' | 'running' | 'success' | 'failed' | 'skipped'
 
 interface BuildLogProps {
   buildId: string
