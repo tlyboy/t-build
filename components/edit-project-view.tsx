@@ -20,15 +20,19 @@ import { useRouter } from '@/i18n/navigation'
 import { useTranslations } from 'next-intl'
 import type { Project } from '@/lib/data/projects'
 import type { SafeGitCredential } from '@/lib/data/settings'
+import type { SafeWebhookConfig } from '@/lib/data/webhooks'
+import { WebhookSettingsCard } from '@/components/webhook-settings-card'
 
 export function EditProjectView({
   project,
   initialWorkDir,
   initialCredentials,
+  initialWebhooks,
 }: {
   project: Project
   initialWorkDir: string
   initialCredentials: SafeGitCredential[]
+  initialWebhooks: SafeWebhookConfig[]
 }) {
   const router = useRouter()
   const t = useTranslations('projectForm')
@@ -94,13 +98,17 @@ export function EditProjectView({
           )}
         </Button>
       </PageHeader>
-      <div className="mx-auto max-w-lg">
+      <div className="mx-auto max-w-lg space-y-6">
         <ProjectForm
           project={project}
           mode="edit"
           initialWorkDir={initialWorkDir}
           initialCredentials={initialCredentials}
           onLoadingChange={setFormLoading}
+        />
+        <WebhookSettingsCard
+          initialProjects={[{ id: project.id, name: project.name }]}
+          initialWebhooks={initialWebhooks}
         />
       </div>
     </>

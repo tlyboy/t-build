@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent } from '@/components/ui/card'
 import { Switch } from '@/components/ui/switch'
+import { toast } from 'sonner'
 import {
   Select,
   SelectContent,
@@ -16,15 +17,19 @@ import {
 } from '@/components/ui/select'
 import { DirectoryPicker } from '@/components/directory-picker'
 import {
+  Copy,
   Loader2,
   Settings,
   GitBranch,
   ChevronDown,
   ChevronUp,
   AlertCircle,
+  RotateCcw,
+  Webhook,
 } from 'lucide-react'
 import { Link, useRouter } from '@/i18n/navigation'
 import { useTranslations } from 'next-intl'
+import type { WebhookProvider } from '@/lib/data/webhooks'
 
 interface Project {
   id: string
@@ -51,6 +56,18 @@ interface ProjectFormProps {
   initialWorkDir: string
   initialCredentials: GitCredential[]
   onLoadingChange?: (loading: boolean) => void
+}
+
+function generateSecret() {
+  const bytes = new Uint8Array(32)
+  crypto.getRandomValues(bytes)
+  return Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join(
+    '',
+  )
+}
+
+function providerLabel(provider: WebhookProvider) {
+  return provider === 'github' ? 'GitHub' : 'Codeup'
 }
 
 export function ProjectForm({
@@ -96,6 +113,23 @@ export function ProjectForm({
   const [gitCredentialId, setGitCredentialId] = useState(
     project?.gitCredentialId || '',
   )
+  const [webhookEnabled, setWebhookEnabled] = useState(false)
+  const [webhookId] = useState(() => crypto.randomUUID())
+  const [webhookName, setWebhookName] = useState('')
+  const [webhookProvider, setWebhookProvider] =
+    useState<WebhookProvider>('github')
+  const [webhookBranch, setWebhookBranch] = useState('main')
+  const [webhookSecret, setWebhookSecret] = useState(() => generateSecret())
+
+  const endpointFor = (id: string) => {
+    if (typeof window === 'undefined') return `/api/webhooks/${id}`
+    return `${window.location.origin}/api/webhooks/${id}`
+  }
+
+  const copy = async (value: string) => {
+    await navigator.clipboard.writeText(value)
+    toast.success(t('copied'))
+  }
 
   const getRepoNameFromUrl = (url: string): string => {
     const parts = url.replace(/\.git$/, '').split('/')
@@ -134,6 +168,43 @@ export function ProjectForm({
       if (!res.ok) {
         const data = await res.json()
         throw new Error(data.error || 'Failed to save project')
+      }
+
+      const savedProject = (await res.json()) as Project
+
+      if (mode === 'create' && webhookEnabled) {
+        const webhookRes = await fetch('/api/webhooks', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            id: webhookId,
+            name:
+              webhookName.trim() ||
+              `${savedProject.name || name || 'Project'} ${providerLabel(webhookProvider)} webhook`,
+            provider: webhookProvider,
+            projectId: savedProject.id,
+            branch: webhookBranch.trim(),
+            secret: webhookSecret.trim(),
+            enabled: true,
+          }),
+        })
+
+        if (!webhookRes.ok) {
+          const data = (await webhookRes.json().catch(() => null)) as {
+            error?: string
+          } | null
+          toast.error(
+            `${t('projectSavedWebhookFailed')}${data?.error ? `: ${data.error}` : ''}`,
+          )
+          router.push(`/projects/${savedProject.id}/edit`)
+          router.refresh()
+          return
+        }
+
+        toast.success(t('webhookSaved'))
+        router.push(`/projects/${savedProject.id}/edit`)
+        router.refresh()
+        return
       }
 
       router.push('/projects')
@@ -183,6 +254,8 @@ export function ProjectForm({
       setRelativePath(repoName)
       setShowCloneOptions(false)
       setGitPullBeforeBuild(true)
+      setWebhookName((current) => current || `${repoName} webhook`)
+      setWebhookBranch(gitBranch || 'main')
 
       if (!name) {
         setName(repoName)
@@ -466,6 +539,142 @@ export function ProjectForm({
                       {t('goToConfigure')}
                     </Button>
                   </Link>
+                </div>
+              )}
+            </div>
+          )}
+
+          {mode === 'create' && (
+            <div className="space-y-4 rounded-lg border p-3">
+              <div className="flex items-center justify-between gap-4">
+                <div className="space-y-0.5">
+                  <Label
+                    htmlFor="webhookEnabled"
+                    className="flex items-center gap-2 text-sm font-medium"
+                  >
+                    <Webhook className="h-4 w-4" />
+                    {t('enableWebhook')}
+                  </Label>
+                  <p className="text-muted-foreground text-xs">
+                    {t('enableWebhookHint')}
+                  </p>
+                </div>
+                <Switch
+                  id="webhookEnabled"
+                  checked={webhookEnabled}
+                  onCheckedChange={setWebhookEnabled}
+                />
+              </div>
+
+              {webhookEnabled && (
+                <div className="space-y-4 border-t pt-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="webhookName">{t('webhookName')}</Label>
+                    <Input
+                      id="webhookName"
+                      value={webhookName}
+                      onChange={(event) => setWebhookName(event.target.value)}
+                      placeholder={
+                        name
+                          ? `${name} ${providerLabel(webhookProvider)} webhook`
+                          : t('webhookNamePlaceholder')
+                      }
+                    />
+                  </div>
+
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <div className="space-y-2">
+                      <Label>{t('webhookProvider')}</Label>
+                      <Select
+                        value={webhookProvider}
+                        onValueChange={(value) =>
+                          setWebhookProvider(value as WebhookProvider)
+                        }
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="github">GitHub</SelectItem>
+                          <SelectItem value="codeup">Codeup</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="webhookBranch">
+                        {t('webhookBranch')}
+                      </Label>
+                      <Input
+                        id="webhookBranch"
+                        value={webhookBranch}
+                        onChange={(event) =>
+                          setWebhookBranch(event.target.value)
+                        }
+                        placeholder={t('webhookBranchPlaceholder')}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="webhookSecret">{t('webhookSecret')}</Label>
+                    <div className="flex gap-2">
+                      <Input
+                        id="webhookSecret"
+                        value={webhookSecret}
+                        onChange={(event) =>
+                          setWebhookSecret(event.target.value)
+                        }
+                        className="font-mono text-xs"
+                        required={webhookEnabled}
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        title={t('regenerateSecret')}
+                        onClick={() => setWebhookSecret(generateSecret())}
+                      >
+                        <RotateCcw className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        title={t('copySecret')}
+                        onClick={() => copy(webhookSecret)}
+                      >
+                        <Copy className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <p className="text-muted-foreground text-xs">
+                      {webhookProvider === 'github'
+                        ? t('githubSecretHint')
+                        : t('codeupSecretHint')}
+                    </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>{t('webhookUrl')}</Label>
+                    <div className="bg-muted flex min-w-0 items-center gap-2 rounded-md px-2 py-1">
+                      <code className="min-w-0 flex-1 truncate text-xs">
+                        {endpointFor(webhookId)}
+                      </code>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7"
+                        title={t('copyWebhookUrl')}
+                        onClick={() => copy(endpointFor(webhookId))}
+                      >
+                        <Copy className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                    <p className="text-muted-foreground text-xs">
+                      {t('webhookUrlHint')}
+                    </p>
+                  </div>
                 </div>
               )}
             </div>
