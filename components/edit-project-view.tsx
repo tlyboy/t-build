@@ -19,8 +19,17 @@ import { Loader2, Trash2 } from 'lucide-react'
 import { useRouter } from '@/i18n/navigation'
 import { useTranslations } from 'next-intl'
 import type { Project } from '@/lib/data/projects'
+import type { SafeGitCredential } from '@/lib/data/settings'
 
-export function EditProjectView({ project }: { project: Project }) {
+export function EditProjectView({
+  project,
+  initialWorkDir,
+  initialCredentials,
+}: {
+  project: Project
+  initialWorkDir: string
+  initialCredentials: SafeGitCredential[]
+}) {
   const router = useRouter()
   const t = useTranslations('projectForm')
   const tDelete = useTranslations('deleteProject')
@@ -47,10 +56,7 @@ export function EditProjectView({ project }: { project: Project }) {
 
   return (
     <>
-      <PageHeader
-        title={t('editProject')}
-        backHref={`/projects/${project.id}`}
-      >
+      <PageHeader title={t('editProject')} backHref={`/projects/${project.id}`}>
         <AlertDialog>
           <AlertDialogTrigger asChild>
             <Button
@@ -92,6 +98,8 @@ export function EditProjectView({ project }: { project: Project }) {
         <ProjectForm
           project={project}
           mode="edit"
+          initialWorkDir={initialWorkDir}
+          initialCredentials={initialCredentials}
           onLoadingChange={setFormLoading}
         />
       </div>

@@ -48,6 +48,8 @@ interface ProjectFormProps {
   project?: Project
   mode: 'create' | 'edit'
   formId?: string
+  initialWorkDir: string
+  initialCredentials: GitCredential[]
   onLoadingChange?: (loading: boolean) => void
 }
 
@@ -55,6 +57,8 @@ export function ProjectForm({
   project,
   mode,
   formId = 'project-form',
+  initialWorkDir,
+  initialCredentials,
   onLoadingChange,
 }: ProjectFormProps) {
   const router = useRouter()
@@ -69,12 +73,13 @@ export function ProjectForm({
   const [error, setError] = useState('')
   const [cloneSuccess, setCloneSuccess] = useState(false)
 
-  const [workDir, setWorkDir] = useState('')
-  const [credentials, setCredentials] = useState<GitCredential[]>([])
-  const [settingsLoaded, setSettingsLoaded] = useState(false)
+  const workDir = initialWorkDir
+  const credentials = initialCredentials
 
   const [name, setName] = useState(project?.name || '')
-  const [relativePath, setRelativePath] = useState('')
+  const [relativePath, setRelativePath] = useState(
+    project?.path?.replace(/\\/g, '/') || '',
+  )
   const [buildCommand, setBuildCommand] = useState(
     project?.buildCommand || 'ni\nnr build',
   )
@@ -91,22 +96,6 @@ export function ProjectForm({
   const [gitCredentialId, setGitCredentialId] = useState(
     project?.gitCredentialId || '',
   )
-
-  useEffect(() => {
-    fetch('/api/settings')
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => {
-        if (data) {
-          setWorkDir(data.workDir || '')
-          setCredentials(data.gitCredentials || [])
-
-          if (project?.path) {
-            setRelativePath(project.path.replace(/\\/g, '/'))
-          }
-        }
-        setSettingsLoaded(true)
-      })
-  }, [project?.path])
 
   const getRepoNameFromUrl = (url: string): string => {
     const parts = url.replace(/\.git$/, '').split('/')
@@ -213,7 +202,7 @@ export function ProjectForm({
     }
   }
 
-  if (settingsLoaded && !workDir) {
+  if (!workDir) {
     return (
       <Card className="w-full">
         <CardContent className="flex flex-col items-center justify-center py-12">

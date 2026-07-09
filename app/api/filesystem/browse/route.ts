@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import fs from 'fs/promises'
 import path from 'path'
 import { getSettings } from '@/lib/data/settings'
+import { requireApiSession } from '@/lib/auth/api'
 
 interface FileEntry {
   name: string
@@ -10,6 +11,9 @@ interface FileEntry {
 }
 
 export async function GET(request: Request) {
+  const unauthorized = await requireApiSession()
+  if (unauthorized) return unauthorized
+
   const settings = await getSettings()
 
   // A working directory must be configured to use this
@@ -27,7 +31,7 @@ export async function GET(request: Request) {
   // Calculate the target path
   const targetPath = relativePath ? path.join(workDir, relativePath) : workDir
 
-  // Security check: ensure the target path is inside the working directory
+  // Security check: ensure the target path is within the working directory
   const resolvedTarget = path.resolve(targetPath)
   const resolvedWorkDir = path.resolve(workDir)
 

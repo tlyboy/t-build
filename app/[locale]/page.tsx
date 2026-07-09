@@ -20,6 +20,8 @@ import {
 } from 'lucide-react'
 import { getAllProjects } from '@/lib/data/projects'
 import { getAllBuilds, type Build } from '@/lib/data/builds'
+import { getCurrentSession } from '@/lib/auth/server'
+import { redirect } from '@/i18n/navigation'
 
 // Data comes from local files and changes with each build, so render dynamically on every request (avoiding a static snapshot at build time).
 export const dynamic = 'force-dynamic'
@@ -67,6 +69,11 @@ export default async function Home({
 }) {
   const { locale } = await params
   setRequestLocale(locale)
+
+  const session = await getCurrentSession()
+  if (!session) {
+    redirect({ href: '/login', locale })
+  }
 
   const t = await getTranslations('dashboard')
   const tProjects = await getTranslations('projects')

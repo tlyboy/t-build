@@ -1,7 +1,5 @@
-import fs from 'fs/promises'
-import os from 'os'
-import path from 'path'
 import { encrypt, decrypt, isEncrypted } from '@/lib/crypto'
+import { getBusinessDatabase } from '@/lib/db/business'
 
 const MASK = '***'
 
@@ -15,115 +13,78 @@ export interface MaskedEnvVar {
   value: string
 }
 
-interface StoredEnvVar {
+interface EnvVarRow {
   projectId: string
   key: string
-  value: string // encrypted
-}
-
-const DATA_DIR = path.join(os.homedir(), '.t-build')
-const ENV_FILE = path.join(DATA_DIR, 'env-vars.json')
-
-let writeLock: Promise<void> = Promise.resolve()
-
-async function ensureDataDir() {
-  try {
-    await fs.access(DATA_DIR)
-  } catch {
-    await fs.mkdir(DATA_DIR, { recursive: true })
-  }
-}
-
-async function readEnvVars(): Promise<StoredEnvVar[]> {
-  await ensureDataDir()
-  try {
-    const data = await fs.readFile(ENV_FILE, 'utf-8')
-    return JSON.parse(data)
-  } catch {
-    return []
-  }
-}
-
-async function writeEnvVars(vars: StoredEnvVar[]) {
-  await ensureDataDir()
-  await fs.writeFile(ENV_FILE, JSON.stringify(vars, null, 2))
-}
-
-async function withLock<T>(fn: () => Promise<T>): Promise<T> {
-  const previousLock = writeLock
-  let resolve: () => void
-  writeLock = new Promise((r) => {
-    resolve = r
-  })
-
-  try {
-    await previousLock
-    return await fn()
-  } finally {
-    resolve!()
-  }
+  value: string
 }
 
 export async function getEnvVars(projectId: string): Promise<MaskedEnvVar[]> {
-  const all = await readEnvVars()
-  return all
-    .filter((v) => v.projectId === projectId)
-    .map((v) => ({ key: v.key, value: MASK }))
+  const db = getBusinessDatabase()
+  const rows = db
+    .prepare('select key from tbuild_env_var where projectId = ? order by key')
+    .all(projectId) as Array<{ key: string }>
+
+  return rows.map((row) => ({ key: row.key, value: MASK }))
 }
 
 export async function setEnvVars(
   projectId: string,
   vars: EnvVar[],
 ): Promise<void> {
-  await withLock(async () => {
-    const all = await readEnvVars()
+  const db = getBusinessDatabase()
+  const now = new Date().toISOString()
 
-    // Deduplicate by key (last value wins)
-    const deduped = new Map<string, string>()
-    for (const v of vars) {
-      deduped.set(v.key, v.value)
+  const existingRows = db
+    .prepare('select key, value from tbuild_env_var where projectId = ?')
+    .all(projectId) as Array<{ key: string; value: string }>
+  const existingMap = new Map(existingRows.map((row) => [row.key, row.value]))
+
+  const deduped = new Map<string, string>()
+  for (const envVar of vars) {
+    deduped.set(envVar.key, envVar.value)
+  }
+
+  const nextEntries = await Promise.all(
+    [...deduped.entries()].map(async ([key, value]) => ({
+      key,
+      value:
+        value === MASK && existingMap.has(key)
+          ? existingMap.get(key)!
+          : await encrypt(value),
+    })),
+  )
+
+  const insert = db.prepare(
+    `insert into tbuild_env_var (projectId, key, value, createdAt, updatedAt)
+     values (?, ?, ?, ?, ?)
+     on conflict(projectId, key) do update
+     set value = excluded.value, updatedAt = excluded.updatedAt`,
+  )
+
+  db.transaction(() => {
+    db.prepare('delete from tbuild_env_var where projectId = ?').run(projectId)
+    for (const entry of nextEntries) {
+      insert.run(projectId, entry.key, entry.value, now, now)
     }
-
-    // Read existing encrypted values to preserve unchanged ones
-    const existingMap = new Map<string, string>()
-    for (const row of all) {
-      if (row.projectId === projectId) {
-        existingMap.set(row.key, row.value)
-      }
-    }
-
-    // Build new entries for this project
-    const newEntries: StoredEnvVar[] = await Promise.all(
-      [...deduped.entries()].map(async ([key, value]) => ({
-        projectId,
-        key,
-        value:
-          value === MASK && existingMap.has(key)
-            ? existingMap.get(key)!
-            : await encrypt(value),
-      })),
-    )
-
-    // Replace all entries for this project
-    const others = all.filter((v) => v.projectId !== projectId)
-    await writeEnvVars([...others, ...newEntries])
-  })
+  })()
 }
 
 export async function getEnvVarsForBuild(
   projectId: string,
 ): Promise<Record<string, string>> {
-  const all = await readEnvVars()
-  const projectVars = all.filter((v) => v.projectId === projectId)
-  if (projectVars.length === 0) return {}
+  const db = getBusinessDatabase()
+  const rows = db
+    .prepare(
+      'select projectId, key, value from tbuild_env_var where projectId = ?',
+    )
+    .all(projectId) as EnvVarRow[]
 
   const result: Record<string, string> = {}
-  for (const row of projectVars) {
-    if (isEncrypted(row.value)) {
-      result[row.key] = await decrypt(row.value)
-    } else {
-      result[row.key] = row.value
-    }
+  for (const row of rows) {
+    result[row.key] = isEncrypted(row.value)
+      ? await decrypt(row.value)
+      : row.value
   }
   return result
 }
@@ -131,9 +92,6 @@ export async function getEnvVarsForBuild(
 export async function deleteEnvVarsByProjectId(
   projectId: string,
 ): Promise<void> {
-  await withLock(async () => {
-    const all = await readEnvVars()
-    const filtered = all.filter((v) => v.projectId !== projectId)
-    await writeEnvVars(filtered)
-  })
+  const db = getBusinessDatabase()
+  db.prepare('delete from tbuild_env_var where projectId = ?').run(projectId)
 }

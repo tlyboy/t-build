@@ -7,8 +7,12 @@ import {
 import { getProjectById } from '@/lib/data/projects'
 import { enqueueBuild } from '@/lib/build-executor'
 import { updateBuild } from '@/lib/data/builds'
+import { requireApiSession } from '@/lib/auth/api'
 
 export async function GET(request: Request) {
+  const unauthorized = await requireApiSession()
+  if (unauthorized) return unauthorized
+
   const { searchParams } = new URL(request.url)
   const projectId = searchParams.get('projectId')
 
@@ -22,6 +26,9 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
+  const unauthorized = await requireApiSession()
+  if (unauthorized) return unauthorized
+
   const body = await request.json()
 
   if (!body.projectId) {

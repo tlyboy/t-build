@@ -1,7 +1,11 @@
 import { NextResponse } from 'next/server'
 import { getSettings, addGitCredential } from '@/lib/data/settings'
+import { requireApiSession } from '@/lib/auth/api'
 
 export async function GET() {
+  const unauthorized = await requireApiSession()
+  if (unauthorized) return unauthorized
+
   const settings = await getSettings()
   // Do not return sensitive information
   return NextResponse.json(
@@ -17,6 +21,9 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  const unauthorized = await requireApiSession()
+  if (unauthorized) return unauthorized
+
   const body = await request.json()
 
   if (!body.name || !body.type) {

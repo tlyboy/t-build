@@ -1,11 +1,15 @@
 import { NextResponse } from 'next/server'
 import { getProjectById } from '@/lib/data/projects'
 import { getEnvVars, setEnvVars } from '@/lib/data/env-vars'
+import { requireApiSession } from '@/lib/auth/api'
 
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const unauthorized = await requireApiSession()
+  if (unauthorized) return unauthorized
+
   const { id } = await params
   const project = await getProjectById(id)
   if (!project)
@@ -19,6 +23,9 @@ export async function PUT(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const unauthorized = await requireApiSession()
+  if (unauthorized) return unauthorized
+
   const { id } = await params
   const project = await getProjectById(id)
   if (!project)

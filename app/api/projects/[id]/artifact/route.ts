@@ -5,11 +5,15 @@ import archiver from 'archiver'
 import fs from 'fs'
 import path from 'path'
 import fg from 'fast-glob'
+import { requireApiSession } from '@/lib/auth/api'
 
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const unauthorized = await requireApiSession()
+  if (unauthorized) return unauthorized
+
   const { id } = await params
 
   const project = await getProjectById(id)

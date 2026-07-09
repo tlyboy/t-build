@@ -6,11 +6,15 @@ import archiver from 'archiver'
 import fs from 'fs'
 import path from 'path'
 import fg from 'fast-glob'
+import { requireApiSession } from '@/lib/auth/api'
 
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const unauthorized = await requireApiSession()
+  if (unauthorized) return unauthorized
+
   const { id } = await params
 
   const build = await getBuildById(id)
@@ -168,7 +172,7 @@ export async function GET(
     })
   }
 
-  // For multiple files or directories, package them as a zip (streaming)
+  // Package multiple files or paths containing directories into a zip (streaming)
   const archive = archiver('zip', {
     zlib: { level: 9 },
   })

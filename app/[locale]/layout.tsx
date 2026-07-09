@@ -13,11 +13,28 @@ import { LocaleSwitcher } from '@/components/locale-switcher'
 import { Button } from '@/components/ui/button'
 import { Home, FolderGit2, Hammer, Settings } from 'lucide-react'
 import { Toaster } from '@/components/ui/sonner'
+import { LogoutButton } from '@/components/logout-button'
 import { Link } from '@/i18n/navigation'
 import { routing } from '@/i18n/routing'
+import { getCurrentSession } from '@/lib/auth/server'
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' })
 const firaCode = Fira_Code({ subsets: ['latin'], variable: '--font-mono' })
+const clientMessageNamespaces = [
+  'auth',
+  'buildDetail',
+  'buildLog',
+  'buildStatus',
+  'common',
+  'deleteBuild',
+  'deleteCredential',
+  'deleteProject',
+  'nav',
+  'projectCard',
+  'projectDetail',
+  'projectForm',
+  'settings',
+] as const
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }))
@@ -51,11 +68,18 @@ export default async function LocaleLayout({
 
   setRequestLocale(locale)
 
-  const [messages, t, tFooter] = await Promise.all([
+  const [messages, t, tFooter, session] = await Promise.all([
     getMessages(),
     getTranslations({ locale, namespace: 'nav' }),
     getTranslations({ locale, namespace: 'footer' }),
+    getCurrentSession(),
   ])
+  const clientMessages = Object.fromEntries(
+    clientMessageNamespaces.map((namespace) => [
+      namespace,
+      messages[namespace],
+    ]),
+  )
 
   return (
     <html
@@ -65,7 +89,7 @@ export default async function LocaleLayout({
     >
       <head />
       <body>
-        <NextIntlClientProvider messages={messages}>
+        <NextIntlClientProvider messages={clientMessages}>
           <ThemeProvider
             attribute="class"
             defaultTheme="system"
@@ -83,42 +107,46 @@ export default async function LocaleLayout({
                       <Hammer className="h-5 w-5" />
                       <span className="hidden sm:inline">T-Build</span>
                     </Link>
-                    <nav className="flex items-center">
-                      <Link href="/">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="sm:w-auto sm:px-3"
-                        >
-                          <Home className="h-4 w-4 sm:mr-1" />
-                          <span className="hidden sm:inline">{t('home')}</span>
-                        </Button>
-                      </Link>
-                      <Link href="/projects">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="sm:w-auto sm:px-3"
-                        >
-                          <FolderGit2 className="h-4 w-4 sm:mr-1" />
-                          <span className="hidden sm:inline">
-                            {t('projects')}
-                          </span>
-                        </Button>
-                      </Link>
-                      <Link href="/settings">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="sm:w-auto sm:px-3"
-                        >
-                          <Settings className="h-4 w-4 sm:mr-1" />
-                          <span className="hidden sm:inline">
-                            {t('settings')}
-                          </span>
-                        </Button>
-                      </Link>
-                    </nav>
+                    {session && (
+                      <nav className="flex items-center">
+                        <Link href="/">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="sm:w-auto sm:px-3"
+                          >
+                            <Home className="h-4 w-4 sm:mr-1" />
+                            <span className="hidden sm:inline">
+                              {t('home')}
+                            </span>
+                          </Button>
+                        </Link>
+                        <Link href="/projects">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="sm:w-auto sm:px-3"
+                          >
+                            <FolderGit2 className="h-4 w-4 sm:mr-1" />
+                            <span className="hidden sm:inline">
+                              {t('projects')}
+                            </span>
+                          </Button>
+                        </Link>
+                        <Link href="/settings">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="sm:w-auto sm:px-3"
+                          >
+                            <Settings className="h-4 w-4 sm:mr-1" />
+                            <span className="hidden sm:inline">
+                              {t('settings')}
+                            </span>
+                          </Button>
+                        </Link>
+                      </nav>
+                    )}
                   </div>
 
                   <div className="flex items-center gap-1">
@@ -138,6 +166,7 @@ export default async function LocaleLayout({
                     </Button>
                     <LocaleSwitcher />
                     <ModeToggle />
+                    {session && <LogoutButton />}
                   </div>
                 </div>
               </header>

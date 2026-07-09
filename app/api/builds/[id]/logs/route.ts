@@ -1,5 +1,6 @@
 import { getBuildById, getBuildLogs } from '@/lib/data/builds'
 import { getBuildEmitter, getBuildMemoryLogs } from '@/lib/build-executor'
+import { requireApiSession } from '@/lib/auth/api'
 
 export const dynamic = 'force-dynamic'
 
@@ -7,6 +8,9 @@ export async function GET(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const unauthorized = await requireApiSession()
+  if (unauthorized) return unauthorized
+
   const { id } = await params
   const build = await getBuildById(id)
 
