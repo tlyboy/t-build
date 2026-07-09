@@ -4,8 +4,12 @@ import fs from 'fs/promises'
 import path from 'path'
 import os from 'os'
 import { getGitCredentialById, getSettings } from '@/lib/data/settings'
+import { requireApiSession } from '@/lib/auth/api'
 
 export async function POST(request: Request) {
+  const unauthorized = await requireApiSession()
+  if (unauthorized) return unauthorized
+
   const body = await request.json()
 
   const { gitUrl, targetPath, branch, credentialId } = body

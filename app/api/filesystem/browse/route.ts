@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import fs from 'fs/promises'
 import path from 'path'
 import { getSettings } from '@/lib/data/settings'
+import { requireApiSession } from '@/lib/auth/api'
 
 interface FileEntry {
   name: string
@@ -10,6 +11,9 @@ interface FileEntry {
 }
 
 export async function GET(request: Request) {
+  const unauthorized = await requireApiSession()
+  if (unauthorized) return unauthorized
+
   const settings = await getSettings()
 
   // 必须配置工作目录才能使用

@@ -30,6 +30,9 @@ export function BuildLog({
   const bottomRef = useRef<HTMLDivElement>(null)
   const stickToBottomRef = useRef(true)
   const onStatusChangeRef = useRef(onStatusChange)
+  const logsRef = useRef<string[]>([])
+  const pendingLogsRef = useRef<string[]>([])
+  const flushTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const getViewport = useCallback(
     () =>
@@ -42,6 +45,24 @@ export function BuildLog({
   useEffect(() => {
     onStatusChangeRef.current = onStatusChange
   }, [onStatusChange])
+
+  const flushPendingLogs = useCallback(() => {
+    if (pendingLogsRef.current.length === 0) return
+
+    const nextLogs = [...logsRef.current, ...pendingLogsRef.current]
+    pendingLogsRef.current = []
+    logsRef.current = nextLogs
+    setLogs(nextLogs)
+  }, [])
+
+  const scheduleLogFlush = useCallback(() => {
+    if (flushTimerRef.current) return
+
+    flushTimerRef.current = setTimeout(() => {
+      flushTimerRef.current = null
+      flushPendingLogs()
+    }, 100)
+  }, [flushPendingLogs])
 
   // Track user scroll to toggle sticky behavior
   useEffect(() => {
@@ -58,6 +79,12 @@ export function BuildLog({
   }, [getViewport, logs.length > 0]) // re-attach when viewport appears
 
   useEffect(() => {
+    if (flushTimerRef.current) {
+      clearTimeout(flushTimerRef.current)
+      flushTimerRef.current = null
+    }
+    logsRef.current = []
+    pendingLogsRef.current = []
     setLogs([])
     setStatus(initialStatus)
     setIsLive(true)
@@ -77,11 +104,14 @@ export function BuildLog({
         switch (msg.type) {
           case 'log':
             logCount++
-            setLogs((prev) => {
-              // On reconnect, server resends all stored logs; skip duplicates
-              if (logCount <= prev.length) return prev
-              return [...prev, stripAnsi(msg.data)]
-            })
+            // On reconnect, server resends all stored logs; skip duplicates.
+            if (
+              logCount >
+              logsRef.current.length + pendingLogsRef.current.length
+            ) {
+              pendingLogsRef.current.push(stripAnsi(msg.data))
+              scheduleLogFlush()
+            }
             break
           case 'status': {
             const newStatus = msg.data as BuildStatus
@@ -91,6 +121,7 @@ export function BuildLog({
           }
           case 'done': {
             const doneStatus = msg.data.status as BuildStatus
+            flushPendingLogs()
             setStatus(doneStatus)
             onStatusChangeRef.current?.(doneStatus)
             setIsLive(false)
@@ -111,9 +142,13 @@ export function BuildLog({
     }
 
     return () => {
+      if (flushTimerRef.current) {
+        clearTimeout(flushTimerRef.current)
+        flushTimerRef.current = null
+      }
       es.close()
     }
-  }, [buildId]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [buildId, flushPendingLogs, initialStatus, scheduleLogFlush])
 
   // Smart auto-scroll: only when user is at the bottom
   useEffect(() => {
@@ -125,7 +160,7 @@ export function BuildLog({
       }
     })
     return () => cancelAnimationFrame(raf)
-  }, [logs, getViewport])
+  }, [logs.length, getViewport])
 
   const isRunning = status === 'running' || status === 'pending'
 
@@ -154,7 +189,7 @@ export function BuildLog({
             logs.map((log, index) => (
               <div
                 key={index}
-                className={`whitespace-pre-wrap ${
+                className={`whitespace-pre-wrap [contain-intrinsic-size:0_20px] [content-visibility:auto] ${
                   log.startsWith('[T-Build]') || log.startsWith('[git]')
                     ? 'text-blue-500'
                     : ''

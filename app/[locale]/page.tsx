@@ -20,6 +20,8 @@ import {
 } from 'lucide-react'
 import { getAllProjects } from '@/lib/data/projects'
 import { getAllBuilds, type Build } from '@/lib/data/builds'
+import { getCurrentSession } from '@/lib/auth/server'
+import { redirect } from '@/i18n/navigation'
 
 // 数据来自本地文件且随构建实时变化，需每次请求动态渲染（避免构建时静态快照）
 export const dynamic = 'force-dynamic'
@@ -67,6 +69,11 @@ export default async function Home({
 }) {
   const { locale } = await params
   setRequestLocale(locale)
+
+  const session = await getCurrentSession()
+  if (!session) {
+    redirect({ href: '/login', locale })
+  }
 
   const t = await getTranslations('dashboard')
   const tProjects = await getTranslations('projects')

@@ -1,6 +1,4 @@
-import fs from 'fs/promises'
-import os from 'os'
-import path from 'path'
+import { getBusinessDatabase } from '@/lib/db/business'
 
 export interface Project {
   id: string
@@ -9,50 +7,70 @@ export interface Project {
   buildCommand: string
   createdAt: string
   updatedAt: string
-  gitPullBeforeBuild?: boolean // 构建前 git pull
-  outputPaths?: string[] // 构建产物路径，支持目录和文件
-  gitCredentialId?: string // Git 凭证 ID
+  gitPullBeforeBuild?: boolean
+  outputPaths?: string[]
+  gitCredentialId?: string
 }
 
-const DATA_DIR = path.join(os.homedir(), '.t-build')
-const PROJECTS_FILE = path.join(DATA_DIR, 'projects.json')
+interface ProjectRow {
+  id: string
+  name: string
+  path: string
+  buildCommand: string
+  createdAt: string
+  updatedAt: string
+  gitPullBeforeBuild: number
+  outputPaths: string | null
+  gitCredentialId: string | null
+}
 
-async function ensureDataDir() {
+function parseOutputPaths(value: string | null) {
+  if (!value) return undefined
+
   try {
-    await fs.access(DATA_DIR)
+    const parsed = JSON.parse(value) as unknown
+    return Array.isArray(parsed)
+      ? parsed.filter(Boolean).map(String)
+      : undefined
   } catch {
-    await fs.mkdir(DATA_DIR, { recursive: true })
+    return undefined
   }
 }
 
-async function readProjects(): Promise<Project[]> {
-  await ensureDataDir()
-  try {
-    const data = await fs.readFile(PROJECTS_FILE, 'utf-8')
-    return JSON.parse(data)
-  } catch {
-    return []
+function toProject(row: ProjectRow): Project {
+  return {
+    id: row.id,
+    name: row.name,
+    path: row.path,
+    buildCommand: row.buildCommand,
+    gitPullBeforeBuild: row.gitPullBeforeBuild === 1,
+    outputPaths: parseOutputPaths(row.outputPaths),
+    gitCredentialId: row.gitCredentialId ?? undefined,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
   }
-}
-
-async function writeProjects(projects: Project[]) {
-  await ensureDataDir()
-  await fs.writeFile(PROJECTS_FILE, JSON.stringify(projects, null, 2))
 }
 
 export async function getAllProjects(): Promise<Project[]> {
-  return readProjects()
+  const db = getBusinessDatabase()
+  const rows = db
+    .prepare('select * from tbuild_project order by createdAt desc')
+    .all() as ProjectRow[]
+  return rows.map(toProject)
 }
 
 export async function getProjectById(id: string): Promise<Project | null> {
-  const projects = await readProjects()
-  return projects.find((p) => p.id === id) || null
+  const db = getBusinessDatabase()
+  const row = db
+    .prepare('select * from tbuild_project where id = ?')
+    .get(id) as ProjectRow | undefined
+  return row ? toProject(row) : null
 }
 
 export async function createProject(
   data: Omit<Project, 'id' | 'createdAt' | 'updatedAt'>,
 ): Promise<Project> {
-  const projects = await readProjects()
+  const db = getBusinessDatabase()
   const now = new Date().toISOString()
   const project: Project = {
     id: crypto.randomUUID(),
@@ -65,8 +83,24 @@ export async function createProject(
     createdAt: now,
     updatedAt: now,
   }
-  projects.push(project)
-  await writeProjects(projects)
+
+  db.prepare(
+    `insert into tbuild_project (
+      id, name, path, buildCommand, gitPullBeforeBuild, outputPaths,
+      gitCredentialId, createdAt, updatedAt
+    ) values (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+  ).run(
+    project.id,
+    project.name,
+    project.path,
+    project.buildCommand,
+    project.gitPullBeforeBuild ? 1 : 0,
+    project.outputPaths ? JSON.stringify(project.outputPaths) : null,
+    project.gitCredentialId ?? null,
+    project.createdAt,
+    project.updatedAt,
+  )
+
   return project
 }
 
@@ -74,25 +108,37 @@ export async function updateProject(
   id: string,
   data: Partial<Omit<Project, 'id' | 'createdAt'>>,
 ): Promise<Project | null> {
-  const projects = await readProjects()
-  const index = projects.findIndex((p) => p.id === id)
-  if (index === -1) return null
+  const db = getBusinessDatabase()
+  const existing = await getProjectById(id)
+  if (!existing) return null
 
-  projects[index] = {
-    ...projects[index],
+  const updated: Project = {
+    ...existing,
     ...data,
     updatedAt: new Date().toISOString(),
   }
-  await writeProjects(projects)
-  return projects[index]
+
+  db.prepare(
+    `update tbuild_project
+     set name = ?, path = ?, buildCommand = ?, gitPullBeforeBuild = ?,
+         outputPaths = ?, gitCredentialId = ?, updatedAt = ?
+     where id = ?`,
+  ).run(
+    updated.name,
+    updated.path,
+    updated.buildCommand,
+    updated.gitPullBeforeBuild ? 1 : 0,
+    updated.outputPaths ? JSON.stringify(updated.outputPaths) : null,
+    updated.gitCredentialId ?? null,
+    updated.updatedAt,
+    id,
+  )
+
+  return updated
 }
 
 export async function deleteProject(id: string): Promise<boolean> {
-  const projects = await readProjects()
-  const index = projects.findIndex((p) => p.id === id)
-  if (index === -1) return false
-
-  projects.splice(index, 1)
-  await writeProjects(projects)
-  return true
+  const db = getBusinessDatabase()
+  const result = db.prepare('delete from tbuild_project where id = ?').run(id)
+  return result.changes > 0
 }

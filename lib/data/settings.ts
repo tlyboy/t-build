@@ -1,74 +1,70 @@
-import fs from 'fs/promises'
-import os from 'os'
 import path from 'path'
-import { encrypt, decrypt, isEncrypted } from '../crypto'
+import { encrypt, decrypt, isEncrypted } from '@/lib/crypto'
+import { getDataDir } from '@/lib/db/paths'
+import { getBusinessDatabase } from '@/lib/db/business'
 
 export interface GitCredential {
   id: string
   name: string
   type: 'https' | 'ssh'
-  // HTTPS
   username?: string
-  password?: string // 加密存储
-  // SSH - 存储私钥内容
-  sshKey?: string // 加密存储
+  password?: string
+  sshKey?: string
 }
 
-// 用于 API 返回的安全凭证类型（不包含敏感信息）
 export interface SafeGitCredential {
   id: string
   name: string
   type: 'https' | 'ssh'
   username?: string
-  hasPassword?: boolean // 是否已配置密码
-  hasSshKey?: boolean // 是否已配置 SSH 密钥
+  hasPassword?: boolean
+  hasSshKey?: boolean
 }
 
 export interface Settings {
-  workDir: string // 工作目录
-  gitCredentials: GitCredential[] // Git 认证配置
+  workDir: string
+  gitCredentials: GitCredential[]
 }
 
-const DATA_DIR = path.join(os.homedir(), '.t-build')
-const SETTINGS_FILE = path.join(DATA_DIR, 'settings.json')
+interface GitCredentialRow {
+  id: string
+  name: string
+  type: 'https' | 'ssh'
+  username: string | null
+  password: string | null
+  sshKey: string | null
+}
 
 const defaultSettings: Settings = {
-  workDir: path.join(DATA_DIR, 'workspace'),
+  workDir: path.join(getDataDir(), 'workspace'),
   gitCredentials: [],
 }
 
-async function ensureDataDir() {
-  try {
-    await fs.access(DATA_DIR)
-  } catch {
-    await fs.mkdir(DATA_DIR, { recursive: true })
+function toCredential(row: GitCredentialRow): GitCredential {
+  return {
+    id: row.id,
+    name: row.name,
+    type: row.type,
+    username: row.username ?? undefined,
+    password: row.password ?? undefined,
+    sshKey: row.sshKey ?? undefined,
   }
 }
 
-export async function getSettings(): Promise<Settings> {
-  await ensureDataDir()
-  try {
-    const data = await fs.readFile(SETTINGS_FILE, 'utf-8')
-    return { ...defaultSettings, ...JSON.parse(data) }
-  } catch {
-    return defaultSettings
+function toSafeCredential(credential: GitCredential): SafeGitCredential {
+  return {
+    id: credential.id,
+    name: credential.name,
+    type: credential.type,
+    username: credential.username,
+    hasPassword: !!credential.password,
+    hasSshKey: !!credential.sshKey,
   }
 }
 
-export async function updateSettings(
-  data: Partial<Settings>,
-): Promise<Settings> {
-  await ensureDataDir()
-  const current = await getSettings()
-  const updated = { ...current, ...data }
-  await fs.writeFile(SETTINGS_FILE, JSON.stringify(updated, null, 2))
-  return updated
-}
-
-// 加密凭证中的敏感信息
 async function encryptCredential(
-  credential: Omit<GitCredential, 'id'>,
-): Promise<Omit<GitCredential, 'id'>> {
+  credential: Partial<Omit<GitCredential, 'id'>>,
+): Promise<Partial<Omit<GitCredential, 'id'>>> {
   const encrypted = { ...credential }
 
   if (encrypted.password) {
@@ -81,7 +77,6 @@ async function encryptCredential(
   return encrypted
 }
 
-// 解密凭证中的敏感信息
 async function decryptCredential(
   credential: GitCredential,
 ): Promise<GitCredential> {
@@ -97,19 +92,45 @@ async function decryptCredential(
   return decrypted
 }
 
-// 将凭证转换为安全格式（不包含敏感信息）
-function toSafeCredential(credential: GitCredential): SafeGitCredential {
+function readWorkDir() {
+  const db = getBusinessDatabase()
+  const row = db
+    .prepare('select value from tbuild_setting where key = ?')
+    .get('workDir') as { value: string } | undefined
+  return row?.value ?? defaultSettings.workDir
+}
+
+function readCredentials() {
+  const db = getBusinessDatabase()
+  const rows = db
+    .prepare('select * from tbuild_git_credential order by createdAt desc')
+    .all() as GitCredentialRow[]
+  return rows.map(toCredential)
+}
+
+export async function getSettings(): Promise<Settings> {
   return {
-    id: credential.id,
-    name: credential.name,
-    type: credential.type,
-    username: credential.username,
-    hasPassword: !!credential.password,
-    hasSshKey: !!credential.sshKey,
+    workDir: readWorkDir(),
+    gitCredentials: readCredentials(),
   }
 }
 
-// 获取安全的设置（用于 API 返回）
+export async function updateSettings(
+  data: Partial<Settings>,
+): Promise<Settings> {
+  const db = getBusinessDatabase()
+
+  if (data.workDir !== undefined) {
+    db.prepare(
+      `insert into tbuild_setting (key, value, updatedAt)
+       values (?, ?, ?)
+       on conflict(key) do update set value = excluded.value, updatedAt = excluded.updatedAt`,
+    ).run('workDir', data.workDir, new Date().toISOString())
+  }
+
+  return getSettings()
+}
+
 export async function getSafeSettings(): Promise<{
   workDir: string
   gitCredentials: SafeGitCredential[]
@@ -124,14 +145,33 @@ export async function getSafeSettings(): Promise<{
 export async function addGitCredential(
   credential: Omit<GitCredential, 'id'>,
 ): Promise<SafeGitCredential> {
-  const settings = await getSettings()
+  const db = getBusinessDatabase()
+  const now = new Date().toISOString()
   const encrypted = await encryptCredential(credential)
   const newCredential: GitCredential = {
-    ...encrypted,
     id: crypto.randomUUID(),
+    name: encrypted.name ?? credential.name,
+    type: encrypted.type ?? credential.type,
+    username: encrypted.username,
+    password: encrypted.password,
+    sshKey: encrypted.sshKey,
   }
-  settings.gitCredentials.push(newCredential)
-  await updateSettings({ gitCredentials: settings.gitCredentials })
+
+  db.prepare(
+    `insert into tbuild_git_credential (
+      id, name, type, username, password, sshKey, createdAt, updatedAt
+    ) values (?, ?, ?, ?, ?, ?, ?, ?)`,
+  ).run(
+    newCredential.id,
+    newCredential.name,
+    newCredential.type,
+    newCredential.username ?? null,
+    newCredential.password ?? null,
+    newCredential.sshKey ?? null,
+    now,
+    now,
+  )
+
   return toSafeCredential(newCredential)
 }
 
@@ -139,37 +179,49 @@ export async function updateGitCredential(
   id: string,
   data: Partial<Omit<GitCredential, 'id'>>,
 ): Promise<SafeGitCredential | null> {
-  const settings = await getSettings()
-  const index = settings.gitCredentials.findIndex((c) => c.id === id)
-  if (index === -1) return null
+  const db = getBusinessDatabase()
+  const current = (db
+    .prepare('select * from tbuild_git_credential where id = ?')
+    .get(id) ?? null) as GitCredentialRow | null
+  if (!current) return null
 
-  // 加密敏感字段
-  const encrypted = await encryptCredential(data as Omit<GitCredential, 'id'>)
-
-  settings.gitCredentials[index] = {
-    ...settings.gitCredentials[index],
+  const encrypted = await encryptCredential(data)
+  const updated: GitCredential = {
+    ...toCredential(current),
     ...encrypted,
   }
-  await updateSettings({ gitCredentials: settings.gitCredentials })
-  return toSafeCredential(settings.gitCredentials[index])
+
+  db.prepare(
+    `update tbuild_git_credential
+     set name = ?, type = ?, username = ?, password = ?, sshKey = ?, updatedAt = ?
+     where id = ?`,
+  ).run(
+    updated.name,
+    updated.type,
+    updated.username ?? null,
+    updated.password ?? null,
+    updated.sshKey ?? null,
+    new Date().toISOString(),
+    id,
+  )
+
+  return toSafeCredential(updated)
 }
 
 export async function deleteGitCredential(id: string): Promise<boolean> {
-  const settings = await getSettings()
-  const index = settings.gitCredentials.findIndex((c) => c.id === id)
-  if (index === -1) return false
-
-  settings.gitCredentials.splice(index, 1)
-  await updateSettings({ gitCredentials: settings.gitCredentials })
-  return true
+  const db = getBusinessDatabase()
+  const result = db
+    .prepare('delete from tbuild_git_credential where id = ?')
+    .run(id)
+  return result.changes > 0
 }
 
-// 获取完整凭证（包含解密后的敏感信息，仅用于内部使用）
 export async function getGitCredentialById(
   id: string,
 ): Promise<GitCredential | null> {
-  const settings = await getSettings()
-  const credential = settings.gitCredentials.find((c) => c.id === id)
-  if (!credential) return null
-  return decryptCredential(credential)
+  const db = getBusinessDatabase()
+  const row = db
+    .prepare('select * from tbuild_git_credential where id = ?')
+    .get(id) as GitCredentialRow | undefined
+  return row ? decryptCredential(toCredential(row)) : null
 }

@@ -9,11 +9,15 @@ import {
 import { deleteProjectBuilds } from '@/lib/data/builds'
 import { deleteEnvVarsByProjectId } from '@/lib/data/env-vars'
 import { getSettings } from '@/lib/data/settings'
+import { requireApiSession } from '@/lib/auth/api'
 
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const unauthorized = await requireApiSession()
+  if (unauthorized) return unauthorized
+
   const { id } = await params
   const project = await getProjectById(id)
 
@@ -28,6 +32,9 @@ export async function PUT(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const unauthorized = await requireApiSession()
+  if (unauthorized) return unauthorized
+
   const { id } = await params
   const body = await request.json()
 
@@ -51,6 +58,9 @@ export async function DELETE(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const unauthorized = await requireApiSession()
+  if (unauthorized) return unauthorized
+
   const { id } = await params
 
   const project = await getProjectById(id)
