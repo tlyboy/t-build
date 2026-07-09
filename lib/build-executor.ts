@@ -607,6 +607,110 @@ export async function executeBuild(buildId: string): Promise<void> {
     }
   }
 
+  const deployLines = project.deployCommand
+    ?.split('\n')
+    .map((cmd) => cmd.trim())
+    .filter((cmd) => cmd.length > 0 && !cmd.startsWith('#'))
+
+  if (deployLines && deployLines.length > 0) {
+    logLine('')
+    logLine('[T-Build] Starting deploy')
+
+    let deployDir = projectDir
+    let deployStepCount = 0
+    const totalDeploySteps = deployLines.filter(
+      (line) => !line.startsWith('cd '),
+    ).length
+
+    for (const line of deployLines) {
+      if (line.startsWith('cd ')) {
+        const targetDir = line.slice(3).trim()
+        const newDir = path.isAbsolute(targetDir)
+          ? targetDir
+          : path.resolve(deployDir, targetDir)
+
+        try {
+          const stat = await import('fs/promises').then((fs) => fs.stat(newDir))
+          if (!stat.isDirectory()) {
+            throw new Error('Not a directory')
+          }
+          deployDir = newDir
+          logLine('')
+          logLine(
+            `[T-Build] Changed deploy directory to: ${shortPath(deployDir)}`,
+          )
+          continue
+        } catch {
+          logLine('')
+          logLine(
+            `[T-Build] Failed to change deploy directory: ${newDir} does not exist`,
+          )
+
+          if (flushTimer) {
+            clearTimeout(flushTimer)
+            flushTimer = null
+          }
+          await flushLogs()
+
+          await updateBuild(buildId, {
+            status: 'failed',
+            finishedAt: new Date().toISOString(),
+          })
+
+          emitter.emit('status', 'failed')
+          emitter.emit('done', {
+            status: 'failed',
+            error: `Deploy directory not found: ${targetDir}`,
+          })
+
+          setTimeout(() => cleanupBuildEmitter(buildId), 60000)
+          return
+        }
+      }
+
+      deployStepCount++
+      const stepNum =
+        totalDeploySteps > 1 ? ` [${deployStepCount}/${totalDeploySteps}]` : ''
+
+      logLine('')
+      logLine(`[T-Build] Deploy${stepNum} executing: ${line}`)
+      if (deployDir !== projectDir) {
+        logLine(`[T-Build] Deploy directory: ${shortPath(deployDir)}`)
+      }
+
+      const result = await executeCommand(line, deployDir, logLine, projectEnv)
+      lastExitCode = result.exitCode
+
+      if (!result.success) {
+        logLine('')
+        logLine(
+          `[T-Build] Deploy failed at step ${deployStepCount} with exit code: ${result.exitCode}`,
+        )
+
+        if (flushTimer) {
+          clearTimeout(flushTimer)
+          flushTimer = null
+        }
+        await flushLogs()
+
+        await updateBuild(buildId, {
+          status: 'failed',
+          finishedAt: new Date().toISOString(),
+          exitCode: result.exitCode ?? undefined,
+        })
+
+        emitter.emit('status', 'failed')
+        emitter.emit('done', { status: 'failed', exitCode: result.exitCode })
+
+        setTimeout(() => cleanupBuildEmitter(buildId), 60000)
+        return
+      }
+    }
+
+    logLine('')
+    logLine('[T-Build] Deploy success')
+  }
+
   // 所有命令执行成功
   logLine('')
   logLine(`[T-Build] Build success`)

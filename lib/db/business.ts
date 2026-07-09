@@ -69,6 +69,7 @@ function createBusinessTables(db: Database.Database) {
       name text not null,
       path text not null,
       buildCommand text not null,
+      deployCommand text,
       gitPullBeforeBuild integer not null default 0,
       outputPaths text,
       gitCredentialId text,
@@ -166,6 +167,23 @@ function setMeta(db: Database.Database, key: string, value: string) {
   ).run(key, value, new Date().toISOString())
 }
 
+function hasColumn(
+  db: Database.Database,
+  tableName: string,
+  columnName: string,
+) {
+  const rows = db.prepare(`pragma table_info(${tableName})`).all() as Array<{
+    name: string
+  }>
+  return rows.some((row) => row.name === columnName)
+}
+
+function migrateBusinessSchema(db: Database.Database) {
+  if (!hasColumn(db, 'tbuild_project', 'deployCommand')) {
+    db.exec('alter table tbuild_project add column deployCommand text')
+  }
+}
+
 function archiveLegacyJsonData(db: Database.Database) {
   if (
     !metaValue(db, 'jsonMigratedAt') ||
@@ -214,6 +232,7 @@ function migrateJsonData(db: Database.Database) {
         name: string
         path: string
         buildCommand: string
+        deployCommand?: string
         gitPullBeforeBuild?: boolean
         outputPaths?: string[]
         gitCredentialId?: string
@@ -225,9 +244,9 @@ function migrateJsonData(db: Database.Database) {
     if (projects) {
       const insertProject = db.prepare(
         `insert or ignore into tbuild_project (
-          id, name, path, buildCommand, gitPullBeforeBuild, outputPaths,
-          gitCredentialId, createdAt, updatedAt
-        ) values (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          id, name, path, buildCommand, deployCommand, gitPullBeforeBuild,
+          outputPaths, gitCredentialId, createdAt, updatedAt
+        ) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       )
 
       for (const project of projects) {
@@ -236,6 +255,7 @@ function migrateJsonData(db: Database.Database) {
           project.name,
           project.path,
           project.buildCommand,
+          project.deployCommand?.trim() || null,
           project.gitPullBeforeBuild ? 1 : 0,
           project.outputPaths ? JSON.stringify(project.outputPaths) : null,
           project.gitCredentialId ?? null,
@@ -426,6 +446,7 @@ export function getBusinessDatabase(): Database.Database {
 
   if (!globalForBusinessDb.__tbuildBusinessDbReady) {
     createBusinessTables(db)
+    migrateBusinessSchema(db)
     migrateJsonData(db)
     globalForBusinessDb.__tbuildBusinessDbReady = true
   }

@@ -42,6 +42,7 @@ export async function PUT(
     name: body.name,
     path: body.path,
     buildCommand: body.buildCommand,
+    deployCommand: body.deployCommand,
     gitPullBeforeBuild: body.gitPullBeforeBuild,
     outputPaths: body.outputPaths,
     gitCredentialId: body.gitCredentialId,

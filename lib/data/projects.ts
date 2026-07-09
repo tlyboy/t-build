@@ -5,6 +5,7 @@ export interface Project {
   name: string
   path: string
   buildCommand: string
+  deployCommand?: string
   createdAt: string
   updatedAt: string
   gitPullBeforeBuild?: boolean
@@ -17,6 +18,7 @@ interface ProjectRow {
   name: string
   path: string
   buildCommand: string
+  deployCommand: string | null
   createdAt: string
   updatedAt: string
   gitPullBeforeBuild: number
@@ -43,6 +45,7 @@ function toProject(row: ProjectRow): Project {
     name: row.name,
     path: row.path,
     buildCommand: row.buildCommand,
+    deployCommand: row.deployCommand ?? undefined,
     gitPullBeforeBuild: row.gitPullBeforeBuild === 1,
     outputPaths: parseOutputPaths(row.outputPaths),
     gitCredentialId: row.gitCredentialId ?? undefined,
@@ -77,6 +80,7 @@ export async function createProject(
     name: data.name,
     path: data.path,
     buildCommand: data.buildCommand,
+    deployCommand: data.deployCommand,
     gitPullBeforeBuild: data.gitPullBeforeBuild,
     outputPaths: data.outputPaths,
     gitCredentialId: data.gitCredentialId,
@@ -86,14 +90,15 @@ export async function createProject(
 
   db.prepare(
     `insert into tbuild_project (
-      id, name, path, buildCommand, gitPullBeforeBuild, outputPaths,
-      gitCredentialId, createdAt, updatedAt
-    ) values (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      id, name, path, buildCommand, deployCommand, gitPullBeforeBuild,
+      outputPaths, gitCredentialId, createdAt, updatedAt
+    ) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
   ).run(
     project.id,
     project.name,
     project.path,
     project.buildCommand,
+    project.deployCommand?.trim() || null,
     project.gitPullBeforeBuild ? 1 : 0,
     project.outputPaths ? JSON.stringify(project.outputPaths) : null,
     project.gitCredentialId ?? null,
@@ -120,13 +125,15 @@ export async function updateProject(
 
   db.prepare(
     `update tbuild_project
-     set name = ?, path = ?, buildCommand = ?, gitPullBeforeBuild = ?,
-         outputPaths = ?, gitCredentialId = ?, updatedAt = ?
+     set name = ?, path = ?, buildCommand = ?, deployCommand = ?,
+         gitPullBeforeBuild = ?, outputPaths = ?, gitCredentialId = ?,
+         updatedAt = ?
      where id = ?`,
   ).run(
     updated.name,
     updated.path,
     updated.buildCommand,
+    updated.deployCommand?.trim() || null,
     updated.gitPullBeforeBuild ? 1 : 0,
     updated.outputPaths ? JSON.stringify(updated.outputPaths) : null,
     updated.gitCredentialId ?? null,

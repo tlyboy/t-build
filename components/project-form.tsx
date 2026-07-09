@@ -36,6 +36,7 @@ interface Project {
   name: string
   path: string
   buildCommand: string
+  deployCommand?: string
   gitUrl?: string
   gitBranch?: string
   gitPullBeforeBuild?: boolean
@@ -106,6 +107,9 @@ export function ProjectForm({
   const [outputPaths, setOutputPaths] = useState(
     project?.outputPaths?.join('\n') || 'dist',
   )
+  const [deployCommand, setDeployCommand] = useState(
+    project?.deployCommand || '',
+  )
 
   const [showCloneOptions, setShowCloneOptions] = useState(false)
   const [gitUrl, setGitUrl] = useState('')
@@ -158,6 +162,7 @@ export function ProjectForm({
           name,
           path: relativePath,
           buildCommand,
+          deployCommand: deployCommand.trim() || undefined,
           gitPullBeforeBuild,
           outputPaths:
             parsedOutputPaths.length > 0 ? parsedOutputPaths : undefined,
@@ -487,6 +492,23 @@ export function ProjectForm({
             />
             <p className="text-muted-foreground text-xs">
               {t('outputPathsHint')}
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="deployCommand">{t('deployCommand')}</Label>
+            <Textarea
+              id="deployCommand"
+              value={deployCommand}
+              onChange={(e) => setDeployCommand(e.target.value)}
+              placeholder={
+                'rsync -av dist/ deploy@server:/var/www/app/\nssh deploy@server "systemctl reload nginx"'
+              }
+              rows={3}
+              className="font-mono text-sm"
+            />
+            <p className="text-muted-foreground text-xs">
+              {t('deployCommandHint')}
             </p>
           </div>
 

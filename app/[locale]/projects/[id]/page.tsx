@@ -81,6 +81,16 @@ export default async function ProjectDetailPage({
               {project.buildCommand}
             </pre>
           </div>
+          {project.deployCommand && (
+            <div>
+              <div className="text-muted-foreground mb-1.5 text-sm">
+                {t('deployCommand')}
+              </div>
+              <pre className="bg-muted/50 overflow-x-auto rounded-md p-3 font-mono text-sm break-all whitespace-pre-wrap">
+                {project.deployCommand}
+              </pre>
+            </div>
+          )}
           <div className="grid grid-cols-2 gap-4">
             <div>
               <div className="text-muted-foreground text-sm">
