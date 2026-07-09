@@ -7,6 +7,11 @@ import { getGitCredentialById, getSettings } from './data/settings'
 import { getEnvVarsForBuild } from './data/env-vars'
 import { EventEmitter } from 'events'
 
+export interface EnqueueBuildResult {
+  buildId: string
+  supersededBuildId?: string
+}
+
 // globalThis ensures shared state across Next.js route bundles
 const g = globalThis as {
   __tbuild?: {
@@ -14,7 +19,10 @@ const g = globalThis as {
     processes: Map<string, ChildProcess>
     buildLogs: Map<string, string[]>
     queue: string[]
+    queuedProjects?: Map<string, string>
     processing: boolean
+    runningBuildId?: string
+    runningProjectId?: string
   }
 }
 const state = (g.__tbuild ??= {
@@ -22,32 +30,111 @@ const state = (g.__tbuild ??= {
   processes: new Map<string, ChildProcess>(),
   buildLogs: new Map<string, string[]>(),
   queue: [] as string[],
+  queuedProjects: new Map<string, string>(),
   processing: false,
 })
+const queuedProjects = (state.queuedProjects ??= new Map<string, string>())
 
 const MAX_QUEUE_LENGTH = 50
 
-export function enqueueBuild(buildId: string): void {
+async function skipSupersededBuild(
+  skippedBuildId: string,
+  newerBuildId: string,
+): Promise<void> {
+  const shortNewerBuildId = newerBuildId.slice(0, 8)
+  const logLine = `[T-Build] Skipped: a newer build (${shortNewerBuildId}) was queued for this project.`
+
+  state.buildLogs.set(skippedBuildId, [
+    ...(state.buildLogs.get(skippedBuildId) ?? []),
+    logLine,
+  ])
+  await appendBuildLogs(skippedBuildId, [logLine])
+  await updateBuild(skippedBuildId, {
+    status: 'skipped',
+    finishedAt: new Date().toISOString(),
+  })
+
+  const emitter = getBuildEmitter(skippedBuildId)
+  emitter.emit('log', logLine)
+  emitter.emit('status', 'skipped')
+  emitter.emit('done', {
+    status: 'skipped',
+    skippedByBuildId: newerBuildId,
+  })
+
+  setTimeout(() => cleanupBuildEmitter(skippedBuildId), 60000)
+}
+
+export async function enqueueBuild(
+  buildId: string,
+): Promise<EnqueueBuildResult> {
+  const build = await getBuildById(buildId)
+  if (!build) {
+    throw new Error(`Build ${buildId} not found`)
+  }
+  if (build.status !== 'pending') {
+    throw new Error(`Build ${buildId} is not pending`)
+  }
+
+  const queuedBuildId = queuedProjects.get(build.projectId)
+  if (queuedBuildId) {
+    const queueIndex = state.queue.indexOf(queuedBuildId)
+    if (queueIndex >= 0) {
+      state.queue[queueIndex] = buildId
+      queuedProjects.set(build.projectId, buildId)
+      await skipSupersededBuild(queuedBuildId, buildId)
+      void processQueue()
+      return { buildId, supersededBuildId: queuedBuildId }
+    }
+
+    queuedProjects.delete(build.projectId)
+  }
+
   if (state.queue.length >= MAX_QUEUE_LENGTH) {
     throw new Error('Build queue is full')
   }
+
   state.queue.push(buildId)
-  processQueue()
+  queuedProjects.set(build.projectId, buildId)
+  void processQueue()
+  return { buildId }
 }
 
 async function processQueue(): Promise<void> {
-  if (state.processing || state.queue.length === 0) return
+  if (state.processing) return
 
-  const nextBuildId = state.queue.shift()!
   state.processing = true
 
   try {
-    await executeBuild(nextBuildId)
-  } catch (error) {
-    console.error(`Build ${nextBuildId} failed:`, error)
+    while (state.queue.length > 0) {
+      const nextBuildId = state.queue.shift()!
+      const build = await getBuildById(nextBuildId)
+
+      if (!build) continue
+
+      if (queuedProjects.get(build.projectId) === nextBuildId) {
+        queuedProjects.delete(build.projectId)
+      }
+
+      if (build.status !== 'pending') continue
+
+      state.runningBuildId = nextBuildId
+      state.runningProjectId = build.projectId
+
+      try {
+        await executeBuild(nextBuildId)
+      } catch (error) {
+        console.error(`Build ${nextBuildId} failed:`, error)
+      } finally {
+        state.runningBuildId = undefined
+        state.runningProjectId = undefined
+      }
+    }
   } finally {
     state.processing = false
-    processQueue()
+    if (state.queue.length > 0) {
+      void processQueue()
+    }
   }
 }
 
@@ -255,6 +342,9 @@ export async function executeBuild(buildId: string): Promise<void> {
   const build = await getBuildById(buildId)
   if (!build) {
     throw new Error(`Build ${buildId} not found`)
+  }
+  if (build.status !== 'pending') {
+    return
   }
 
   const project = await getProjectById(build.projectId)
@@ -540,6 +630,22 @@ export async function executeBuild(buildId: string): Promise<void> {
 }
 
 export function cancelBuild(buildId: string): boolean {
+  const queuedBuild = state.queue.includes(buildId)
+  if (queuedBuild) {
+    state.queue = state.queue.filter((id) => id !== buildId)
+    for (const [projectId, queuedBuildId] of queuedProjects) {
+      if (queuedBuildId === buildId) {
+        queuedProjects.delete(projectId)
+        break
+      }
+    }
+    void updateBuild(buildId, {
+      status: 'failed',
+      finishedAt: new Date().toISOString(),
+    })
+    return true
+  }
+
   const proc = state.processes.get(buildId)
   if (proc) {
     proc.kill('SIGTERM')

@@ -1,10 +1,10 @@
 'use client'
 
 import { Badge } from '@/components/ui/badge'
-import { CheckCircle, XCircle, Loader2, Clock } from 'lucide-react'
+import { CheckCircle, CircleSlash, XCircle, Loader2, Clock } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
-type BuildStatus = 'pending' | 'running' | 'success' | 'failed'
+type BuildStatus = 'pending' | 'running' | 'success' | 'failed' | 'skipped'
 
 const statusConfig: Record<
   BuildStatus,
@@ -33,6 +33,11 @@ const statusConfig: Record<
     key: 'failed',
     variant: 'destructive',
     icon: XCircle,
+  },
+  skipped: {
+    key: 'skipped',
+    variant: 'outline',
+    icon: CircleSlash,
   },
 }
 

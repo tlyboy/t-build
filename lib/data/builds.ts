@@ -1,6 +1,11 @@
 import { getBusinessDatabase } from '@/lib/db/business'
 
-export type BuildStatus = 'pending' | 'running' | 'success' | 'failed'
+export type BuildStatus =
+  | 'pending'
+  | 'running'
+  | 'success'
+  | 'failed'
+  | 'skipped'
 
 export interface Build {
   id: string

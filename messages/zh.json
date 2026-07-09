@@ -51,7 +51,8 @@
     "statusSuccess": "成功",
     "statusFailed": "失败",
     "statusRunning": "运行中",
-    "statusPending": "等待中"
+    "statusPending": "等待中",
+    "statusSkipped": "已跳过"
   },
   "projects": {
     "title": "项目列表",
@@ -141,7 +142,8 @@
     "pending": "等待中",
     "running": "构建中",
     "success": "成功",
-    "failed": "失败"
+    "failed": "失败",
+    "skipped": "已跳过"
   },
   "buildDetail": {
     "title": "构建详情",

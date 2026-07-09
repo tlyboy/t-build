@@ -46,7 +46,7 @@ export async function POST(request: Request) {
   const build = await createBuild(body.projectId)
 
   try {
-    enqueueBuild(build.id)
+    await enqueueBuild(build.id)
   } catch {
     await updateBuild(build.id, {
       status: 'failed',
