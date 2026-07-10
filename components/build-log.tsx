@@ -178,7 +178,7 @@ export function BuildLog({
 
       <ScrollArea
         ref={scrollAreaRef}
-        className="bg-muted/30 h-[500px] rounded-md border"
+        className="bg-muted/30 h-[55dvh] max-h-[500px] min-h-80 rounded-md border"
       >
         <div className="p-4 font-mono text-sm">
           {logs.length === 0 ? (

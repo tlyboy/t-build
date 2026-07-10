@@ -9,11 +9,20 @@ export const dynamic = 'force-dynamic'
 
 export default async function SettingsPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>
+  searchParams: Promise<{ from?: string | string[] }>
 }) {
   const { locale } = await params
+  const { from } = await searchParams
   setRequestLocale(locale)
+
+  const backHref =
+    typeof from === 'string' &&
+    (from === '/projects/new' || /^\/projects\/[^/]+\/edit$/.test(from))
+      ? from
+      : undefined
 
   const [settings, projects, webhooks] = await Promise.all([
     getSafeSettings(),
@@ -23,6 +32,7 @@ export default async function SettingsPage({
 
   return (
     <SettingsView
+      backHref={backHref}
       initialCredentials={settings.gitCredentials}
       initialProjects={projects.map((project) => ({
         id: project.id,

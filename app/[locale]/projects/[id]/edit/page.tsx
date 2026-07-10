@@ -7,11 +7,20 @@ import { getSafeWebhooks } from '@/lib/data/webhooks'
 
 export default async function EditProjectPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string; id: string }>
+  searchParams: Promise<{ from?: string | string[] }>
 }) {
   const { locale, id } = await params
+  const { from } = await searchParams
   setRequestLocale(locale)
+
+  const backHref =
+    typeof from === 'string' &&
+    (from === '/projects' || from === `/projects/${id}`)
+      ? from
+      : `/projects/${id}`
 
   const [project, settings, webhooks] = await Promise.all([
     getProjectById(id),
@@ -27,6 +36,7 @@ export default async function EditProjectPage({
   return (
     <EditProjectView
       project={project}
+      backHref={backHref}
       initialWorkDir={settings.workDir}
       initialCredentials={settings.gitCredentials}
       initialWebhooks={webhooks.filter((webhook) => webhook.projectId === id)}

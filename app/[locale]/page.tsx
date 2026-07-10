@@ -6,7 +6,8 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
+import { BuildRow } from '@/components/build-row'
+import { PageHeader } from '@/components/page-header'
 import { Link } from '@/i18n/navigation'
 import { getTranslations, getLocale, setRequestLocale } from 'next-intl/server'
 import {
@@ -19,7 +20,7 @@ import {
   ArrowRight,
 } from 'lucide-react'
 import { getAllProjects } from '@/lib/data/projects'
-import { getAllBuilds, type Build } from '@/lib/data/builds'
+import { getAllBuilds } from '@/lib/data/builds'
 import { getCurrentSession } from '@/lib/auth/server'
 import { redirect } from '@/i18n/navigation'
 
@@ -98,25 +99,8 @@ export default async function Home({
   const successRate =
     executedBuilds > 0 ? Math.round((successBuilds / executedBuilds) * 100) : 0
 
-  // 以项目为维度聚合：每个项目只保留其最新一次构建
-  const latestBuildByProject = new Map<string, Build>()
-  for (const build of builds) {
-    const existing = latestBuildByProject.get(build.projectId)
-    if (
-      !existing ||
-      new Date(build.startedAt).getTime() >
-        new Date(existing.startedAt).getTime()
-    ) {
-      latestBuildByProject.set(build.projectId, build)
-    }
-  }
-
-  const recentBuilds = [...latestBuildByProject.values()]
-    .sort(
-      (a, b) =>
-        new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime(),
-    )
-    .slice(0, 5)
+  // 数据层已按开始时间倒序返回，直接展示最近 5 条构建记录。
+  const recentBuilds = builds.slice(0, 5)
 
   // id -> name 查找表，避免在 map 中重复 find
   const projectNameById = new Map(projects.map((p) => [p.id, p.name]))
@@ -131,22 +115,17 @@ export default async function Home({
   if (projects.length === 0) {
     return (
       <div className="mx-auto max-w-6xl space-y-6 sm:space-y-8">
-        <div>
-          <h1 className="text-2xl font-bold sm:text-3xl">{t('title')}</h1>
-          <p className="text-muted-foreground text-sm sm:text-base">
-            {t('description')}
-          </p>
-        </div>
+        <PageHeader title={t('title')} description={t('description')} />
         <div className="py-12 text-center sm:py-20">
           <p className="text-muted-foreground mb-4 text-sm">
             {tProjects('noProjectsDesc')}
           </p>
-          <Link href="/projects/new">
-            <Button>
+          <Button asChild>
+            <Link href="/projects/new">
               <Plus className="mr-2 h-4 w-4" />
               {tProjects('newProject')}
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         </div>
       </div>
     )
@@ -154,20 +133,14 @@ export default async function Home({
 
   return (
     <div className="mx-auto max-w-6xl space-y-6 sm:space-y-8">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold sm:text-3xl">{t('title')}</h1>
-          <p className="text-muted-foreground text-sm sm:text-base">
-            {t('description')}
-          </p>
-        </div>
-        <Link href="/projects/new">
-          <Button className="w-full sm:w-auto">
+      <PageHeader title={t('title')} description={t('description')}>
+        <Button className="w-full sm:w-auto" asChild>
+          <Link href="/projects/new">
             <Plus className="mr-2 h-4 w-4" />
             {t('newProject')}
-          </Button>
-        </Link>
-      </div>
+          </Link>
+        </Button>
+      </PageHeader>
 
       <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
         <Card>
@@ -254,12 +227,12 @@ export default async function Home({
               {t('recentBuilds')}
             </CardTitle>
             {recentBuilds.length > 0 && (
-              <Link href="/projects">
-                <Button variant="ghost" size="sm" className="text-xs">
+              <Button variant="ghost" size="sm" className="text-xs" asChild>
+                <Link href="/builds">
                   {t('viewAll')}
                   <ArrowRight className="ml-1 h-3 w-3" />
-                </Button>
-              </Link>
+                </Link>
+              </Button>
             )}
           </div>
         </CardHeader>
@@ -270,61 +243,23 @@ export default async function Home({
             </p>
           ) : (
             <div className="space-y-1">
-              {recentBuilds.map((build: Build) => (
-                <Link
+              {recentBuilds.map((build) => (
+                <BuildRow
                   key={build.id}
-                  href={`/projects/${build.projectId}`}
-                  className="hover:bg-muted/50 group flex cursor-pointer items-center justify-between rounded-lg p-2.5 transition-colors sm:p-3"
-                >
-                  <div className="flex min-w-0 items-center gap-2 sm:gap-3">
-                    <div
-                      className={`h-2 w-2 flex-shrink-0 rounded-full ${
-                        build.status === 'success'
-                          ? 'bg-green-500'
-                          : build.status === 'failed'
-                            ? 'bg-red-500'
-                            : build.status === 'running'
-                              ? 'animate-pulse bg-yellow-500'
-                              : build.status === 'skipped'
-                                ? 'bg-slate-400'
-                                : 'bg-gray-400'
-                      }`}
-                    />
-                    <span className="truncate text-sm font-medium">
-                      {projectNameById.get(build.projectId) || 'Unknown'}
-                    </span>
-                    <Badge
-                      variant={
-                        build.status === 'success'
-                          ? 'outline'
-                          : build.status === 'failed'
-                            ? 'destructive'
-                            : 'secondary'
-                      }
-                      className="hidden text-xs sm:inline-flex"
-                    >
-                      {build.status === 'success'
-                        ? t('statusSuccess')
-                        : build.status === 'failed'
-                          ? t('statusFailed')
-                          : build.status === 'running'
-                            ? t('statusRunning')
-                            : build.status === 'skipped'
-                              ? t('statusSkipped')
-                              : t('statusPending')}
-                    </Badge>
-                  </div>
-                  <div className="flex flex-shrink-0 items-center gap-2">
-                    <span className="text-muted-foreground text-xs">
-                      {formatRelativeTime(
-                        build.startedAt,
-                        locale,
-                        relativeTimeTranslations,
-                      )}
-                    </span>
-                    <ArrowRight className="text-muted-foreground hidden h-4 w-4 opacity-0 transition-opacity group-hover:opacity-100 sm:block" />
-                  </div>
-                </Link>
+                  status={build.status}
+                  href={`/builds/${build.id}`}
+                  projectName={
+                    projectNameById.get(build.projectId) || t('unknownProject')
+                  }
+                  timeLabel={formatRelativeTime(
+                    build.startedAt,
+                    locale,
+                    relativeTimeTranslations,
+                  )}
+                  dateTime={build.startedAt}
+                  commitHash={build.gitCommitHash}
+                  commitMessage={build.gitCommitMessage}
+                />
               ))}
             </div>
           )}

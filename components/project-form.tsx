@@ -27,7 +27,7 @@ import {
   RotateCcw,
   Webhook,
 } from 'lucide-react'
-import { Link, useRouter } from '@/i18n/navigation'
+import { Link, usePathname, useRouter } from '@/i18n/navigation'
 import { useTranslations } from 'next-intl'
 import type { WebhookProvider } from '@/lib/data/webhooks'
 
@@ -80,7 +80,9 @@ export function ProjectForm({
   onLoadingChange,
 }: ProjectFormProps) {
   const router = useRouter()
+  const pathname = usePathname()
   const t = useTranslations('projectForm')
+  const settingsHref = `/settings?from=${encodeURIComponent(pathname)}`
   const [, setLoadingState] = useState(false)
 
   const setLoading = (value: boolean) => {
@@ -289,12 +291,12 @@ export function ProjectForm({
           <p className="text-muted-foreground mb-6 max-w-sm text-center text-sm">
             {t('workDirRequiredDesc')}
           </p>
-          <Link href="/settings">
-            <Button>
+          <Button asChild>
+            <Link href={settingsHref}>
               <Settings className="mr-2 h-4 w-4" />
               {t('goToSettings')}
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         </CardContent>
       </Card>
     )
@@ -402,17 +404,17 @@ export function ProjectForm({
                           <span className="text-muted-foreground text-xs">
                             {t('publicRepoCanClone')}
                           </span>
-                          <Link href="/settings">
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="sm"
-                              className="h-6 px-2 text-xs"
-                            >
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-6 px-2 text-xs"
+                            asChild
+                          >
+                            <Link href={settingsHref}>
                               <Settings className="mr-1 h-3 w-3" />
                               {t('configure')}
-                            </Button>
-                          </Link>
+                            </Link>
+                          </Button>
                         </div>
                       )}
                     </div>
@@ -555,12 +557,12 @@ export function ProjectForm({
                   <p className="text-muted-foreground text-sm">
                     {t('noCredentialHint')}
                   </p>
-                  <Link href="/settings">
-                    <Button type="button" variant="outline" size="sm">
+                  <Button variant="outline" size="sm" asChild>
+                    <Link href={settingsHref}>
                       <Settings className="mr-1 h-3 w-3" />
                       {t('goToConfigure')}
-                    </Button>
-                  </Link>
+                    </Link>
+                  </Button>
                 </div>
               )}
             </div>

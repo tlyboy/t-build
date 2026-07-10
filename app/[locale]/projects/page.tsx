@@ -31,12 +31,12 @@ export default async function ProjectsPage({
         }
       >
         {projects.length > 0 && (
-          <Link href="/projects/new">
-            <Button className="w-full sm:w-auto">
+          <Button className="w-full sm:w-auto" asChild>
+            <Link href="/projects/new">
               <Plus className="mr-2 h-4 w-4" />
               {t('newProject')}
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         )}
       </PageHeader>
 
@@ -45,12 +45,12 @@ export default async function ProjectsPage({
           <p className="text-muted-foreground mb-4 text-sm">
             {t('noProjectsDesc')}
           </p>
-          <Link href="/projects/new">
-            <Button>
+          <Button asChild>
+            <Link href="/projects/new">
               <Plus className="mr-2 h-4 w-4" />
               {t('newProject')}
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         </div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

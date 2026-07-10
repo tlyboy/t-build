@@ -23,15 +23,13 @@ export default async function BuildDetailPage({
   if (!build) {
     return (
       <div className="mx-auto max-w-6xl">
-        <PageHeader title={t('notFound')} backHref="/" />
+        <PageHeader title={t('notFound')} backHref="/" backBehavior="history" />
       </div>
     )
   }
 
   // build.projectId 来自 build，是真实数据依赖，服务端直读已消除 HTTP 往返
-  const project = build.projectId
-    ? await getProjectById(build.projectId)
-    : null
+  const project = build.projectId ? await getProjectById(build.projectId) : null
 
   const backHref = project ? `/projects/${project.id}` : '/'
 
@@ -41,8 +39,9 @@ export default async function BuildDetailPage({
         title={t('title')}
         description={project?.name}
         backHref={backHref}
+        backBehavior="history"
       >
-        <DeleteBuildButton buildId={build.id} projectId={project?.id ?? null} />
+        <DeleteBuildButton buildId={build.id} redirectHref={backHref} />
       </PageHeader>
 
       <Card>
@@ -51,14 +50,18 @@ export default async function BuildDetailPage({
         </CardHeader>
         <CardContent className="grid grid-cols-2 gap-4 sm:grid-cols-4">
           <div>
-            <div className="text-muted-foreground text-xs">{t('startTime')}</div>
+            <div className="text-muted-foreground text-xs">
+              {t('startTime')}
+            </div>
             <div className="text-sm">
               {new Date(build.startedAt).toLocaleString(currentLocale)}
             </div>
           </div>
           {build.finishedAt && (
             <div>
-              <div className="text-muted-foreground text-xs">{t('endTime')}</div>
+              <div className="text-muted-foreground text-xs">
+                {t('endTime')}
+              </div>
               <div className="text-sm">
                 {new Date(build.finishedAt).toLocaleString(currentLocale)}
               </div>

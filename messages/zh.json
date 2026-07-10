@@ -6,12 +6,13 @@
   "nav": {
     "home": "首页",
     "projects": "项目",
+    "builds": "构建",
     "settings": "设置",
+    "menu": "打开导航菜单",
+    "primaryNavigation": "主导航",
+    "changeLanguage": "切换语言",
     "logout": "退出登录",
     "toggleTheme": "切换深色模式"
-  },
-  "footer": {
-    "text": "T-Build - 自动化部署平台"
   },
   "auth": {
     "loginTitle": "登录 T-Build",
@@ -52,7 +53,16 @@
     "statusFailed": "失败",
     "statusRunning": "运行中",
     "statusPending": "等待中",
-    "statusSkipped": "已跳过"
+    "statusSkipped": "已跳过",
+    "unknownProject": "未知项目"
+  },
+  "buildHistory": {
+    "title": "构建历史",
+    "description": "全部项目的构建记录，共 {count} 条",
+    "noBuilds": "暂无构建记录",
+    "noBuildsDescription": "项目触发构建后，记录会显示在这里",
+    "unknownProject": "未知项目",
+    "duration": "耗时 {seconds}s"
   },
   "projects": {
     "title": "项目列表",
@@ -153,11 +163,6 @@
     "webhookSaved": "Webhook 已保存",
     "projectSavedWebhookFailed": "项目已保存，但 Webhook 创建失败"
   },
-  "projectCard": {
-    "building": "构建中...",
-    "build": "构建",
-    "detail": "详情"
-  },
   "buildStatus": {
     "pending": "等待中",
     "running": "构建中",
@@ -234,6 +239,7 @@
     "lastTriggeredAt": "最近触发：{time}"
   },
   "common": {
+    "back": "返回",
     "cancel": "取消",
     "delete": "删除",
     "save": "保存",
