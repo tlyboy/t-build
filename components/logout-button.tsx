@@ -25,6 +25,7 @@ export function LogoutButton() {
       size="icon"
       title={t('logout')}
       aria-label={t('logout')}
+      className="size-10 md:size-8"
       disabled={loading}
       onClick={handleSignOut}
     >

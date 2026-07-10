@@ -19,12 +19,12 @@ import { useTranslations } from 'next-intl'
 
 interface DeleteBuildButtonProps {
   buildId: string
-  projectId: string | null
+  redirectHref: string
 }
 
 export function DeleteBuildButton({
   buildId,
-  projectId,
+  redirectHref,
 }: DeleteBuildButtonProps) {
   const t = useTranslations('buildDetail')
   const tDelete = useTranslations('deleteBuild')
@@ -37,7 +37,7 @@ export function DeleteBuildButton({
     try {
       const res = await fetch(`/api/builds/${buildId}`, { method: 'DELETE' })
       if (res.ok) {
-        router.push(projectId ? `/projects/${projectId}` : '/')
+        router.push(redirectHref)
         router.refresh()
       } else {
         setDeleting(false)

@@ -6,12 +6,13 @@
   "nav": {
     "home": "Home",
     "projects": "Projects",
+    "builds": "Builds",
     "settings": "Settings",
+    "menu": "Open navigation menu",
+    "primaryNavigation": "Primary navigation",
+    "changeLanguage": "Change language",
     "logout": "Sign out",
     "toggleTheme": "Toggle dark mode"
-  },
-  "footer": {
-    "text": "T-Build - Automated Deployment Platform"
   },
   "auth": {
     "loginTitle": "Sign in to T-Build",
@@ -52,7 +53,16 @@
     "statusFailed": "Failed",
     "statusRunning": "Running",
     "statusPending": "Pending",
-    "statusSkipped": "Skipped"
+    "statusSkipped": "Skipped",
+    "unknownProject": "Unknown project"
+  },
+  "buildHistory": {
+    "title": "Build History",
+    "description": "{count} build records across all projects",
+    "noBuilds": "No build records yet",
+    "noBuildsDescription": "Build records will appear here after a project starts a build",
+    "unknownProject": "Unknown project",
+    "duration": "Duration {seconds}s"
   },
   "projects": {
     "title": "Projects",
@@ -153,11 +163,6 @@
     "webhookSaved": "Webhook saved",
     "projectSavedWebhookFailed": "Project saved, but webhook creation failed"
   },
-  "projectCard": {
-    "building": "Building...",
-    "build": "Build",
-    "detail": "Details"
-  },
   "buildStatus": {
     "pending": "Pending",
     "running": "Building",
@@ -234,6 +239,7 @@
     "lastTriggeredAt": "Last triggered: {time}"
   },
   "common": {
+    "back": "Back",
     "cancel": "Cancel",
     "delete": "Delete",
     "save": "Save",

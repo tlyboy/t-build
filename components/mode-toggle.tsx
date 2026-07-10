@@ -59,8 +59,9 @@ export function ModeToggle() {
     <Button
       variant="secondary"
       size="icon"
-      className="size-8"
+      className="size-10 md:size-8"
       title={t('toggleTheme')}
+      aria-label={t('toggleTheme')}
       onClick={toggleDark}
     >
       <svg

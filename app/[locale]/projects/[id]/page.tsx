@@ -6,7 +6,7 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { BuildStatusBadge } from '@/components/build-status'
+import { BuildRow } from '@/components/build-row'
 import { EnvEditor } from '@/components/env-editor'
 import { PageHeader } from '@/components/page-header'
 import { StartBuildButton } from '@/components/start-build-button'
@@ -44,6 +44,53 @@ export default async function ProjectDetailPage({
     (a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime(),
   )
 
+  const buildHistoryCard = (
+    <Card>
+      <CardHeader>
+        <CardTitle>{t('buildHistory')}</CardTitle>
+        <CardDescription>{t('recentBuilds')}</CardDescription>
+      </CardHeader>
+      <CardContent>
+        {sortedBuilds.length === 0 ? (
+          <div className="text-muted-foreground text-sm">{t('noBuilds')}</div>
+        ) : (
+          <div className="space-y-2">
+            {sortedBuilds.map((build) => {
+              const duration = build.finishedAt
+                ? Math.round(
+                    (new Date(build.finishedAt).getTime() -
+                      new Date(build.startedAt).getTime()) /
+                      1000,
+                  )
+                : null
+
+              return (
+                <BuildRow
+                  key={build.id}
+                  href={`/builds/${build.id}`}
+                  status={build.status}
+                  projectName={project.name}
+                  timeLabel={new Date(build.startedAt).toLocaleString(
+                    currentLocale,
+                  )}
+                  dateTime={build.startedAt}
+                  durationLabel={
+                    duration !== null
+                      ? t('duration', { seconds: duration })
+                      : undefined
+                  }
+                  commitHash={build.gitCommitHash}
+                  commitMessage={build.gitCommitMessage}
+                  variant="bordered"
+                />
+              )
+            })}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  )
+
   return (
     <div className="mx-auto max-w-6xl space-y-6">
       <PageHeader
@@ -59,12 +106,14 @@ export default async function ProjectDetailPage({
             </a>
           </Button>
         )}
-        <Link href={`/projects/${id}/edit`}>
-          <Button variant="outline">
+        <Button variant="outline" asChild>
+          <Link
+            href={`/projects/${id}/edit?from=${encodeURIComponent(`/projects/${id}`)}`}
+          >
             <Settings className="mr-2 h-4 w-4" />
             {t('edit')}
-          </Button>
-        </Link>
+          </Link>
+        </Button>
         <StartBuildButton projectId={id} />
       </PageHeader>
 
@@ -122,45 +171,7 @@ export default async function ProjectDetailPage({
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>{t('buildHistory')}</CardTitle>
-          <CardDescription>{t('recentBuilds')}</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {sortedBuilds.length === 0 ? (
-            <div className="text-muted-foreground text-sm">{t('noBuilds')}</div>
-          ) : (
-            <div className="space-y-2">
-              {sortedBuilds.map((build) => (
-                <Link
-                  key={build.id}
-                  href={`/builds/${build.id}`}
-                  className="hover:bg-muted flex flex-col justify-between gap-2 rounded-md border p-3 transition-colors sm:flex-row sm:items-center"
-                >
-                  <div className="flex items-center gap-3">
-                    <BuildStatusBadge status={build.status} />
-                    <span className="text-muted-foreground text-sm">
-                      {new Date(build.startedAt).toLocaleString(currentLocale)}
-                    </span>
-                  </div>
-                  {build.finishedAt && (
-                    <span className="text-muted-foreground text-xs sm:text-right">
-                      {t('duration', {
-                        seconds: Math.round(
-                          (new Date(build.finishedAt).getTime() -
-                            new Date(build.startedAt).getTime()) /
-                            1000,
-                        ),
-                      })}
-                    </span>
-                  )}
-                </Link>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+      {buildHistoryCard}
     </div>
   )
 }

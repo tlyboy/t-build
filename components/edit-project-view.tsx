@@ -25,11 +25,13 @@ import { WebhookSettingsCard } from '@/components/webhook-settings-card'
 
 export function EditProjectView({
   project,
+  backHref,
   initialWorkDir,
   initialCredentials,
   initialWebhooks,
 }: {
   project: Project
+  backHref: string
   initialWorkDir: string
   initialCredentials: SafeGitCredential[]
   initialWebhooks: SafeWebhookConfig[]
@@ -60,7 +62,7 @@ export function EditProjectView({
 
   return (
     <>
-      <PageHeader title={t('editProject')} backHref={`/projects/${project.id}`}>
+      <PageHeader title={t('editProject')} backHref={backHref}>
         <AlertDialog>
           <AlertDialogTrigger asChild>
             <Button

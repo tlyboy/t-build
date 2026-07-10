@@ -11,10 +11,12 @@ interface SettingsProject {
 }
 
 export async function SettingsView({
+  backHref,
   initialCredentials,
   initialProjects,
   initialWebhooks,
 }: {
+  backHref?: string
   initialCredentials: SafeGitCredential[]
   initialProjects: SettingsProject[]
   initialWebhooks: SafeWebhookConfig[]
@@ -23,7 +25,11 @@ export async function SettingsView({
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
-      <PageHeader title={t('title')} description={t('description')} />
+      <PageHeader
+        title={t('title')}
+        description={t('description')}
+        backHref={backHref}
+      />
 
       <WebhookSettingsCard
         initialProjects={initialProjects}

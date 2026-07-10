@@ -11,15 +11,19 @@ import { ThemeProvider } from '@/components/theme-provider'
 import { ModeToggle } from '@/components/mode-toggle'
 import { LocaleSwitcher } from '@/components/locale-switcher'
 import { Button } from '@/components/ui/button'
-import { Home, FolderGit2, Hammer, Settings } from 'lucide-react'
+import { Hammer } from 'lucide-react'
 import { Toaster } from '@/components/ui/sonner'
 import { LogoutButton } from '@/components/logout-button'
 import { Link } from '@/i18n/navigation'
 import { routing } from '@/i18n/routing'
 import { getCurrentSession } from '@/lib/auth/server'
+import {
+  DesktopNavigation,
+  MobileNavigation,
+} from '@/components/main-navigation'
 
-const inter = Inter({ subsets: ['latin'], variable: '--font-sans' })
-const firaCode = Fira_Code({ subsets: ['latin'], variable: '--font-mono' })
+const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
+const firaCode = Fira_Code({ subsets: ['latin'], variable: '--font-fira-code' })
 const clientMessageNamespaces = [
   'auth',
   'buildDetail',
@@ -30,7 +34,6 @@ const clientMessageNamespaces = [
   'deleteCredential',
   'deleteProject',
   'nav',
-  'projectCard',
   'projectDetail',
   'projectForm',
   'settings',
@@ -68,10 +71,8 @@ export default async function LocaleLayout({
 
   setRequestLocale(locale)
 
-  const [messages, t, tFooter, session] = await Promise.all([
+  const [messages, session] = await Promise.all([
     getMessages(),
-    getTranslations({ locale, namespace: 'nav' }),
-    getTranslations({ locale, namespace: 'footer' }),
     getCurrentSession(),
   ])
   const clientMessages = Object.fromEntries(
@@ -87,7 +88,6 @@ export default async function LocaleLayout({
       suppressHydrationWarning
       className={`${inter.variable} ${firaCode.variable} font-sans antialiased`}
     >
-      <head />
       <body>
         <NextIntlClientProvider messages={clientMessages}>
           <ThemeProvider
@@ -96,65 +96,33 @@ export default async function LocaleLayout({
             enableSystem
             disableTransitionOnChange
           >
-            <div className="flex min-h-screen flex-col">
+            <div className="flex min-h-dvh flex-col">
               <header className="bg-background sticky top-0 z-50 border-b">
                 <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
-                  <div className="flex items-center gap-2 sm:gap-6">
+                  <div className="flex min-w-0 items-center gap-2 md:gap-6">
                     <Link
                       href="/"
-                      className="flex items-center gap-2 font-bold"
+                      className="flex shrink-0 items-center gap-2 font-bold"
+                      aria-label="T-Build"
                     >
                       <Hammer className="h-5 w-5" />
                       <span className="hidden sm:inline">T-Build</span>
                     </Link>
-                    {session && (
-                      <nav className="flex items-center">
-                        <Link href="/">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="sm:w-auto sm:px-3"
-                          >
-                            <Home className="h-4 w-4 sm:mr-1" />
-                            <span className="hidden sm:inline">
-                              {t('home')}
-                            </span>
-                          </Button>
-                        </Link>
-                        <Link href="/projects">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="sm:w-auto sm:px-3"
-                          >
-                            <FolderGit2 className="h-4 w-4 sm:mr-1" />
-                            <span className="hidden sm:inline">
-                              {t('projects')}
-                            </span>
-                          </Button>
-                        </Link>
-                        <Link href="/settings">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="sm:w-auto sm:px-3"
-                          >
-                            <Settings className="h-4 w-4 sm:mr-1" />
-                            <span className="hidden sm:inline">
-                              {t('settings')}
-                            </span>
-                          </Button>
-                        </Link>
-                      </nav>
-                    )}
+                    {session && <DesktopNavigation />}
                   </div>
 
                   <div className="flex items-center gap-1">
-                    <Button variant="ghost" size="icon" asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="hidden md:inline-flex"
+                      asChild
+                    >
                       <a
                         href="https://github.com/tlyboy/t-build"
                         target="_blank"
                         rel="noopener noreferrer"
+                        aria-label="GitHub"
                       >
                         <svg viewBox="0 0 438.549 438.549" aria-hidden="true">
                           <path
@@ -167,19 +135,14 @@ export default async function LocaleLayout({
                     <LocaleSwitcher />
                     <ModeToggle />
                     {session && <LogoutButton />}
+                    {session && <MobileNavigation />}
                   </div>
                 </div>
               </header>
 
-              <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8">
+              <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 sm:py-8">
                 {children}
               </main>
-
-              <footer className="border-t py-4">
-                <div className="text-muted-foreground mx-auto max-w-6xl px-4 text-center text-sm">
-                  {tFooter('text')}
-                </div>
-              </footer>
             </div>
             <Toaster />
           </ThemeProvider>
