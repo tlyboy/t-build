@@ -87,7 +87,9 @@ Create a project with:
 - Build command, one command per line
 - Optional build output paths for artifact downloads
 - Optional deploy command that runs after the build succeeds
-- Optional Git credential and auto pull before build
+- Optional Git credential and auto pull before build. Auto pull discards
+  tracked changes and removes untracked, non-ignored files from the project
+  working tree before running a fast-forward-only pull.
 - Optional webhook configuration during project creation
 
 Build commands and deploy commands support comment lines beginning with `#`. A standalone `cd path` line changes the working directory for following lines.
