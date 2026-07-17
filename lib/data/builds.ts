@@ -44,9 +44,17 @@ export async function pruneBuildHistory(): Promise<number> {
       `delete from tbuild_build
        where status not in ('pending', 'running')
          and id in (
-           select id from tbuild_build
-           order by startedAt desc, rowid desc
-           limit -1 offset ?
+           select id
+           from (
+             select
+               id,
+               row_number() over (
+                 partition by projectId
+                 order by startedAt desc, rowid desc
+               ) as buildNumber
+             from tbuild_build
+           ) ranked_builds
+           where buildNumber > ?
          )`,
     )
     .run(getBuildHistoryLimit())

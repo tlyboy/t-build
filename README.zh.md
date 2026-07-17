@@ -51,7 +51,7 @@ T_BUILD_DATABASE_PATH=""
 T_BUILD_HISTORY_LIMIT="5"
 ```
 
-默认 SQLite 数据库路径为 `~/.t-build/t-build.sqlite`。如果需要自定义数据位置，可以设置 `T_BUILD_DATA_DIR`、`T_BUILD_DATABASE_PATH`，或使用 `DATABASE_URL=file:/absolute/path/t-build.sqlite`。`T_BUILD_HISTORY_LIMIT` 用于配置保留的最近构建记录数，默认为 `5`，且必须是正整数；排队中和构建中的记录不会被清理。请不要提交 `.env.local`。
+默认 SQLite 数据库路径为 `~/.t-build/t-build.sqlite`。如果需要自定义数据位置，可以设置 `T_BUILD_DATA_DIR`、`T_BUILD_DATABASE_PATH`，或使用 `DATABASE_URL=file:/absolute/path/t-build.sqlite`。`T_BUILD_HISTORY_LIMIT` 用于配置每个项目保留的最近构建记录数，默认为 `5`，且必须是正整数；排队中和构建中的记录不会被清理。请不要提交 `.env.local`。
 
 ## 使用说明
 
