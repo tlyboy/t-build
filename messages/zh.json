@@ -135,7 +135,7 @@
     "deployCommand": "部署命令",
     "deployCommandHint": "可选。构建成功后执行，支持多行 shell 命令和 cd 切换目录。",
     "gitPullBeforeBuild": "构建前 Git Pull",
-    "gitPullHint": "每次构建前自动拉取最新代码",
+    "gitPullHint": "丢弃本地修改和未忽略的未跟踪文件，再仅快进到最新代码",
     "noCredential": "不使用（公开仓库）",
     "noCredentialHint": "暂无凭证，公开仓库可直接使用",
     "goToConfigure": "去配置",
