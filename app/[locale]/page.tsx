@@ -87,15 +87,13 @@ export default async function Home({
   // 单次遍历统计构建结果，避免多次 filter
   let successBuilds = 0
   let failedBuilds = 0
-  let skippedBuilds = 0
   for (const build of builds) {
     if (build.status === 'success') successBuilds++
     else if (build.status === 'failed') failedBuilds++
-    else if (build.status === 'skipped') skippedBuilds++
   }
 
   const totalBuilds = builds.length
-  const executedBuilds = totalBuilds - skippedBuilds
+  const executedBuilds = successBuilds + failedBuilds
   const successRate =
     executedBuilds > 0 ? Math.round((successBuilds / executedBuilds) * 100) : 0
 

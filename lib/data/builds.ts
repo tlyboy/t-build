@@ -1,11 +1,7 @@
 import { getBusinessDatabase } from '@/lib/db/business'
 
 export type BuildStatus =
-  | 'pending'
-  | 'running'
-  | 'success'
-  | 'failed'
-  | 'skipped'
+  'pending' | 'running' | 'success' | 'failed' | 'skipped'
 
 export interface Build {
   id: string
@@ -29,6 +25,35 @@ interface BuildRow {
   gitCommitMessage: string | null
 }
 
+const DEFAULT_BUILD_HISTORY_LIMIT = 5
+
+function getBuildHistoryLimit(): number {
+  const configuredLimit = process.env.T_BUILD_HISTORY_LIMIT?.trim()
+  if (!configuredLimit) return DEFAULT_BUILD_HISTORY_LIMIT
+
+  const limit = Number(configuredLimit)
+  return Number.isSafeInteger(limit) && limit > 0
+    ? limit
+    : DEFAULT_BUILD_HISTORY_LIMIT
+}
+
+export async function pruneBuildHistory(): Promise<number> {
+  const db = getBusinessDatabase()
+  const result = db
+    .prepare(
+      `delete from tbuild_build
+       where status not in ('pending', 'running')
+         and id in (
+           select id from tbuild_build
+           order by startedAt desc, rowid desc
+           limit -1 offset ?
+         )`,
+    )
+    .run(getBuildHistoryLimit())
+
+  return result.changes
+}
+
 function toBuild(row: BuildRow): Build {
   return {
     id: row.id,
@@ -43,6 +68,7 @@ function toBuild(row: BuildRow): Build {
 }
 
 export async function getAllBuilds(): Promise<Build[]> {
+  await pruneBuildHistory()
   const db = getBusinessDatabase()
   const rows = db
     .prepare('select * from tbuild_build order by startedAt desc')
@@ -53,14 +79,14 @@ export async function getAllBuilds(): Promise<Build[]> {
 export async function getBuildById(id: string): Promise<Build | null> {
   const db = getBusinessDatabase()
   const row = db.prepare('select * from tbuild_build where id = ?').get(id) as
-    | BuildRow
-    | undefined
+    BuildRow | undefined
   return row ? toBuild(row) : null
 }
 
 export async function getBuildsByProjectId(
   projectId: string,
 ): Promise<Build[]> {
+  await pruneBuildHistory()
   const db = getBusinessDatabase()
   const rows = db
     .prepare(
@@ -95,6 +121,8 @@ export async function createBuild(projectId: string): Promise<Build> {
     null,
   )
 
+  await pruneBuildHistory()
+
   return build
 }
 
@@ -124,6 +152,10 @@ export async function updateBuild(
     updated.gitCommitMessage ?? null,
     id,
   )
+
+  if (updated.status !== 'pending' && updated.status !== 'running') {
+    await pruneBuildHistory()
+  }
 
   return updated
 }
