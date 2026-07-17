@@ -48,9 +48,10 @@ BETTER_AUTH_URL="http://localhost:3000"
 BETTER_AUTH_TRUSTED_ORIGINS=""
 T_BUILD_DATA_DIR=""
 T_BUILD_DATABASE_PATH=""
+T_BUILD_HISTORY_LIMIT="5"
 ```
 
-By default, SQLite data is stored at `~/.t-build/t-build.sqlite`. Use `T_BUILD_DATA_DIR`, `T_BUILD_DATABASE_PATH`, or `DATABASE_URL=file:/absolute/path/t-build.sqlite` when you need a custom location. Keep `.env.local` private.
+By default, SQLite data is stored at `~/.t-build/t-build.sqlite`. Use `T_BUILD_DATA_DIR`, `T_BUILD_DATABASE_PATH`, or `DATABASE_URL=file:/absolute/path/t-build.sqlite` when you need a custom location. `T_BUILD_HISTORY_LIMIT` controls how many recent build records are retained and defaults to `5`; it must be a positive integer. Pending and running builds are never removed. Keep `.env.local` private.
 
 ## Usage
 

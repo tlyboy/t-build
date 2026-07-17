@@ -37,8 +37,12 @@ export function DeleteBuildButton({
     try {
       const res = await fetch(`/api/builds/${buildId}`, { method: 'DELETE' })
       if (res.ok) {
-        router.push(redirectHref)
-        router.refresh()
+        if (window.history.length > 1) {
+          router.back()
+          return
+        }
+
+        router.replace(redirectHref)
       } else {
         setDeleting(false)
       }
