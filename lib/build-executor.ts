@@ -161,6 +161,67 @@ function resolveProjectPath(workDir: string, projectPath: string): string {
   return path.join(workDir, projectPath)
 }
 
+interface GitCommandResult {
+  success: boolean
+  exitCode: number | null
+}
+
+function executeGitCommand(
+  args: string[],
+  cwd: string,
+  env: NodeJS.ProcessEnv,
+  logLine: (line: string) => void,
+): Promise<GitCommandResult> {
+  return new Promise((resolve) => {
+    let settled = false
+    let timedOut = false
+
+    const finish = (result: GitCommandResult) => {
+      if (settled) return
+      settled = true
+      resolve(result)
+    }
+
+    logLine(`[T-Build] Executing git ${args.join(' ')}...`)
+
+    const child = spawn('git', args, {
+      cwd,
+      env,
+    })
+
+    const timer = setTimeout(() => {
+      timedOut = true
+      child.kill('SIGTERM')
+      logLine(`[T-Build] Git command timed out: git ${args.join(' ')}`)
+    }, 30 * 1000)
+
+    child.stdout?.on('data', (data: Buffer) => {
+      const lines = data.toString().split('\n')
+      for (const line of lines) {
+        if (line) logLine(`[git] ${line}`)
+      }
+    })
+
+    child.stderr?.on('data', (data: Buffer) => {
+      const lines = data.toString().split('\n')
+      for (const line of lines) {
+        if (line) logLine(`[git] ${line}`)
+      }
+    })
+
+    child.on('close', (code) => {
+      clearTimeout(timer)
+      finish({ success: code === 0 && !timedOut, exitCode: code })
+    })
+
+    child.on('error', (error) => {
+      clearTimeout(timer)
+      logLine(`[T-Build] Git command error: ${error.message}`)
+      finish({ success: false, exitCode: null })
+    })
+  })
+}
+
 async function executeGitPull(
   project: Project,
   projectDir: string,
@@ -197,78 +258,82 @@ async function executeGitPull(
     }
   }
 
-  return new Promise((resolve) => {
-    logLine('[T-Build] Executing git pull...')
+  // Prevent any credential helper / SSH from hanging
+  if (!env.GIT_SSH_COMMAND) {
+    env.GIT_SSH_COMMAND = 'ssh -o ConnectTimeout=10 -o StrictHostKeyChecking=no'
+  }
 
-    // Prevent any credential helper / SSH from hanging
-    if (!env.GIT_SSH_COMMAND) {
-      env.GIT_SSH_COMMAND =
-        'ssh -o ConnectTimeout=10 -o StrictHostKeyChecking=no'
+  const gitEnv: NodeJS.ProcessEnv = {
+    ...env,
+    GIT_TERMINAL_PROMPT: '0',
+    GIT_ASKPASS: '/bin/echo',
+    GIT_CONFIG_NOSYSTEM: '1',
+  }
+
+  try {
+    logLine('[T-Build] Restoring Git working tree before pull...')
+
+    const resetResult = await executeGitCommand(
+      ['reset', '--hard', 'HEAD'],
+      projectDir,
+      gitEnv,
+      logLine,
+    )
+    if (!resetResult.success) {
+      logLine(
+        `[T-Build] Git reset failed with exit code: ${resetResult.exitCode}`,
+      )
+      return { success: false }
     }
 
-    const child = spawn('git', ['pull'], {
-      cwd: projectDir,
-      shell: true,
-      env: {
-        ...env,
-        GIT_TERMINAL_PROMPT: '0',
-        GIT_ASKPASS: '/bin/echo',
-        GIT_CONFIG_NOSYSTEM: '1',
-      },
-    })
+    const cleanResult = await executeGitCommand(
+      ['clean', '-fd'],
+      projectDir,
+      gitEnv,
+      logLine,
+    )
+    if (!cleanResult.success) {
+      logLine(
+        `[T-Build] Git clean failed with exit code: ${cleanResult.exitCode}`,
+      )
+      return { success: false }
+    }
 
-    const timer = setTimeout(() => {
-      child.kill('SIGTERM')
-      logLine('[T-Build] Git pull timed out (30s limit)')
-    }, 30 * 1000)
+    logLine('[T-Build] Git working tree restored')
 
-    child.stdout?.on('data', (data: Buffer) => {
-      const lines = data.toString().split('\n')
-      for (const line of lines) {
-        if (line) logLine(`[git] ${line}`)
+    const pullResult = await executeGitCommand(
+      ['pull', '--ff-only'],
+      projectDir,
+      gitEnv,
+      logLine,
+    )
+    if (!pullResult.success) {
+      logLine(
+        `[T-Build] Git pull failed with exit code: ${pullResult.exitCode}`,
+      )
+      return { success: false }
+    }
+
+    const gitInfo = getGitInfo(projectDir)
+    if (gitInfo.hash) {
+      logLine(
+        `[T-Build] Git pull successful, commit: ${gitInfo.hash.substring(0, 8)}`,
+      )
+      if (gitInfo.message) {
+        logLine(`[T-Build] Commit message: ${gitInfo.message}`)
       }
-    })
+    } else {
+      logLine('[T-Build] Git pull successful')
+    }
 
-    child.stderr?.on('data', (data: Buffer) => {
-      const lines = data.toString().split('\n')
-      for (const line of lines) {
-        if (line) logLine(`[git] ${line}`)
-      }
-    })
-
-    child.on('close', async (code) => {
-      clearTimeout(timer)
-      await cleanup()
-      if (code === 0) {
-        const gitInfo = getGitInfo(projectDir)
-        if (gitInfo.hash) {
-          logLine(
-            `[T-Build] Git pull successful, commit: ${gitInfo.hash.substring(0, 8)}`,
-          )
-          if (gitInfo.message) {
-            logLine(`[T-Build] Commit message: ${gitInfo.message}`)
-          }
-        } else {
-          logLine('[T-Build] Git pull successful')
-        }
-        resolve({
-          success: true,
-          commitHash: gitInfo.hash,
-          commitMessage: gitInfo.message,
-        })
-      } else {
-        logLine(`[T-Build] Git pull failed with exit code: ${code}`)
-        resolve({ success: false })
-      }
-    })
-
-    child.on('error', async (error) => {
-      clearTimeout(timer)
-      await cleanup()
-      logLine(`[T-Build] Git pull error: ${error.message}`)
-      resolve({ success: false })
-    })
-  })
+    return {
+      success: true,
+      commitHash: gitInfo.hash,
+      commitMessage: gitInfo.message,
+    }
+  } finally {
+    await cleanup()
+  }
 }
 
 interface GitInfo {

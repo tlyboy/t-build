@@ -135,7 +135,7 @@
     "deployCommand": "Deploy Command",
     "deployCommandHint": "Optional. Runs after the build succeeds, supports multiple shell lines and cd.",
     "gitPullBeforeBuild": "Git Pull Before Build",
-    "gitPullHint": "Automatically pull latest code before each build",
+    "gitPullHint": "Discard local changes and untracked, non-ignored files, then fast-forward to the latest code",
     "noCredential": "None (Public Repository)",
     "noCredentialHint": "No credentials yet, public repos can be used directly",
     "goToConfigure": "Configure",
