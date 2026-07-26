@@ -2,21 +2,20 @@
 
 import { useState } from 'react'
 import { LogOut, Loader2 } from 'lucide-react'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { authClient } from '@/lib/auth-client'
-import { useRouter } from '@/i18n/navigation'
+import { getPathname } from '@/i18n/navigation'
 import { Button } from '@/components/ui/button'
 
 export function LogoutButton() {
   const t = useTranslations('nav')
-  const router = useRouter()
+  const locale = useLocale()
   const [loading, setLoading] = useState(false)
 
   const handleSignOut = async () => {
     setLoading(true)
     await authClient.signOut()
-    router.push('/login')
-    router.refresh()
+    window.location.replace(getPathname({ href: '/login', locale }))
   }
 
   return (

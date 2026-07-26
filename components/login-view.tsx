@@ -2,8 +2,8 @@
 
 import { useMemo, useState } from 'react'
 import { authClient } from '@/lib/auth-client'
-import { useRouter } from '@/i18n/navigation'
-import { useTranslations } from 'next-intl'
+import { getPathname } from '@/i18n/navigation'
+import { useLocale, useTranslations } from 'next-intl'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -16,7 +16,7 @@ interface LoginViewProps {
 
 export function LoginView({ initialNeedsSetup }: LoginViewProps) {
   const t = useTranslations('auth')
-  const router = useRouter()
+  const locale = useLocale()
   const [needsSetup, setNeedsSetup] = useState(initialNeedsSetup)
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
@@ -87,8 +87,7 @@ export function LoginView({ initialNeedsSetup }: LoginViewProps) {
 
       await signInWithUsername()
       await activateDefaultOrganization()
-      router.push('/')
-      router.refresh()
+      window.location.replace(getPathname({ href: '/', locale }))
     } catch (err) {
       setError(err instanceof Error ? err.message : t('loginFailed'))
     } finally {
