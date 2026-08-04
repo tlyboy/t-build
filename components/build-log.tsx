@@ -78,18 +78,10 @@ export function BuildLog({
     return () => viewport.removeEventListener('scroll', handleScroll)
   }, [getViewport, logs.length > 0]) // re-attach when viewport appears
 
+  // When buildId changes, the parent component remounts this component using key to reset its state, so don't clear it manually here —
+  // synchronously calling setState in an effect triggers cascading renders, and initialStatus was also in the dependencies,
+  // so router.refresh() after the build finishes would also clear logs that have already been received.
   useEffect(() => {
-    if (flushTimerRef.current) {
-      clearTimeout(flushTimerRef.current)
-      flushTimerRef.current = null
-    }
-    logsRef.current = []
-    pendingLogsRef.current = []
-    setLogs([])
-    setStatus(initialStatus)
-    setIsLive(true)
-    stickToBottomRef.current = true
-
     const es = new EventSource(`/api/builds/${buildId}/logs`)
 
     let logCount = 0
@@ -148,7 +140,7 @@ export function BuildLog({
       }
       es.close()
     }
-  }, [buildId, flushPendingLogs, initialStatus, scheduleLogFlush])
+  }, [buildId, flushPendingLogs, scheduleLogFlush])
 
   // Smart auto-scroll: only when user is at the bottom
   useEffect(() => {

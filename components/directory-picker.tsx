@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -71,13 +71,17 @@ export function DirectoryPicker({
     }
   }
 
-  useEffect(() => {
-    if (!open) return
-    setSearch('')
-    fetchDirectory(value || '')
-    // fetchDirectory is stable component logic and only needs to run when opening or when the selected path changes
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, value])
+  // Directory loading is triggered by the "open dialog" action, rather than being synchronized with an effect:
+  // The selected path only changes when the dialog closes, so there is no external state to respond to while it is open.
+  const handleOpenChange = (next: boolean) => {
+    setOpen(next)
+    if (next) {
+      fetchDirectory(value || '')
+    } else {
+      // Clear the search term on close so the next opening starts fresh
+      setSearch('')
+    }
+  }
 
   const filteredEntries = search
     ? entries.filter((entry) =>
@@ -99,18 +103,18 @@ export function DirectoryPicker({
 
   const handleSelect = (path: string) => {
     onChange(path)
-    setOpen(false)
+    handleOpenChange(false)
   }
 
   const handleSelectCurrent = () => {
     onChange(currentPath === '/' ? '' : currentPath)
-    setOpen(false)
+    handleOpenChange(false)
   }
 
   const displayPath = currentPath === '/' ? '/' : `/${currentPath}`
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         <Button type="button" variant="outline" size="sm" disabled={disabled}>
           <FolderOpen className="mr-2 h-4 w-4" />
@@ -196,7 +200,7 @@ export function DirectoryPicker({
           </ScrollArea>
 
           <div className="flex justify-between gap-2">
-            <Button variant="outline" onClick={() => setOpen(false)}>
+            <Button variant="outline" onClick={() => handleOpenChange(false)}>
               {t('cancel')}
             </Button>
             <Button onClick={handleSelectCurrent}>{t('selectCurrent')}</Button>
