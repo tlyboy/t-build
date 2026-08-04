@@ -64,6 +64,10 @@ export function BuildLog({
     }, 100)
   }, [flushPendingLogs])
 
+  // The viewport doesn't exist until the first batch of logs has rendered, so use "whether logs exist" as the point to reattach the listener.
+  // Expressions can't be written directly in the dependency array (static analysis can't inspect them), so extract them into a variable.
+  const hasLogs = logs.length > 0
+
   // Track user scroll to toggle sticky behavior
   useEffect(() => {
     const viewport = getViewport()
@@ -76,7 +80,7 @@ export function BuildLog({
 
     viewport.addEventListener('scroll', handleScroll)
     return () => viewport.removeEventListener('scroll', handleScroll)
-  }, [getViewport, logs.length > 0]) // re-attach when viewport appears
+  }, [getViewport, hasLogs])
 
   // When buildId changes, the parent component remounts this component using key to reset its state, so don't clear it manually here —
   // synchronously calling setState in an effect triggers cascading renders, and initialStatus was also in the dependencies,

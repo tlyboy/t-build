@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button'
 import { BuildRow } from '@/components/build-row'
 import { PageHeader } from '@/components/page-header'
 import { Link } from '@/i18n/navigation'
-import { getTranslations, getLocale, setRequestLocale } from 'next-intl/server'
+import { getTranslations, setRequestLocale } from 'next-intl/server'
 import {
   FolderGit2,
   Plus,
