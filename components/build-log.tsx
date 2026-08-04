@@ -78,7 +78,9 @@ export function BuildLog({
       stickToBottomRef.current = scrollHeight - scrollTop - clientHeight < 50
     }
 
-    viewport.addEventListener('scroll', handleScroll)
+    // handler 只读滚动位置、不 preventDefault,标成 passive 让浏览器
+    // 不必等它执行完再决定要不要滚
+    viewport.addEventListener('scroll', handleScroll, { passive: true })
     return () => viewport.removeEventListener('scroll', handleScroll)
   }, [getViewport, hasLogs])
 
