@@ -26,7 +26,12 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint
       - run: pnpm typecheck
+      # lib/auth.ts 在模块求值时就调 getAuthSecret(),production 下缺这个变量直接抛错,
+      # 收集页面数据那步就会挂。本地有未提交的 .env.local 兜着,CI 没有。
+      # 只做构建校验,占位值即可,不用配成真 secret。
       - run: pnpm build
+        env:
+          BETTER_AUTH_SECRET: ci-build-only-placeholder
       # 传递依赖的漏洞往往一时半会儿修不掉，所以只报告不拦人
       - run: pnpm audit --prod
         continue-on-error: true
