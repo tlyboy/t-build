@@ -26,7 +26,12 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint
       - run: pnpm typecheck
+      # lib/auth.ts calls getAuthSecret() during module evaluation, so if this variable is missing in production, it throws immediately,
+      # and the page data collection step fails. Locally, an uncommitted .env.local covers this; CI doesn't have one.
+      # This is only a build check, so a placeholder value is enough; it doesn't need to be a real secret.
       - run: pnpm build
+        env:
+          BETTER_AUTH_SECRET: ci-build-only-placeholder
       # Vulnerabilities in transitive dependencies often can't be fixed right away, so report them without blocking the build
       - run: pnpm audit --prod
         continue-on-error: true
