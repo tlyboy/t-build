@@ -78,18 +78,10 @@ export function BuildLog({
     return () => viewport.removeEventListener('scroll', handleScroll)
   }, [getViewport, logs.length > 0]) // re-attach when viewport appears
 
+  // 切换 buildId 时由父组件的 key 重新挂载本组件来重置状态,这里不再手动清空——
+  // 在 effect 里同步 setState 会触发级联渲染,而且原先 initialStatus 也在依赖里,
+  // 构建结束触发 router.refresh() 后会把已经收到的日志一并清掉。
   useEffect(() => {
-    if (flushTimerRef.current) {
-      clearTimeout(flushTimerRef.current)
-      flushTimerRef.current = null
-    }
-    logsRef.current = []
-    pendingLogsRef.current = []
-    setLogs([])
-    setStatus(initialStatus)
-    setIsLive(true)
-    stickToBottomRef.current = true
-
     const es = new EventSource(`/api/builds/${buildId}/logs`)
 
     let logCount = 0
@@ -148,7 +140,7 @@ export function BuildLog({
       }
       es.close()
     }
-  }, [buildId, flushPendingLogs, initialStatus, scheduleLogFlush])
+  }, [buildId, flushPendingLogs, scheduleLogFlush])
 
   // Smart auto-scroll: only when user is at the bottom
   useEffect(() => {

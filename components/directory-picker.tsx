@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -71,13 +71,17 @@ export function DirectoryPicker({
     }
   }
 
-  useEffect(() => {
-    if (!open) return
-    setSearch('')
-    fetchDirectory(value || '')
-    // fetchDirectory 是组件内稳定逻辑，仅需在打开或选中路径变化时触发
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, value])
+  // 目录加载由「打开对话框」这个动作触发，不再用 effect 同步：
+  // 选中路径只会在对话框关闭时改变，所以没有需要在打开期间响应的外部状态。
+  const handleOpenChange = (next: boolean) => {
+    setOpen(next)
+    if (next) {
+      fetchDirectory(value || '')
+    } else {
+      // 关闭时清掉搜索词，下次打开就是干净的
+      setSearch('')
+    }
+  }
 
   const filteredEntries = search
     ? entries.filter((entry) =>
@@ -99,18 +103,18 @@ export function DirectoryPicker({
 
   const handleSelect = (path: string) => {
     onChange(path)
-    setOpen(false)
+    handleOpenChange(false)
   }
 
   const handleSelectCurrent = () => {
     onChange(currentPath === '/' ? '' : currentPath)
-    setOpen(false)
+    handleOpenChange(false)
   }
 
   const displayPath = currentPath === '/' ? '/' : `/${currentPath}`
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         <Button type="button" variant="outline" size="sm" disabled={disabled}>
           <FolderOpen className="mr-2 h-4 w-4" />
@@ -196,7 +200,7 @@ export function DirectoryPicker({
           </ScrollArea>
 
           <div className="flex justify-between gap-2">
-            <Button variant="outline" onClick={() => setOpen(false)}>
+            <Button variant="outline" onClick={() => handleOpenChange(false)}>
               {t('cancel')}
             </Button>
             <Button onClick={handleSelectCurrent}>{t('selectCurrent')}</Button>

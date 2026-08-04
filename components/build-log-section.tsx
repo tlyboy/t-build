@@ -33,6 +33,7 @@ export function BuildLogSection({
       </CardHeader>
       <CardContent>
         <BuildLog
+          key={buildId}
           buildId={buildId}
           initialStatus={initialStatus}
           onStatusChange={handleStatusChange}
