@@ -64,6 +64,10 @@ export function BuildLog({
     }, 100)
   }, [flushPendingLogs])
 
+  // 视口要等第一批日志渲染出来才存在,所以用「是否已有日志」作为重新挂监听的时机。
+  // 依赖数组里不能直接写表达式(静态分析看不了),提出来成变量。
+  const hasLogs = logs.length > 0
+
   // Track user scroll to toggle sticky behavior
   useEffect(() => {
     const viewport = getViewport()
@@ -76,7 +80,7 @@ export function BuildLog({
 
     viewport.addEventListener('scroll', handleScroll)
     return () => viewport.removeEventListener('scroll', handleScroll)
-  }, [getViewport, logs.length > 0]) // re-attach when viewport appears
+  }, [getViewport, hasLogs])
 
   // 切换 buildId 时由父组件的 key 重新挂载本组件来重置状态,这里不再手动清空——
   // 在 effect 里同步 setState 会触发级联渲染,而且原先 initialStatus 也在依赖里,
