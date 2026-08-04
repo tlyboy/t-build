@@ -78,7 +78,9 @@ export function BuildLog({
       stickToBottomRef.current = scrollHeight - scrollTop - clientHeight < 50
     }
 
-    viewport.addEventListener('scroll', handleScroll)
+    // The handler only reads the scroll position and doesn't call preventDefault, so mark it passive to let the browser
+    // decide whether to scroll without waiting for it to finish
+    viewport.addEventListener('scroll', handleScroll, { passive: true })
     return () => viewport.removeEventListener('scroll', handleScroll)
   }, [getViewport, hasLogs])
 
