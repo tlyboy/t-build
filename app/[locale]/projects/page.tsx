@@ -42,7 +42,7 @@ export default async function ProjectsPage({
 
       {projects.length === 0 ? (
         <div className="py-12 text-center sm:py-20">
-          <p className="text-muted-foreground mb-4 text-sm">
+          <p className="mb-4 text-sm text-muted-foreground">
             {t('noProjectsDesc')}
           </p>
           <Button asChild>

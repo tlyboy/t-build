@@ -50,7 +50,7 @@ export default async function BuildDetailPage({
         </CardHeader>
         <CardContent className="grid grid-cols-2 gap-4 sm:grid-cols-4">
           <div>
-            <div className="text-muted-foreground text-xs">
+            <div className="text-xs text-muted-foreground">
               {t('startTime')}
             </div>
             <div className="text-sm">
@@ -59,7 +59,7 @@ export default async function BuildDetailPage({
           </div>
           {build.finishedAt && (
             <div>
-              <div className="text-muted-foreground text-xs">
+              <div className="text-xs text-muted-foreground">
                 {t('endTime')}
               </div>
               <div className="text-sm">
@@ -69,7 +69,7 @@ export default async function BuildDetailPage({
           )}
           {build.finishedAt && (
             <div>
-              <div className="text-muted-foreground text-xs">
+              <div className="text-xs text-muted-foreground">
                 {t('duration')}
               </div>
               <div className="text-sm">
@@ -84,7 +84,7 @@ export default async function BuildDetailPage({
           )}
           {build.exitCode !== undefined && (
             <div>
-              <div className="text-muted-foreground text-xs">
+              <div className="text-xs text-muted-foreground">
                 {t('exitCode')}
               </div>
               <div className="text-sm">{build.exitCode}</div>
@@ -92,14 +92,14 @@ export default async function BuildDetailPage({
           )}
           {build.gitCommitHash && (
             <div className="col-span-2 sm:col-span-4">
-              <div className="text-muted-foreground text-xs">Git Commit</div>
+              <div className="text-xs text-muted-foreground">Git Commit</div>
               <div className="mt-0.5 flex items-center gap-2">
-                <GitCommit className="text-muted-foreground h-4 w-4 flex-shrink-0" />
+                <GitCommit className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
                 <code className="text-sm">
                   {build.gitCommitHash.substring(0, 8)}
                 </code>
                 {build.gitCommitMessage && (
-                  <span className="text-muted-foreground truncate text-sm">
+                  <span className="truncate text-sm text-muted-foreground">
                     {build.gitCommitMessage}
                   </span>
                 )}

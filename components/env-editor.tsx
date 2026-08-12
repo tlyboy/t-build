@@ -166,13 +166,13 @@ export function EnvEditor({ projectId }: { projectId: string }) {
   }
 
   if (loading) {
-    return <div className="text-muted-foreground text-sm">{t('loading')}</div>
+    return <div className="text-sm text-muted-foreground">{t('loading')}</div>
   }
 
   return (
     <div className="space-y-3">
       {rows.length === 0 ? (
-        <div className="text-muted-foreground text-sm">{t('noEnvVars')}</div>
+        <div className="text-sm text-muted-foreground">{t('noEnvVars')}</div>
       ) : (
         <div className="space-y-2">
           {rows.map((row, index) => (

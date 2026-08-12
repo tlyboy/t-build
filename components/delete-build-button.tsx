@@ -57,7 +57,7 @@ export function DeleteBuildButton({
         <Button
           variant="outline"
           disabled={deleting}
-          className="text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/50"
+          className="border-destructive/50 text-destructive hover:bg-destructive/10 hover:text-destructive"
         >
           <Trash2 className="mr-1 h-4 w-4" />
           {t('delete')}

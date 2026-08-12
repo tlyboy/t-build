@@ -99,12 +99,12 @@ export function LoginView({ initialNeedsSetup }: LoginViewProps) {
     <div className="mx-auto flex min-h-[calc(100dvh-12rem)] w-full max-w-md items-center">
       <Card className="w-full">
         <CardHeader className="space-y-3">
-          <div className="bg-primary/10 text-primary flex h-10 w-10 items-center justify-center rounded-lg">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
             <Hammer className="h-5 w-5" />
           </div>
           <div className="space-y-1">
             <CardTitle className="text-xl">{title}</CardTitle>
-            <p className="text-muted-foreground text-sm">{description}</p>
+            <p className="text-sm text-muted-foreground">{description}</p>
           </div>
         </CardHeader>
         <CardContent>
@@ -125,7 +125,7 @@ export function LoginView({ initialNeedsSetup }: LoginViewProps) {
             <div className="space-y-2">
               <Label htmlFor="username">{t('username')}</Label>
               <div className="relative">
-                <UserRound className="text-muted-foreground pointer-events-none absolute top-2 left-2.5 h-4 w-4" />
+                <UserRound className="pointer-events-none absolute top-2 left-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="username"
                   value={username}
@@ -141,7 +141,7 @@ export function LoginView({ initialNeedsSetup }: LoginViewProps) {
             <div className="space-y-2">
               <Label htmlFor="password">{t('password')}</Label>
               <div className="relative">
-                <LockKeyhole className="text-muted-foreground pointer-events-none absolute top-2 left-2.5 h-4 w-4" />
+                <LockKeyhole className="pointer-events-none absolute top-2 left-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="password"
                   type="password"
@@ -157,7 +157,7 @@ export function LoginView({ initialNeedsSetup }: LoginViewProps) {
             </div>
 
             {error && (
-              <p className="text-destructive text-sm" role="alert">
+              <p className="text-sm text-destructive" role="alert">
                 {error}
               </p>
             )}

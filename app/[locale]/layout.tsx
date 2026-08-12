@@ -97,7 +97,7 @@ export default async function LocaleLayout({
             disableTransitionOnChange
           >
             <div className="flex min-h-dvh flex-col">
-              <header className="bg-background sticky top-0 z-50 border-b">
+              <header className="sticky top-0 z-50 border-b bg-background">
                 <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
                   <div className="flex min-w-0 items-center gap-2 md:gap-6">
                     <Link

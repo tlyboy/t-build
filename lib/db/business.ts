@@ -154,8 +154,7 @@ function createBusinessTables(db: Database.Database) {
 function metaValue(db: Database.Database, key: string) {
   return (
     db.prepare('select value from tbuild_meta where key = ?').get(key) as
-      | { value: string }
-      | undefined
+      { value: string } | undefined
   )?.value
 }
 

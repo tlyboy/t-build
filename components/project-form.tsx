@@ -286,9 +286,9 @@ export function ProjectForm({
     return (
       <Card className="w-full">
         <CardContent className="flex flex-col items-center justify-center py-12">
-          <AlertCircle className="text-muted-foreground mb-4 h-12 w-12" />
+          <AlertCircle className="mb-4 h-12 w-12 text-muted-foreground" />
           <h3 className="mb-2 text-lg font-semibold">{t('workDirRequired')}</h3>
-          <p className="text-muted-foreground mb-6 max-w-sm text-center text-sm">
+          <p className="mb-6 max-w-sm text-center text-sm text-muted-foreground">
             {t('workDirRequiredDesc')}
           </p>
           <Button asChild>
@@ -307,7 +307,7 @@ export function ProjectForm({
       <CardContent className="pt-6">
         <form id={formId} onSubmit={handleSubmit} className="space-y-6">
           {error && (
-            <div className="bg-destructive/10 text-destructive rounded-lg p-3 text-sm">
+            <div className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive">
               {error}
             </div>
           )}
@@ -340,7 +340,7 @@ export function ProjectForm({
                   <button
                     type="button"
                     onClick={() => setShowCloneOptions(!showCloneOptions)}
-                    className="bg-card text-muted-foreground hover:text-foreground flex items-center gap-1 px-3 text-xs transition-colors"
+                    className="flex items-center gap-1 bg-card px-3 text-xs text-muted-foreground transition-colors hover:text-foreground"
                   >
                     <GitBranch className="h-3 w-3" />
                     {showCloneOptions ? t('collapseClone') : t('expandClone')}
@@ -354,7 +354,7 @@ export function ProjectForm({
               </div>
 
               {showCloneOptions && (
-                <div className="bg-muted/30 space-y-4 rounded-lg p-4">
+                <div className="space-y-4 rounded-lg bg-muted/30 p-4">
                   <div className="space-y-2">
                     <Label htmlFor="gitUrl">{t('gitUrl')}</Label>
                     <Input
@@ -364,9 +364,9 @@ export function ProjectForm({
                       placeholder="https://github.com/user/repo.git"
                     />
                     {gitUrl && (
-                      <p className="text-muted-foreground text-xs">
+                      <p className="text-xs text-muted-foreground">
                         {t('cloneTo')}:{' '}
-                        <code className="bg-muted rounded px-1">
+                        <code className="rounded bg-muted px-1">
                           {getRepoNameFromUrl(gitUrl)}
                         </code>
                       </p>
@@ -401,7 +401,7 @@ export function ProjectForm({
                         </Select>
                       ) : (
                         <div className="flex h-9 items-center justify-between rounded-md border border-dashed p-2">
-                          <span className="text-muted-foreground text-xs">
+                          <span className="text-xs text-muted-foreground">
                             {t('publicRepoCanClone')}
                           </span>
                           <Button
@@ -477,7 +477,7 @@ export function ProjectForm({
               required
               className="font-mono text-sm"
             />
-            <p className="text-muted-foreground text-xs">
+            <p className="text-xs text-muted-foreground">
               {t('buildCommandHint')}
             </p>
           </div>
@@ -492,7 +492,7 @@ export function ProjectForm({
               rows={2}
               className="font-mono text-sm"
             />
-            <p className="text-muted-foreground text-xs">
+            <p className="text-xs text-muted-foreground">
               {t('outputPathsHint')}
             </p>
           </div>
@@ -509,7 +509,7 @@ export function ProjectForm({
               rows={3}
               className="font-mono text-sm"
             />
-            <p className="text-muted-foreground text-xs">
+            <p className="text-xs text-muted-foreground">
               {t('deployCommandHint')}
             </p>
           </div>
@@ -519,7 +519,7 @@ export function ProjectForm({
               <Label htmlFor="gitPull" className="text-sm font-medium">
                 {t('gitPullBeforeBuild')}
               </Label>
-              <p className="text-muted-foreground text-xs">
+              <p className="text-xs text-muted-foreground">
                 {t('gitPullHint')}
               </p>
             </div>
@@ -554,7 +554,7 @@ export function ProjectForm({
                 </Select>
               ) : (
                 <div className="flex items-center justify-between rounded-md border border-dashed p-3">
-                  <p className="text-muted-foreground text-sm">
+                  <p className="text-sm text-muted-foreground">
                     {t('noCredentialHint')}
                   </p>
                   <Button variant="outline" size="sm" asChild>
@@ -579,7 +579,7 @@ export function ProjectForm({
                     <Webhook className="h-4 w-4" />
                     {t('enableWebhook')}
                   </Label>
-                  <p className="text-muted-foreground text-xs">
+                  <p className="text-xs text-muted-foreground">
                     {t('enableWebhookHint')}
                   </p>
                 </div>
@@ -671,7 +671,7 @@ export function ProjectForm({
                         <Copy className="h-4 w-4" />
                       </Button>
                     </div>
-                    <p className="text-muted-foreground text-xs">
+                    <p className="text-xs text-muted-foreground">
                       {webhookProvider === 'github'
                         ? t('githubSecretHint')
                         : t('codeupSecretHint')}
@@ -680,7 +680,7 @@ export function ProjectForm({
 
                   <div className="space-y-2">
                     <Label>{t('webhookUrl')}</Label>
-                    <div className="bg-muted flex min-w-0 items-center gap-2 rounded-md px-2 py-1">
+                    <div className="flex min-w-0 items-center gap-2 rounded-md bg-muted px-2 py-1">
                       <code className="min-w-0 flex-1 truncate text-xs">
                         {endpointFor(webhookId)}
                       </code>
@@ -695,7 +695,7 @@ export function ProjectForm({
                         <Copy className="h-3.5 w-3.5" />
                       </Button>
                     </div>
-                    <p className="text-muted-foreground text-xs">
+                    <p className="text-xs text-muted-foreground">
                       {t('webhookUrlHint')}
                     </p>
                   </div>

@@ -249,7 +249,7 @@ export function WebhookSettingsCard({
                 <div className="space-y-2">
                   <Label htmlFor="webhookBranch">{t('webhookBranch')}</Label>
                   <div className="relative">
-                    <GitBranch className="text-muted-foreground pointer-events-none absolute top-2 left-2.5 h-4 w-4" />
+                    <GitBranch className="pointer-events-none absolute top-2 left-2.5 h-4 w-4 text-muted-foreground" />
                     <Input
                       id="webhookBranch"
                       value={branch}
@@ -288,7 +288,7 @@ export function WebhookSettingsCard({
                       <Copy className="h-4 w-4" />
                     </Button>
                   </div>
-                  <p className="text-muted-foreground text-xs">
+                  <p className="text-xs text-muted-foreground">
                     {provider === 'github'
                       ? t('githubSecretHint')
                       : t('codeupSecretHint')}
@@ -320,11 +320,11 @@ export function WebhookSettingsCard({
       </CardHeader>
       <CardContent>
         {projects.length === 0 ? (
-          <div className="text-muted-foreground py-8 text-center text-sm">
+          <div className="py-8 text-center text-sm text-muted-foreground">
             {t('webhookNoProjects')}
           </div>
         ) : webhooks.length === 0 ? (
-          <div className="text-muted-foreground py-8 text-center text-sm">
+          <div className="py-8 text-center text-sm text-muted-foreground">
             {t('noWebhooks')}
           </div>
         ) : (
@@ -347,12 +347,12 @@ export function WebhookSettingsCard({
                         {providerLabel(webhook.provider)}
                       </Badge>
                     </div>
-                    <div className="text-muted-foreground text-xs">
+                    <div className="text-xs text-muted-foreground">
                       {projectNameById.get(webhook.projectId) ??
                         t('unknownProject')}
                       {webhook.branch ? ` · ${webhook.branch}` : ''}
                     </div>
-                    <div className="bg-muted flex min-w-0 items-center gap-2 rounded-md px-2 py-1">
+                    <div className="flex min-w-0 items-center gap-2 rounded-md bg-muted px-2 py-1">
                       <code className="min-w-0 flex-1 truncate text-xs">
                         {endpointFor(webhook.id)}
                       </code>
@@ -367,7 +367,7 @@ export function WebhookSettingsCard({
                       </Button>
                     </div>
                     {webhook.lastTriggeredAt && (
-                      <div className="text-muted-foreground text-xs">
+                      <div className="text-xs text-muted-foreground">
                         {t('lastTriggeredAt', {
                           time: new Date(
                             webhook.lastTriggeredAt,
@@ -386,7 +386,7 @@ export function WebhookSettingsCard({
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="text-destructive hover:text-destructive hover:bg-destructive/10 h-8 w-8"
+                      className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
                       title={tCommon('delete')}
                       onClick={() => handleDelete(webhook.id)}
                     >

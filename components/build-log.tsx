@@ -167,7 +167,7 @@ export function BuildLog({
       <div className="flex items-center gap-4">
         <BuildStatusBadge status={status} />
         {isRunning && isLive && (
-          <span className="text-muted-foreground flex items-center gap-1 text-xs">
+          <span className="flex items-center gap-1 text-xs text-muted-foreground">
             <span className="h-2 w-2 animate-pulse rounded-full bg-green-500" />
             {t('liveUpdating')}
           </span>
@@ -176,7 +176,7 @@ export function BuildLog({
 
       <ScrollArea
         ref={scrollAreaRef}
-        className="bg-muted/30 h-[55dvh] max-h-[500px] min-h-80 rounded-md border"
+        className="h-[55dvh] max-h-[500px] min-h-80 rounded-md border bg-muted/30"
       >
         <div className="p-4 font-mono text-sm">
           {logs.length === 0 ? (

@@ -35,7 +35,7 @@ export function PageHeader({
   }
 
   return (
-    <header className="bg-background/95 supports-[backdrop-filter]:bg-background/80 sticky top-14 z-40 -mx-4 mb-6 flex flex-col gap-3 border-b px-4 py-3 backdrop-blur sm:flex-row sm:items-center sm:gap-4 sm:py-4">
+    <header className="sticky top-14 z-40 -mx-4 mb-6 flex flex-col gap-3 border-b bg-background/95 px-4 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/80 sm:flex-row sm:items-center sm:gap-4 sm:py-4">
       <div className="flex min-w-0 flex-1 items-start gap-3">
         {backHref &&
           (backBehavior === 'history' ? (
@@ -68,7 +68,7 @@ export function PageHeader({
             {title}
           </h1>
           {description && (
-            <p className="text-muted-foreground mt-0.5 text-sm break-all">
+            <p className="mt-0.5 text-sm break-all text-muted-foreground">
               {description}
             </p>
           )}

@@ -176,7 +176,7 @@ export function GitCredentialsSettingsCard({
                           rows={8}
                           className="font-mono text-xs break-all"
                         />
-                        <p className="text-muted-foreground text-xs">
+                        <p className="text-xs text-muted-foreground">
                           {t('sshKeyHint')}
                         </p>
                       </div>
@@ -203,7 +203,7 @@ export function GitCredentialsSettingsCard({
                           }
                           placeholder={t('passwordPlaceholder')}
                         />
-                        <p className="text-muted-foreground text-xs">
+                        <p className="text-xs text-muted-foreground">
                           {t('passwordHint')}
                         </p>
                       </div>
@@ -239,7 +239,7 @@ export function GitCredentialsSettingsCard({
         </CardHeader>
         <CardContent>
           {credentials.length === 0 ? (
-            <div className="text-muted-foreground py-8 text-center text-sm">
+            <div className="py-8 text-center text-sm text-muted-foreground">
               {t('noCredentials')}
             </div>
           ) : (
@@ -251,13 +251,13 @@ export function GitCredentialsSettingsCard({
                 >
                   <div className="flex items-center gap-3">
                     {cred.type === 'https' ? (
-                      <User className="text-muted-foreground h-4 w-4" />
+                      <User className="h-4 w-4 text-muted-foreground" />
                     ) : (
-                      <KeyRound className="text-muted-foreground h-4 w-4" />
+                      <KeyRound className="h-4 w-4 text-muted-foreground" />
                     )}
                     <div>
                       <div className="text-sm font-medium">{cred.name}</div>
-                      <div className="text-muted-foreground text-xs">
+                      <div className="text-xs text-muted-foreground">
                         {cred.type === 'https'
                           ? `HTTPS · ${cred.username || t('httpsNotConfiguredUsername')}${cred.hasPassword ? ` · ${t('httpsPasswordConfigured')}` : ''}`
                           : `SSH · ${cred.hasSshKey ? t('sshKeyConfigured') : t('sshKeyNotConfigured')}`}
@@ -267,7 +267,7 @@ export function GitCredentialsSettingsCard({
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="text-destructive hover:text-destructive hover:bg-destructive/10 h-8 w-8"
+                    className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
                     onClick={() => setDeleteCredentialId(cred.id)}
                   >
                     <Trash2 className="h-4 w-4" />
