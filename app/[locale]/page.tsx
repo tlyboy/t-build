@@ -115,7 +115,7 @@ export default async function Home({
       <div className="mx-auto max-w-6xl space-y-6 sm:space-y-8">
         <PageHeader title={t('title')} description={t('description')} />
         <div className="py-12 text-center sm:py-20">
-          <p className="text-muted-foreground mb-4 text-sm">
+          <p className="mb-4 text-sm text-muted-foreground">
             {tProjects('noProjectsDesc')}
           </p>
           <Button asChild>
@@ -154,7 +154,7 @@ export default async function Home({
           <CardContent className="pt-0">
             <Link
               href="/projects"
-              className="text-muted-foreground hover:text-primary inline-flex items-center gap-1 text-xs transition-colors"
+              className="inline-flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-primary"
             >
               {t('viewAll')}
               <ArrowRight className="h-3 w-3" />
@@ -173,7 +173,7 @@ export default async function Home({
             </CardTitle>
           </CardHeader>
           <CardContent className="pt-0">
-            <span className="text-muted-foreground text-xs">
+            <span className="text-xs text-muted-foreground">
               {t('allBuilds')}
             </span>
           </CardContent>
@@ -190,7 +190,7 @@ export default async function Home({
             </CardTitle>
           </CardHeader>
           <CardContent className="pt-0">
-            <span className="text-muted-foreground text-xs">
+            <span className="text-xs text-muted-foreground">
               {t('buildSuccess')}
             </span>
           </CardContent>
@@ -207,7 +207,7 @@ export default async function Home({
             </CardTitle>
           </CardHeader>
           <CardContent className="pt-0">
-            <div className="bg-muted h-1.5 w-full overflow-hidden rounded-full">
+            <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
               <div
                 className="h-full bg-green-500 transition-all duration-500"
                 style={{ width: `${successRate}%` }}
@@ -236,7 +236,7 @@ export default async function Home({
         </CardHeader>
         <CardContent>
           {recentBuilds.length === 0 ? (
-            <p className="text-muted-foreground py-6 text-center text-sm">
+            <p className="py-6 text-center text-sm text-muted-foreground">
               {t('noBuilds')}
             </p>
           ) : (

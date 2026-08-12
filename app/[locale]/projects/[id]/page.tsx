@@ -52,7 +52,7 @@ export default async function ProjectDetailPage({
       </CardHeader>
       <CardContent>
         {sortedBuilds.length === 0 ? (
-          <div className="text-muted-foreground text-sm">{t('noBuilds')}</div>
+          <div className="text-sm text-muted-foreground">{t('noBuilds')}</div>
         ) : (
           <div className="space-y-2">
             {sortedBuilds.map((build) => {
@@ -123,26 +123,26 @@ export default async function ProjectDetailPage({
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <div className="text-muted-foreground mb-1.5 text-sm">
+            <div className="mb-1.5 text-sm text-muted-foreground">
               {t('buildCommand')}
             </div>
-            <pre className="bg-muted/50 overflow-x-auto rounded-md p-3 font-mono text-sm break-all whitespace-pre-wrap">
+            <pre className="overflow-x-auto rounded-md bg-muted/50 p-3 font-mono text-sm break-all whitespace-pre-wrap">
               {project.buildCommand}
             </pre>
           </div>
           {project.deployCommand && (
             <div>
-              <div className="text-muted-foreground mb-1.5 text-sm">
+              <div className="mb-1.5 text-sm text-muted-foreground">
                 {t('deployCommand')}
               </div>
-              <pre className="bg-muted/50 overflow-x-auto rounded-md p-3 font-mono text-sm break-all whitespace-pre-wrap">
+              <pre className="overflow-x-auto rounded-md bg-muted/50 p-3 font-mono text-sm break-all whitespace-pre-wrap">
                 {project.deployCommand}
               </pre>
             </div>
           )}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <div className="text-muted-foreground text-sm">
+              <div className="text-sm text-muted-foreground">
                 {t('createdAt')}
               </div>
               <div className="text-sm">
@@ -150,7 +150,7 @@ export default async function ProjectDetailPage({
               </div>
             </div>
             <div>
-              <div className="text-muted-foreground text-sm">
+              <div className="text-sm text-muted-foreground">
                 {t('updatedAt')}
               </div>
               <div className="text-sm">

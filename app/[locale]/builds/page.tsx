@@ -37,9 +37,9 @@ export default async function BuildsPage({
       {builds.length === 0 ? (
         <Card>
           <CardContent className="flex flex-col items-center py-12 text-center">
-            <Clock3 className="text-muted-foreground mb-3 h-8 w-8" />
+            <Clock3 className="mb-3 h-8 w-8 text-muted-foreground" />
             <p className="font-medium">{t('noBuilds')}</p>
-            <p className="text-muted-foreground mt-1 text-sm">
+            <p className="mt-1 text-sm text-muted-foreground">
               {t('noBuildsDescription')}
             </p>
           </CardContent>

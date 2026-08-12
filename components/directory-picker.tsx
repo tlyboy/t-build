@@ -138,13 +138,13 @@ export function DirectoryPicker({
             >
               <ChevronUp className="h-4 w-4" />
             </Button>
-            <div className="text-muted-foreground bg-muted min-w-0 flex-1 truncate rounded px-2 py-1 font-mono text-sm">
+            <div className="min-w-0 flex-1 truncate rounded bg-muted px-2 py-1 font-mono text-sm text-muted-foreground">
               {displayPath}
             </div>
           </div>
 
           <div className="relative">
-            <Search className="text-muted-foreground absolute top-2.5 left-2.5 h-4 w-4" />
+            <Search className="absolute top-2.5 left-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               type="text"
               placeholder={t('searchDir')}
@@ -155,18 +155,18 @@ export function DirectoryPicker({
           </div>
 
           {error && (
-            <div className="bg-destructive/10 text-destructive rounded-md p-3 text-sm">
+            <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
               {error}
             </div>
           )}
 
           <ScrollArea className="h-64 rounded-md border">
             {loading ? (
-              <div className="text-muted-foreground p-4 text-center">
+              <div className="p-4 text-center text-muted-foreground">
                 {t('loading')}
               </div>
             ) : filteredEntries.length === 0 ? (
-              <div className="text-muted-foreground p-4 text-center">
+              <div className="p-4 text-center text-muted-foreground">
                 {search ? t('noMatch') : t('emptyDir')}
               </div>
             ) : (
@@ -174,7 +174,7 @@ export function DirectoryPicker({
                 {filteredEntries.map((entry) => (
                   <div
                     key={entry.path}
-                    className="hover:bg-muted group flex items-center justify-between rounded-md"
+                    className="group flex items-center justify-between rounded-md hover:bg-muted"
                   >
                     <button
                       type="button"
