@@ -105,7 +105,7 @@ export default async function LocaleLayout({
                       className="flex shrink-0 items-center gap-2 font-bold"
                       aria-label="T-Build"
                     >
-                      <Hammer className="h-5 w-5" />
+                      <Hammer className="h-5 w-5 text-primary" />
                       <span className="hidden sm:inline">T-Build</span>
                     </Link>
                     {session && <DesktopNavigation />}
