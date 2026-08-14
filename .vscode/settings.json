@@ -10,6 +10,6 @@
   "files.associations": {
     "*.css": "tailwindcss"
   },
-  "prettier.enable": true,
-  "i18n-ally.localesPaths": ["i18n", "messages"]
+  "i18n-ally.localesPaths": ["messages"],
+  "prettier.enable": true
 }
