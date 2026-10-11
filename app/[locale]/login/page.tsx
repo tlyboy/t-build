@@ -7,18 +7,14 @@ import { redirect } from '@/i18n/navigation'
 export const dynamic = 'force-dynamic'
 
 function needsSetup() {
-  const row = getSqliteDatabase()
-    .prepare('select count(*) as count from user')
-    .get() as { count: number }
+  const row = getSqliteDatabase().prepare('select count(*) as count from user').get() as {
+    count: number
+  }
 
   return row.count === 0
 }
 
-export default async function LoginPage({
-  params,
-}: {
-  params: Promise<{ locale: string }>
-}) {
+export default async function LoginPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params
   setRequestLocale(locale)
 

@@ -12,10 +12,7 @@ interface BuildLogSectionProps {
   initialStatus: BuildStatus
 }
 
-export function BuildLogSection({
-  buildId,
-  initialStatus,
-}: BuildLogSectionProps) {
+export function BuildLogSection({ buildId, initialStatus }: BuildLogSectionProps) {
   const t = useTranslations('buildDetail')
   const router = useRouter()
 

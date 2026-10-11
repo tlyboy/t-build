@@ -33,11 +33,7 @@ interface DirectoryPickerProps {
   disabled?: boolean
 }
 
-export function DirectoryPicker({
-  value,
-  onChange,
-  disabled,
-}: DirectoryPickerProps) {
+export function DirectoryPicker({ value, onChange, disabled }: DirectoryPickerProps) {
   const t = useTranslations('common')
   const [open, setOpen] = useState(false)
   const [currentPath, setCurrentPath] = useState('')
@@ -84,9 +80,7 @@ export function DirectoryPicker({
   }
 
   const filteredEntries = search
-    ? entries.filter((entry) =>
-        entry.name.toLowerCase().includes(search.toLowerCase()),
-      )
+    ? entries.filter((entry) => entry.name.toLowerCase().includes(search.toLowerCase()))
     : entries
 
   const handleNavigate = (path: string) => {
@@ -155,16 +149,12 @@ export function DirectoryPicker({
           </div>
 
           {error && (
-            <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
-              {error}
-            </div>
+            <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">{error}</div>
           )}
 
           <ScrollArea className="h-64 rounded-md border">
             {loading ? (
-              <div className="p-4 text-center text-muted-foreground">
-                {t('loading')}
-              </div>
+              <div className="p-4 text-center text-muted-foreground">{t('loading')}</div>
             ) : filteredEntries.length === 0 ? (
               <div className="p-4 text-center text-muted-foreground">
                 {search ? t('noMatch') : t('emptyDir')}

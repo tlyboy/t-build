@@ -1,20 +1,13 @@
 import { NextResponse } from 'next/server'
 import path from 'path'
 import fs from 'fs/promises'
-import {
-  getProjectById,
-  updateProject,
-  deleteProject,
-} from '@/lib/data/projects'
+import { getProjectById, updateProject, deleteProject } from '@/lib/data/projects'
 import { deleteProjectBuilds } from '@/lib/data/builds'
 import { deleteEnvVarsByProjectId } from '@/lib/data/env-vars'
 import { getSettings } from '@/lib/data/settings'
 import { requireApiSession } from '@/lib/auth/api'
 
-export async function GET(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> },
-) {
+export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const unauthorized = await requireApiSession()
   if (unauthorized) return unauthorized
 
@@ -28,10 +21,7 @@ export async function GET(
   return NextResponse.json(project)
 }
 
-export async function PUT(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> },
-) {
+export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const unauthorized = await requireApiSession()
   if (unauthorized) return unauthorized
 
@@ -55,10 +45,7 @@ export async function PUT(
   return NextResponse.json(project)
 }
 
-export async function DELETE(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> },
-) {
+export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const unauthorized = await requireApiSession()
   if (unauthorized) return unauthorized
 
@@ -79,9 +66,7 @@ export async function DELETE(
     if (settings.workDir) {
       const projectDir = path.join(settings.workDir, project.path)
       if (projectDir.startsWith(settings.workDir)) {
-        await fs
-          .rm(projectDir, { recursive: true, force: true })
-          .catch(() => {})
+        await fs.rm(projectDir, { recursive: true, force: true }).catch(() => {})
       }
     }
   }

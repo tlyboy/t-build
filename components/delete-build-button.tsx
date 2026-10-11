@@ -22,10 +22,7 @@ interface DeleteBuildButtonProps {
   redirectHref: string
 }
 
-export function DeleteBuildButton({
-  buildId,
-  redirectHref,
-}: DeleteBuildButtonProps) {
+export function DeleteBuildButton({ buildId, redirectHref }: DeleteBuildButtonProps) {
   const t = useTranslations('buildDetail')
   const tDelete = useTranslations('deleteBuild')
   const tCommon = useTranslations('common')
@@ -66,9 +63,7 @@ export function DeleteBuildButton({
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>{tDelete('title')}</AlertDialogTitle>
-          <AlertDialogDescription>
-            {tDelete('description')}
-          </AlertDialogDescription>
+          <AlertDialogDescription>{tDelete('description')}</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>{tCommon('cancel')}</AlertDialogCancel>

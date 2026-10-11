@@ -19,8 +19,7 @@ export default async function SettingsPage({
   setRequestLocale(locale)
 
   const backHref =
-    typeof from === 'string' &&
-    (from === '/projects/new' || /^\/projects\/[^/]+\/edit$/.test(from))
+    typeof from === 'string' && (from === '/projects/new' || /^\/projects\/[^/]+\/edit$/.test(from))
       ? from
       : undefined
 

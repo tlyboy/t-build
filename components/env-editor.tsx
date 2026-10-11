@@ -72,11 +72,7 @@ export function EnvEditor({ projectId }: { projectId: string }) {
   const handleValueFocus = (index: number) => {
     const row = rows[index]
     if (row.masked) {
-      setRows(
-        rows.map((r, i) =>
-          i === index ? { ...r, value: '', masked: false } : r,
-        ),
-      )
+      setRows(rows.map((r, i) => (i === index ? { ...r, value: '', masked: false } : r)))
     }
   }
 
@@ -141,9 +137,7 @@ export function EnvEditor({ projectId }: { projectId: string }) {
 
       if (res.ok) {
         toast.success(t('envSaved'))
-        const fresh = await fetch(`/api/projects/${projectId}/env`).then((r) =>
-          r.json(),
-        )
+        const fresh = await fetch(`/api/projects/${projectId}/env`).then((r) => r.json())
         if (Array.isArray(fresh)) {
           setRows(
             fresh.map((d: { key: string; value: string }) => ({
@@ -206,12 +200,7 @@ export function EnvEditor({ projectId }: { projectId: string }) {
                   )}
                 </Button>
               </div>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                onClick={() => removeRow(index)}
-              >
+              <Button type="button" variant="ghost" size="icon" onClick={() => removeRow(index)}>
                 <Trash2 className="h-4 w-4" />
               </Button>
             </div>
@@ -227,12 +216,7 @@ export function EnvEditor({ projectId }: { projectId: string }) {
             className="h-32 font-mono text-sm"
           />
           <div className="flex gap-2">
-            <Button
-              type="button"
-              size="sm"
-              onClick={handleImport}
-              disabled={!importText.trim()}
-            >
+            <Button type="button" size="sm" onClick={handleImport} disabled={!importText.trim()}>
               {t('envImportConfirm')}
             </Button>
             <Button
@@ -264,12 +248,7 @@ export function EnvEditor({ projectId }: { projectId: string }) {
           {t('envImport')}
         </Button>
         {(rows.length > 0 || initialCount > 0) && (
-          <Button
-            type="button"
-            size="sm"
-            onClick={handleSave}
-            disabled={saving}
-          >
+          <Button type="button" size="sm" onClick={handleSave} disabled={saving}>
             {saving && <Loader2 className="mr-1 h-4 w-4 animate-spin" />}
             {saving ? t('savingEnvVars') : t('saveEnvVars')}
           </Button>

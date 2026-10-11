@@ -17,8 +17,7 @@ export default async function EditProjectPage({
   setRequestLocale(locale)
 
   const backHref =
-    typeof from === 'string' &&
-    (from === '/projects' || from === `/projects/${id}`)
+    typeof from === 'string' && (from === '/projects' || from === `/projects/${id}`)
       ? from
       : `/projects/${id}`
 

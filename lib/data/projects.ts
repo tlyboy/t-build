@@ -31,9 +31,7 @@ function parseOutputPaths(value: string | null) {
 
   try {
     const parsed = JSON.parse(value) as unknown
-    return Array.isArray(parsed)
-      ? parsed.filter(Boolean).map(String)
-      : undefined
+    return Array.isArray(parsed) ? parsed.filter(Boolean).map(String) : undefined
   } catch {
     return undefined
   }
@@ -64,9 +62,9 @@ export async function getAllProjects(): Promise<Project[]> {
 
 export async function getProjectById(id: string): Promise<Project | null> {
   const db = getBusinessDatabase()
-  const row = db
-    .prepare('select * from tbuild_project where id = ?')
-    .get(id) as ProjectRow | undefined
+  const row = db.prepare('select * from tbuild_project where id = ?').get(id) as
+    | ProjectRow
+    | undefined
   return row ? toProject(row) : null
 }
 

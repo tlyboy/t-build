@@ -46,9 +46,7 @@ export function BuildRow({
             <div className="mt-1 flex min-w-0 items-center gap-1.5 text-xs text-muted-foreground">
               <GitCommit className="h-3.5 w-3.5 shrink-0" />
               <code className="shrink-0">{commitHash.slice(0, 8)}</code>
-              {commitMessage && (
-                <span className="truncate">{commitMessage}</span>
-              )}
+              {commitMessage && <span className="truncate">{commitMessage}</span>}
             </div>
           )}
         </div>
@@ -56,10 +54,7 @@ export function BuildRow({
 
       <div className="flex shrink-0 items-center justify-between gap-4 sm:justify-end sm:pl-4">
         <div className="text-left sm:text-right">
-          <time
-            dateTime={dateTime}
-            className="block text-xs text-muted-foreground tabular-nums"
-          >
+          <time dateTime={dateTime} className="block text-xs text-muted-foreground tabular-nums">
             {timeLabel}
           </time>
           {durationLabel && (

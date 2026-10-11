@@ -25,16 +25,9 @@ export async function SettingsView({
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
-      <PageHeader
-        title={t('title')}
-        description={t('description')}
-        backHref={backHref}
-      />
+      <PageHeader title={t('title')} description={t('description')} backHref={backHref} />
 
-      <WebhookSettingsCard
-        initialProjects={initialProjects}
-        initialWebhooks={initialWebhooks}
-      />
+      <WebhookSettingsCard initialProjects={initialProjects} initialWebhooks={initialWebhooks} />
 
       <GitCredentialsSettingsCard initialCredentials={initialCredentials} />
     </div>

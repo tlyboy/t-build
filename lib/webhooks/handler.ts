@@ -20,17 +20,10 @@ function safeEqual(value: string, expected: string) {
   )
 }
 
-function verifyGithubSignature(
-  rawBody: Buffer,
-  secret: string,
-  signature: string | null,
-) {
+function verifyGithubSignature(rawBody: Buffer, secret: string, signature: string | null) {
   if (!signature?.startsWith('sha256=')) return false
 
-  const expected = `sha256=${crypto
-    .createHmac('sha256', secret)
-    .update(rawBody)
-    .digest('hex')}`
+  const expected = `sha256=${crypto.createHmac('sha256', secret).update(rawBody).digest('hex')}`
 
   return safeEqual(signature, expected)
 }
@@ -45,10 +38,7 @@ function branchFromRef(ref?: unknown) {
   return ref.replace(/^refs\/heads\//, '')
 }
 
-function parseGithubDelivery(
-  headers: Headers,
-  payload: Record<string, unknown>,
-): WebhookDelivery {
+function parseGithubDelivery(headers: Headers, payload: Record<string, unknown>): WebhookDelivery {
   const event = headers.get('x-github-event') ?? ''
 
   if (event === 'ping') {
@@ -59,10 +49,7 @@ function parseGithubDelivery(
     return { event, ignored: 'unsupported_event' }
   }
 
-  if (
-    payload.deleted === true ||
-    payload.after === '0000000000000000000000000000000000000000'
-  ) {
+  if (payload.deleted === true || payload.after === '0000000000000000000000000000000000000000') {
     return { event, ignored: 'deleted_ref' }
   }
 
@@ -72,10 +59,7 @@ function parseGithubDelivery(
   }
 }
 
-function parseCodeupDelivery(
-  headers: Headers,
-  payload: Record<string, unknown>,
-): WebhookDelivery {
+function parseCodeupDelivery(headers: Headers, payload: Record<string, unknown>): WebhookDelivery {
   const event =
     headers.get('codeup-event') ??
     headers.get('x-codeup-event') ??
@@ -95,11 +79,7 @@ function parseCodeupDelivery(
   }
 }
 
-function parseDelivery(
-  webhook: WebhookConfig,
-  headers: Headers,
-  payload: Record<string, unknown>,
-) {
+function parseDelivery(webhook: WebhookConfig, headers: Headers, payload: Record<string, unknown>) {
   if (webhook.provider === 'github') {
     return parseGithubDelivery(headers, payload)
   }
@@ -107,17 +87,9 @@ function parseDelivery(
   return parseCodeupDelivery(headers, payload)
 }
 
-export function verifyWebhookRequest(
-  webhook: WebhookConfig,
-  rawBody: Buffer,
-  headers: Headers,
-) {
+export function verifyWebhookRequest(webhook: WebhookConfig, rawBody: Buffer, headers: Headers) {
   if (webhook.provider === 'github') {
-    return verifyGithubSignature(
-      rawBody,
-      webhook.secret,
-      headers.get('x-hub-signature-256'),
-    )
+    return verifyGithubSignature(rawBody, webhook.secret, headers.get('x-hub-signature-256'))
   }
 
   return verifyCodeupToken(webhook.secret, headers.get('x-codeup-token'))
@@ -128,10 +100,7 @@ export async function handleWebhookDelivery(
   headers: Headers,
   rawBody: Buffer,
 ) {
-  const payload = JSON.parse(rawBody.toString('utf-8')) as Record<
-    string,
-    unknown
-  >
+  const payload = JSON.parse(rawBody.toString('utf-8')) as Record<string, unknown>
   const delivery = parseDelivery(webhook, headers, payload)
 
   if (delivery.ignored) {

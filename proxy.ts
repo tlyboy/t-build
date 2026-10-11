@@ -10,13 +10,11 @@ export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
   const sessionCookie = getSessionCookie(request)
   const isLoginPage =
-    pathname === '/login' ||
-    routing.locales.some((locale) => pathname === `/${locale}/login`)
+    pathname === '/login' || routing.locales.some((locale) => pathname === `/${locale}/login`)
   const defaultLocalePrefix = `/${routing.defaultLocale}`
   const isDefaultLocaleInternalRewrite =
     request.headers.get('x-next-intl-locale') === routing.defaultLocale &&
-    (pathname === defaultLocalePrefix ||
-      pathname.startsWith(`${defaultLocalePrefix}/`))
+    (pathname === defaultLocalePrefix || pathname.startsWith(`${defaultLocalePrefix}/`))
 
   if (isDefaultLocaleInternalRewrite) {
     if (!isLoginPage && !sessionCookie) {
@@ -32,8 +30,7 @@ export function proxy(request: NextRequest) {
   if (!isLoginPage && !sessionCookie) {
     const loginUrl = request.nextUrl.clone()
     const locale = routing.locales.find(
-      (locale) =>
-        pathname === `/${locale}` || pathname.startsWith(`/${locale}/`),
+      (locale) => pathname === `/${locale}` || pathname.startsWith(`/${locale}/`),
     )
 
     loginUrl.pathname = locale ? `/${locale}/login` : '/login'

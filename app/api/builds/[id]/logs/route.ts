@@ -8,10 +8,7 @@ function isTerminalBuildStatus(status: string) {
   return status === 'success' || status === 'failed' || status === 'skipped'
 }
 
-export async function GET(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> },
-) {
+export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const unauthorized = await requireApiSession()
   if (unauthorized) return unauthorized
 
@@ -31,15 +28,11 @@ export async function GET(
         const logs = await getBuildLogs(id)
         for (const log of logs) {
           controller.enqueue(
-            encoder.encode(
-              `data: ${JSON.stringify({ type: 'log', data: log })}\n\n`,
-            ),
+            encoder.encode(`data: ${JSON.stringify({ type: 'log', data: log })}\n\n`),
           )
         }
         controller.enqueue(
-          encoder.encode(
-            `data: ${JSON.stringify({ type: 'status', data: build.status })}\n\n`,
-          ),
+          encoder.encode(`data: ${JSON.stringify({ type: 'status', data: build.status })}\n\n`),
         )
         controller.enqueue(
           encoder.encode(
@@ -58,9 +51,7 @@ export async function GET(
       const onLog = (log: string) => {
         if (initialLogsSent) {
           controller.enqueue(
-            encoder.encode(
-              `data: ${JSON.stringify({ type: 'log', data: log })}\n\n`,
-            ),
+            encoder.encode(`data: ${JSON.stringify({ type: 'log', data: log })}\n\n`),
           )
         } else {
           // Buffer logs before sending the initial logs
@@ -70,20 +61,12 @@ export async function GET(
 
       const onStatus = (status: string) => {
         controller.enqueue(
-          encoder.encode(
-            `data: ${JSON.stringify({ type: 'status', data: status })}\n\n`,
-          ),
+          encoder.encode(`data: ${JSON.stringify({ type: 'status', data: status })}\n\n`),
         )
       }
 
-      const onDone = (data: {
-        status: string
-        exitCode?: number
-        error?: string
-      }) => {
-        controller.enqueue(
-          encoder.encode(`data: ${JSON.stringify({ type: 'done', data })}\n\n`),
-        )
+      const onDone = (data: { status: string; exitCode?: number; error?: string }) => {
+        controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'done', data })}\n\n`))
         cleanup()
         controller.close()
       }
@@ -104,13 +87,10 @@ export async function GET(
       const latestBuild = await getBuildById(id)
       if (latestBuild) {
         const memoryLogs = getBuildMemoryLogs(id)
-        const latestLogs =
-          memoryLogs.length > 0 ? memoryLogs : await getBuildLogs(id)
+        const latestLogs = memoryLogs.length > 0 ? memoryLogs : await getBuildLogs(id)
         for (const log of latestLogs) {
           controller.enqueue(
-            encoder.encode(
-              `data: ${JSON.stringify({ type: 'log', data: log })}\n\n`,
-            ),
+            encoder.encode(`data: ${JSON.stringify({ type: 'log', data: log })}\n\n`),
           )
         }
         controller.enqueue(
@@ -135,9 +115,7 @@ export async function GET(
       // Send the buffered logs
       for (const log of bufferedLogs) {
         controller.enqueue(
-          encoder.encode(
-            `data: ${JSON.stringify({ type: 'log', data: log })}\n\n`,
-          ),
+          encoder.encode(`data: ${JSON.stringify({ type: 'log', data: log })}\n\n`),
         )
       }
       initialLogsSent = true

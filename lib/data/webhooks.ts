@@ -131,19 +131,15 @@ export async function getSafeWebhooks(): Promise<SafeWebhookConfig[]> {
   return rows.map((row) => toSafeWebhook(toWebhook(row)))
 }
 
-export async function getWebhookById(
-  id: string,
-): Promise<WebhookConfig | null> {
+export async function getWebhookById(id: string): Promise<WebhookConfig | null> {
   const db = getBusinessDatabase()
-  const row = db
-    .prepare('select * from tbuild_webhook where id = ?')
-    .get(id) as WebhookRow | undefined
+  const row = db.prepare('select * from tbuild_webhook where id = ?').get(id) as
+    | WebhookRow
+    | undefined
   return row ? decryptWebhook(toWebhook(row)) : null
 }
 
-export async function createWebhook(
-  input: CreateWebhookInput,
-): Promise<SafeWebhookConfig> {
+export async function createWebhook(input: CreateWebhookInput): Promise<SafeWebhookConfig> {
   if (!input.name.trim()) throw new Error('Webhook name is required.')
   if (!input.projectId) throw new Error('Project is required.')
   if (!input.secret.trim()) throw new Error('Webhook secret is required.')
@@ -252,10 +248,7 @@ export async function deleteWebhook(id: string): Promise<boolean> {
   return result.changes > 0
 }
 
-export async function recordWebhookTrigger(
-  id: string,
-  buildId: string,
-): Promise<void> {
+export async function recordWebhookTrigger(id: string, buildId: string): Promise<void> {
   const db = getBusinessDatabase()
   db.prepare(
     `update tbuild_webhook

@@ -147,9 +147,7 @@ export function LoginView({ initialNeedsSetup }: LoginViewProps) {
                   type="password"
                   value={password}
                   onChange={(event) => setPassword(event.target.value)}
-                  autoComplete={
-                    needsSetup ? 'new-password' : 'current-password'
-                  }
+                  autoComplete={needsSetup ? 'new-password' : 'current-password'}
                   className="pl-8"
                   disabled={loading}
                 />
@@ -162,12 +160,7 @@ export function LoginView({ initialNeedsSetup }: LoginViewProps) {
               </p>
             )}
 
-            <Button
-              type="submit"
-              size="lg"
-              className="w-full"
-              disabled={!canSubmit || loading}
-            >
+            <Button type="submit" size="lg" className="w-full" disabled={!canSubmit || loading}>
               {loading && <Loader2 className="mr-1 h-4 w-4 animate-spin" />}
               {needsSetup ? t('setupSubmit') : t('loginSubmit')}
             </Button>

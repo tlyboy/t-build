@@ -2,10 +2,7 @@ import { NextResponse } from 'next/server'
 import { getBuildById, getBuildLogs, deleteBuild } from '@/lib/data/builds'
 import { requireApiSession } from '@/lib/auth/api'
 
-export async function GET(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> },
-) {
+export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const unauthorized = await requireApiSession()
   if (unauthorized) return unauthorized
 
@@ -20,10 +17,7 @@ export async function GET(
   return NextResponse.json({ ...build, logs })
 }
 
-export async function DELETE(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> },
-) {
+export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const unauthorized = await requireApiSession()
   if (unauthorized) return unauthorized
 

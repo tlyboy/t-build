@@ -48,17 +48,13 @@ export async function POST() {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const currentOrganizationId =
-    session.session.activeOrganizationId ?? undefined
+  const currentOrganizationId = session.session.activeOrganizationId ?? undefined
   const organization =
     findUserOrganization(session.user.id, currentOrganizationId) ??
     findUserOrganization(session.user.id)
 
   if (!organization) {
-    return NextResponse.json(
-      { error: 'No organization available for this user.' },
-      { status: 404 },
-    )
+    return NextResponse.json({ error: 'No organization available for this user.' }, { status: 404 })
   }
 
   if (currentOrganizationId !== organization.id) {

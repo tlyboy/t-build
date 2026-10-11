@@ -48,10 +48,7 @@ export async function GET(request: Request) {
 
     const stat = await fs.stat(resolvedTarget)
     if (!stat.isDirectory()) {
-      return NextResponse.json(
-        { error: 'Path is not a directory' },
-        { status: 400 },
-      )
+      return NextResponse.json({ error: 'Path is not a directory' }, { status: 400 })
     }
 
     const entries = await fs.readdir(resolvedTarget, { withFileTypes: true })
@@ -83,9 +80,6 @@ export async function GET(request: Request) {
       entries: files,
     })
   } catch {
-    return NextResponse.json(
-      { error: 'Cannot access directory' },
-      { status: 400 },
-    )
+    return NextResponse.json({ error: 'Cannot access directory' }, { status: 400 })
   }
 }

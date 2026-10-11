@@ -1,24 +1,10 @@
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { BuildRow } from '@/components/build-row'
 import { PageHeader } from '@/components/page-header'
 import { Link } from '@/i18n/navigation'
 import { getTranslations, setRequestLocale } from 'next-intl/server'
-import {
-  FolderGit2,
-  Plus,
-  CheckCircle2,
-  Clock,
-  Layers,
-  TrendingUp,
-  ArrowRight,
-} from 'lucide-react'
+import { FolderGit2, Plus, CheckCircle2, Clock, Layers, TrendingUp, ArrowRight } from 'lucide-react'
 import { getAllProjects } from '@/lib/data/projects'
 import { getAllBuilds } from '@/lib/data/builds'
 import { getCurrentSession } from '@/lib/auth/server'
@@ -63,11 +49,7 @@ function formatRelativeTime(
   return date.toLocaleDateString(locale)
 }
 
-export default async function Home({
-  params,
-}: {
-  params: Promise<{ locale: string }>
-}) {
+export default async function Home({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params
   setRequestLocale(locale)
 
@@ -79,10 +61,7 @@ export default async function Home({
   const t = await getTranslations('dashboard')
   const tProjects = await getTranslations('projects')
 
-  const [projects, builds] = await Promise.all([
-    getAllProjects(),
-    getAllBuilds(),
-  ])
+  const [projects, builds] = await Promise.all([getAllProjects(), getAllBuilds()])
 
   // Count build results in a single pass to avoid repeated filter calls.
   let successBuilds = 0
@@ -94,8 +73,7 @@ export default async function Home({
 
   const totalBuilds = builds.length
   const executedBuilds = successBuilds + failedBuilds
-  const successRate =
-    executedBuilds > 0 ? Math.round((successBuilds / executedBuilds) * 100) : 0
+  const successRate = executedBuilds > 0 ? Math.round((successBuilds / executedBuilds) * 100) : 0
 
   // The data layer already returns results in descending start-time order, so display the 5 most recent build records directly.
   const recentBuilds = builds.slice(0, 5)
@@ -115,9 +93,7 @@ export default async function Home({
       <div className="mx-auto max-w-6xl space-y-6 sm:space-y-8">
         <PageHeader title={t('title')} description={t('description')} />
         <div className="py-12 text-center sm:py-20">
-          <p className="mb-4 text-sm text-muted-foreground">
-            {tProjects('noProjectsDesc')}
-          </p>
+          <p className="mb-4 text-sm text-muted-foreground">{tProjects('noProjectsDesc')}</p>
           <Button asChild>
             <Link href="/projects/new">
               <Plus className="mr-2 h-4 w-4" />
@@ -147,9 +123,7 @@ export default async function Home({
               <FolderGit2 className="h-3.5 w-3.5" />
               {t('statProjects')}
             </CardDescription>
-            <CardTitle className="text-2xl tabular-nums sm:text-4xl">
-              {projects.length}
-            </CardTitle>
+            <CardTitle className="text-2xl tabular-nums sm:text-4xl">{projects.length}</CardTitle>
           </CardHeader>
           <CardContent className="pt-0">
             <Link
@@ -168,14 +142,10 @@ export default async function Home({
               <Layers className="h-3.5 w-3.5" />
               {t('statBuilds')}
             </CardDescription>
-            <CardTitle className="text-2xl tabular-nums sm:text-4xl">
-              {totalBuilds}
-            </CardTitle>
+            <CardTitle className="text-2xl tabular-nums sm:text-4xl">{totalBuilds}</CardTitle>
           </CardHeader>
           <CardContent className="pt-0">
-            <span className="text-xs text-muted-foreground">
-              {t('allBuilds')}
-            </span>
+            <span className="text-xs text-muted-foreground">{t('allBuilds')}</span>
           </CardContent>
         </Card>
 
@@ -190,9 +160,7 @@ export default async function Home({
             </CardTitle>
           </CardHeader>
           <CardContent className="pt-0">
-            <span className="text-xs text-muted-foreground">
-              {t('buildSuccess')}
-            </span>
+            <span className="text-xs text-muted-foreground">{t('buildSuccess')}</span>
           </CardContent>
         </Card>
 
@@ -202,9 +170,7 @@ export default async function Home({
               <TrendingUp className="h-3.5 w-3.5" />
               {t('statSuccessRate')}
             </CardDescription>
-            <CardTitle className="text-2xl tabular-nums sm:text-4xl">
-              {successRate}%
-            </CardTitle>
+            <CardTitle className="text-2xl tabular-nums sm:text-4xl">{successRate}%</CardTitle>
           </CardHeader>
           <CardContent className="pt-0">
             <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
@@ -236,9 +202,7 @@ export default async function Home({
         </CardHeader>
         <CardContent>
           {recentBuilds.length === 0 ? (
-            <p className="py-6 text-center text-sm text-muted-foreground">
-              {t('noBuilds')}
-            </p>
+            <p className="py-6 text-center text-sm text-muted-foreground">{t('noBuilds')}</p>
           ) : (
             <div className="space-y-1">
               {recentBuilds.map((build) => (
@@ -246,14 +210,8 @@ export default async function Home({
                   key={build.id}
                   status={build.status}
                   href={`/builds/${build.id}`}
-                  projectName={
-                    projectNameById.get(build.projectId) || t('unknownProject')
-                  }
-                  timeLabel={formatRelativeTime(
-                    build.startedAt,
-                    locale,
-                    relativeTimeTranslations,
-                  )}
+                  projectName={projectNameById.get(build.projectId) || t('unknownProject')}
+                  timeLabel={formatRelativeTime(build.startedAt, locale, relativeTimeTranslations)}
                   dateTime={build.startedAt}
                   commitHash={build.gitCommitHash}
                   commitMessage={build.gitCommitMessage}

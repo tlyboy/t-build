@@ -9,11 +9,7 @@ import { getAllProjects } from '@/lib/data/projects'
 // The project list changes based on user actions, so it needs to be dynamically rendered on every request.
 export const dynamic = 'force-dynamic'
 
-export default async function ProjectsPage({
-  params,
-}: {
-  params: Promise<{ locale: string }>
-}) {
+export default async function ProjectsPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params
   setRequestLocale(locale)
 
@@ -25,9 +21,7 @@ export default async function ProjectsPage({
       <PageHeader
         title={t('title')}
         description={
-          projects.length > 0
-            ? t('count', { count: projects.length })
-            : t('description')
+          projects.length > 0 ? t('count', { count: projects.length }) : t('description')
         }
       >
         {projects.length > 0 && (
@@ -42,9 +36,7 @@ export default async function ProjectsPage({
 
       {projects.length === 0 ? (
         <div className="py-12 text-center sm:py-20">
-          <p className="mb-4 text-sm text-muted-foreground">
-            {t('noProjectsDesc')}
-          </p>
+          <p className="mb-4 text-sm text-muted-foreground">{t('noProjectsDesc')}</p>
           <Button asChild>
             <Link href="/projects/new">
               <Plus className="mr-2 h-4 w-4" />

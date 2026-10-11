@@ -1,9 +1,4 @@
-import {
-  Card,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
+import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Link } from '@/i18n/navigation'
 
 interface Project {
@@ -31,9 +26,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
       </Link>
 
       <CardHeader className="pointer-events-none relative z-10">
-        <CardTitle className="truncate text-base sm:text-lg">
-          {project.name}
-        </CardTitle>
+        <CardTitle className="truncate text-base sm:text-lg">{project.name}</CardTitle>
         <CardDescription className="truncate">{project.path}</CardDescription>
       </CardHeader>
     </Card>

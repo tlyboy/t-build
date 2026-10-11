@@ -38,11 +38,7 @@ function readJsonFile<T extends JsonValue>(fileName: MigrationFile): T | null {
 }
 
 function readBuildLogFile(buildId: string): string[] {
-  const filePath = path.join(
-    /* turbopackIgnore: true */ getDataDir(),
-    'logs',
-    `${buildId}.jsonl`,
-  )
+  const filePath = path.join(/* turbopackIgnore: true */ getDataDir(), 'logs', `${buildId}.jsonl`)
 
   try {
     return fs
@@ -154,7 +150,8 @@ function createBusinessTables(db: Database.Database) {
 function metaValue(db: Database.Database, key: string) {
   return (
     db.prepare('select value from tbuild_meta where key = ?').get(key) as
-      { value: string } | undefined
+      | { value: string }
+      | undefined
   )?.value
 }
 
@@ -166,11 +163,7 @@ function setMeta(db: Database.Database, key: string, value: string) {
   ).run(key, value, new Date().toISOString())
 }
 
-function hasColumn(
-  db: Database.Database,
-  tableName: string,
-  columnName: string,
-) {
+function hasColumn(db: Database.Database, tableName: string, columnName: string) {
   const rows = db.prepare(`pragma table_info(${tableName})`).all() as Array<{
     name: string
   }>
@@ -184,10 +177,7 @@ function migrateBusinessSchema(db: Database.Database) {
 }
 
 function archiveLegacyJsonData(db: Database.Database) {
-  if (
-    !metaValue(db, 'jsonMigratedAt') ||
-    metaValue(db, 'legacyJsonArchivedAt')
-  ) {
+  if (!metaValue(db, 'jsonMigratedAt') || metaValue(db, 'legacyJsonArchivedAt')) {
     return
   }
 
@@ -198,9 +188,7 @@ function archiveLegacyJsonData(db: Database.Database) {
     `legacy-json-backup-${timestamp}`,
   )
   const candidates = [
-    ...legacyJsonFiles.map((fileName) =>
-      path.join(/* turbopackIgnore: true */ dataDir, fileName),
-    ),
+    ...legacyJsonFiles.map((fileName) => path.join(/* turbopackIgnore: true */ dataDir, fileName)),
     path.join(/* turbopackIgnore: true */ dataDir, 'logs'),
   ]
   const existing = candidates.filter((candidate) => fs.existsSync(candidate))
@@ -413,9 +401,7 @@ function migrateJsonData(db: Database.Database) {
         if (!projectExists) continue
 
         const lastBuildExists = webhook.lastBuildId
-          ? db
-              .prepare('select id from tbuild_build where id = ?')
-              .get(webhook.lastBuildId)
+          ? db.prepare('select id from tbuild_build where id = ?').get(webhook.lastBuildId)
           : null
 
         insertWebhook.run(

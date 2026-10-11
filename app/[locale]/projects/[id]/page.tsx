@@ -1,10 +1,4 @@
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { BuildRow } from '@/components/build-row'
 import { EnvEditor } from '@/components/env-editor'
@@ -27,10 +21,7 @@ export default async function ProjectDetailPage({
   const t = await getTranslations('projectDetail')
   const currentLocale = await getLocale()
 
-  const [project, builds] = await Promise.all([
-    getProjectById(id),
-    getBuildsByProjectId(id),
-  ])
+  const [project, builds] = await Promise.all([getProjectById(id), getBuildsByProjectId(id)])
 
   if (!project) {
     return (
@@ -58,8 +49,7 @@ export default async function ProjectDetailPage({
             {sortedBuilds.map((build) => {
               const duration = build.finishedAt
                 ? Math.round(
-                    (new Date(build.finishedAt).getTime() -
-                      new Date(build.startedAt).getTime()) /
+                    (new Date(build.finishedAt).getTime() - new Date(build.startedAt).getTime()) /
                       1000,
                   )
                 : null
@@ -70,14 +60,10 @@ export default async function ProjectDetailPage({
                   href={`/builds/${build.id}`}
                   status={build.status}
                   projectName={project.name}
-                  timeLabel={new Date(build.startedAt).toLocaleString(
-                    currentLocale,
-                  )}
+                  timeLabel={new Date(build.startedAt).toLocaleString(currentLocale)}
                   dateTime={build.startedAt}
                   durationLabel={
-                    duration !== null
-                      ? t('duration', { seconds: duration })
-                      : undefined
+                    duration !== null ? t('duration', { seconds: duration }) : undefined
                   }
                   commitHash={build.gitCommitHash}
                   commitMessage={build.gitCommitMessage}
@@ -93,11 +79,7 @@ export default async function ProjectDetailPage({
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
-      <PageHeader
-        title={project.name}
-        description={project.path}
-        backHref="/projects"
-      >
+      <PageHeader title={project.name} description={project.path} backHref="/projects">
         {project.outputPaths && project.outputPaths.length > 0 && (
           <Button variant="outline" asChild>
             <a href={`/api/projects/${id}/artifact`} download>
@@ -107,9 +89,7 @@ export default async function ProjectDetailPage({
           </Button>
         )}
         <Button variant="outline" asChild>
-          <Link
-            href={`/projects/${id}/edit?from=${encodeURIComponent(`/projects/${id}`)}`}
-          >
+          <Link href={`/projects/${id}/edit?from=${encodeURIComponent(`/projects/${id}`)}`}>
             <Settings className="mr-2 h-4 w-4" />
             {t('edit')}
           </Link>
@@ -123,18 +103,14 @@ export default async function ProjectDetailPage({
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <div className="mb-1.5 text-sm text-muted-foreground">
-              {t('buildCommand')}
-            </div>
+            <div className="mb-1.5 text-sm text-muted-foreground">{t('buildCommand')}</div>
             <pre className="overflow-x-auto rounded-md bg-muted/50 p-3 font-mono text-sm break-all whitespace-pre-wrap">
               {project.buildCommand}
             </pre>
           </div>
           {project.deployCommand && (
             <div>
-              <div className="mb-1.5 text-sm text-muted-foreground">
-                {t('deployCommand')}
-              </div>
+              <div className="mb-1.5 text-sm text-muted-foreground">{t('deployCommand')}</div>
               <pre className="overflow-x-auto rounded-md bg-muted/50 p-3 font-mono text-sm break-all whitespace-pre-wrap">
                 {project.deployCommand}
               </pre>
@@ -142,17 +118,13 @@ export default async function ProjectDetailPage({
           )}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <div className="text-sm text-muted-foreground">
-                {t('createdAt')}
-              </div>
+              <div className="text-sm text-muted-foreground">{t('createdAt')}</div>
               <div className="text-sm">
                 {new Date(project.createdAt).toLocaleString(currentLocale)}
               </div>
             </div>
             <div>
-              <div className="text-sm text-muted-foreground">
-                {t('updatedAt')}
-              </div>
+              <div className="text-sm text-muted-foreground">{t('updatedAt')}</div>
               <div className="text-sm">
                 {new Date(project.updatedAt).toLocaleString(currentLocale)}
               </div>

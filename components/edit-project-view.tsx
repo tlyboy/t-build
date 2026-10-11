@@ -77,9 +77,7 @@ export function EditProjectView({
           <AlertDialogContent>
             <AlertDialogHeader>
               <AlertDialogTitle>{tDelete('title')}</AlertDialogTitle>
-              <AlertDialogDescription>
-                {tDelete('description')}
-              </AlertDialogDescription>
+              <AlertDialogDescription>{tDelete('description')}</AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>{tCommon('cancel')}</AlertDialogCancel>

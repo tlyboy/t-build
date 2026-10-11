@@ -2,26 +2,11 @@
 
 import { useMemo, useState } from 'react'
 import { toast } from 'sonner'
-import {
-  Copy,
-  GitBranch,
-  GitFork,
-  Loader2,
-  Plus,
-  RotateCcw,
-  Trash2,
-  Webhook,
-} from 'lucide-react'
+import { Copy, GitBranch, GitFork, Loader2, Plus, RotateCcw, Trash2, Webhook } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   Dialog,
   DialogContent,
@@ -55,9 +40,7 @@ interface WebhookSettingsCardProps {
 function generateSecret() {
   const bytes = new Uint8Array(32)
   crypto.getRandomValues(bytes)
-  return Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join(
-    '',
-  )
+  return Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('')
 }
 
 function providerLabel(provider: WebhookProvider) {
@@ -215,9 +198,7 @@ export function WebhookSettingsCard({
                     <Label>{t('webhookProvider')}</Label>
                     <Select
                       value={provider}
-                      onValueChange={(value) =>
-                        setProvider(value as WebhookProvider)
-                      }
+                      onValueChange={(value) => setProvider(value as WebhookProvider)}
                     >
                       <SelectTrigger className="w-full">
                         <SelectValue />
@@ -289,28 +270,19 @@ export function WebhookSettingsCard({
                     </Button>
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    {provider === 'github'
-                      ? t('githubSecretHint')
-                      : t('codeupSecretHint')}
+                    {provider === 'github' ? t('githubSecretHint') : t('codeupSecretHint')}
                   </p>
                 </div>
 
                 <div className="flex justify-end gap-2 pt-4">
-                  <Button
-                    variant="outline"
-                    onClick={() => setDialogOpen(false)}
-                  >
+                  <Button variant="outline" onClick={() => setDialogOpen(false)}>
                     {tCommon('cancel')}
                   </Button>
                   <Button
                     onClick={handleCreate}
                     disabled={saving || !projectId || !name.trim() || !secret}
                   >
-                    {saving ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      tCommon('save')
-                    )}
+                    {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : tCommon('save')}
                   </Button>
                 </div>
               </div>
@@ -324,9 +296,7 @@ export function WebhookSettingsCard({
             {t('webhookNoProjects')}
           </div>
         ) : webhooks.length === 0 ? (
-          <div className="py-8 text-center text-sm text-muted-foreground">
-            {t('noWebhooks')}
-          </div>
+          <div className="py-8 text-center text-sm text-muted-foreground">{t('noWebhooks')}</div>
         ) : (
           <div className="space-y-3">
             {webhooks.map((webhook) => (
@@ -343,13 +313,10 @@ export function WebhookSettingsCard({
                       <Badge variant={webhook.enabled ? 'default' : 'outline'}>
                         {webhook.enabled ? t('enabled') : t('disabled')}
                       </Badge>
-                      <Badge variant="secondary">
-                        {providerLabel(webhook.provider)}
-                      </Badge>
+                      <Badge variant="secondary">{providerLabel(webhook.provider)}</Badge>
                     </div>
                     <div className="text-xs text-muted-foreground">
-                      {projectNameById.get(webhook.projectId) ??
-                        t('unknownProject')}
+                      {projectNameById.get(webhook.projectId) ?? t('unknownProject')}
                       {webhook.branch ? ` · ${webhook.branch}` : ''}
                     </div>
                     <div className="flex min-w-0 items-center gap-2 rounded-md bg-muted px-2 py-1">
@@ -369,9 +336,7 @@ export function WebhookSettingsCard({
                     {webhook.lastTriggeredAt && (
                       <div className="text-xs text-muted-foreground">
                         {t('lastTriggeredAt', {
-                          time: new Date(
-                            webhook.lastTriggeredAt,
-                          ).toLocaleString(),
+                          time: new Date(webhook.lastTriggeredAt).toLocaleString(),
                         })}
                       </div>
                     )}
@@ -379,9 +344,7 @@ export function WebhookSettingsCard({
                   <div className="flex items-center gap-2 self-end lg:self-auto">
                     <Switch
                       checked={webhook.enabled}
-                      onCheckedChange={(checked) =>
-                        handleToggle(webhook, checked)
-                      }
+                      onCheckedChange={(checked) => handleToggle(webhook, checked)}
                     />
                     <Button
                       variant="ghost"

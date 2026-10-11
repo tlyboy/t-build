@@ -10,14 +10,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Link, usePathname } from '@/i18n/navigation'
 import { cn } from '@/lib/utils'
-import {
-  ExternalLink,
-  FolderGit2,
-  History,
-  Home,
-  Menu,
-  Settings,
-} from 'lucide-react'
+import { ExternalLink, FolderGit2, History, Home, Menu, Settings } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
 const navigationItems = [
@@ -36,20 +29,12 @@ export function DesktopNavigation() {
   const t = useTranslations('nav')
 
   return (
-    <nav
-      aria-label={t('primaryNavigation')}
-      className="hidden items-center gap-1 md:flex"
-    >
+    <nav aria-label={t('primaryNavigation')} className="hidden items-center gap-1 md:flex">
       {navigationItems.map(({ href, key, icon: Icon }) => {
         const active = isItemActive(pathname, href)
 
         return (
-          <Button
-            key={href}
-            variant={active ? 'secondary' : 'ghost'}
-            size="sm"
-            asChild
-          >
+          <Button key={href} variant={active ? 'secondary' : 'ghost'} size="sm" asChild>
             <Link href={href} aria-current={active ? 'page' : undefined}>
               <Icon className="h-4 w-4" />
               {t(key)}
@@ -68,12 +53,7 @@ export function MobileNavigation() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="size-10 md:hidden"
-          aria-label={t('menu')}
-        >
+        <Button variant="ghost" size="icon" className="size-10 md:hidden" aria-label={t('menu')}>
           <Menu className="size-5" />
         </Button>
       </DropdownMenuTrigger>

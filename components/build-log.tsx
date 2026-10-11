@@ -19,11 +19,7 @@ function stripAnsi(str: string): string {
   return str.replace(/\x1B\[[0-9;]*[A-Za-z]/g, '')
 }
 
-export function BuildLog({
-  buildId,
-  initialStatus = 'pending',
-  onStatusChange,
-}: BuildLogProps) {
+export function BuildLog({ buildId, initialStatus = 'pending', onStatusChange }: BuildLogProps) {
   const t = useTranslations('buildLog')
   const [logs, setLogs] = useState<string[]>([])
   const [status, setStatus] = useState<BuildStatus>(initialStatus)
@@ -105,10 +101,7 @@ export function BuildLog({
           case 'log':
             logCount++
             // On reconnect, server resends all stored logs; skip duplicates.
-            if (
-              logCount >
-              logsRef.current.length + pendingLogsRef.current.length
-            ) {
+            if (logCount > logsRef.current.length + pendingLogsRef.current.length) {
               pendingLogsRef.current.push(stripAnsi(msg.data))
               scheduleLogFlush()
             }
@@ -190,9 +183,7 @@ export function BuildLog({
               <div
                 key={index}
                 className={`whitespace-pre-wrap [contain-intrinsic-size:0_20px] [content-visibility:auto] ${
-                  log.startsWith('[T-Build]') || log.startsWith('[git]')
-                    ? 'text-blue-500'
-                    : ''
+                  log.startsWith('[T-Build]') || log.startsWith('[git]') ? 'text-blue-500' : ''
                 }`}
               >
                 {log}

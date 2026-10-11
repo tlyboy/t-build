@@ -52,9 +52,7 @@ export function BuildStatusBadge({ status }: BuildStatusBadgeProps) {
 
   return (
     <Badge variant={config.variant} className="gap-1">
-      <Icon
-        className={`h-3 w-3 ${status === 'running' ? 'animate-spin' : ''}`}
-      />
+      <Icon className={`h-3 w-3 ${status === 'running' ? 'animate-spin' : ''}`} />
       {t(config.key)}
     </Badge>
   )

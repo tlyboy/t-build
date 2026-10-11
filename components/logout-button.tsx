@@ -28,11 +28,7 @@ export function LogoutButton() {
       disabled={loading}
       onClick={handleSignOut}
     >
-      {loading ? (
-        <Loader2 className="size-4.5 animate-spin" />
-      ) : (
-        <LogOut className="size-4.5" />
-      )}
+      {loading ? <Loader2 className="size-4.5 animate-spin" /> : <LogOut className="size-4.5" />}
     </Button>
   )
 }

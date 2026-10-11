@@ -1,9 +1,5 @@
 import { NextResponse } from 'next/server'
-import {
-  BootstrapError,
-  bootstrapAdministrator,
-  getBootstrapStatus,
-} from '@/lib/auth/bootstrap'
+import { BootstrapError, bootstrapAdministrator, getBootstrapStatus } from '@/lib/auth/bootstrap'
 
 export const runtime = 'nodejs'
 
@@ -27,15 +23,9 @@ export async function POST(request: Request) {
     })
   } catch (error) {
     if (error instanceof BootstrapError) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: error.status },
-      )
+      return NextResponse.json({ error: error.message }, { status: error.status })
     }
 
-    return NextResponse.json(
-      { error: 'Failed to bootstrap administrator.' },
-      { status: 500 },
-    )
+    return NextResponse.json({ error: 'Failed to bootstrap administrator.' }, { status: 500 })
   }
 }

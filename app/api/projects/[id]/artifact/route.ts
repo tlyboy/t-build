@@ -7,10 +7,7 @@ import path from 'path'
 import fg from 'fast-glob'
 import { requireApiSession } from '@/lib/auth/api'
 
-export async function GET(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> },
-) {
+export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const unauthorized = await requireApiSession()
   if (unauthorized) return unauthorized
 
@@ -22,10 +19,7 @@ export async function GET(
   }
 
   if (!project.outputPaths || project.outputPaths.length === 0) {
-    return NextResponse.json(
-      { error: 'Project has no output paths configured' },
-      { status: 400 },
-    )
+    return NextResponse.json({ error: 'Project has no output paths configured' }, { status: 400 })
   }
 
   const settings = await getSettings()
@@ -108,10 +102,7 @@ export async function GET(
   }
 
   if (validPaths.length === 0) {
-    return NextResponse.json(
-      { error: 'No valid output paths found' },
-      { status: 404 },
-    )
+    return NextResponse.json({ error: 'No valid output paths found' }, { status: 404 })
   }
 
   // If there is only one file (not a directory), stream it directly

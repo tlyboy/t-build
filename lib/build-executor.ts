@@ -37,17 +37,11 @@ const queuedProjects = (state.queuedProjects ??= new Map<string, string>())
 
 const MAX_QUEUE_LENGTH = 50
 
-async function skipSupersededBuild(
-  skippedBuildId: string,
-  newerBuildId: string,
-): Promise<void> {
+async function skipSupersededBuild(skippedBuildId: string, newerBuildId: string): Promise<void> {
   const shortNewerBuildId = newerBuildId.slice(0, 8)
   const logLine = `[T-Build] Skipped: a newer build (${shortNewerBuildId}) was queued for this project.`
 
-  state.buildLogs.set(skippedBuildId, [
-    ...(state.buildLogs.get(skippedBuildId) ?? []),
-    logLine,
-  ])
+  state.buildLogs.set(skippedBuildId, [...(state.buildLogs.get(skippedBuildId) ?? []), logLine])
   await appendBuildLogs(skippedBuildId, [logLine])
   await updateBuild(skippedBuildId, {
     status: 'skipped',
@@ -65,9 +59,7 @@ async function skipSupersededBuild(
   setTimeout(() => cleanupBuildEmitter(skippedBuildId), 60000)
 }
 
-export async function enqueueBuild(
-  buildId: string,
-): Promise<EnqueueBuildResult> {
+export async function enqueueBuild(buildId: string): Promise<EnqueueBuildResult> {
   const build = await getBuildById(buildId)
   if (!build) {
     throw new Error(`Build ${buildId} not found`)
@@ -239,8 +231,7 @@ async function executeGitPull(
       const fs = await import('fs/promises')
       tempKeyPath = path.join(os.tmpdir(), `t-build-ssh-${buildId}`)
       const normalizedKey =
-        credential.sshKey.replace(/\r\n/g, '\n').replace(/\r/g, '\n').trim() +
-        '\n'
+        credential.sshKey.replace(/\r\n/g, '\n').replace(/\r/g, '\n').trim() + '\n'
       await fs.writeFile(tempKeyPath, normalizedKey, { mode: 0o600 })
       env.GIT_SSH_COMMAND = `ssh -i "${tempKeyPath}" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null`
       logLine('[T-Build] Using SSH credential')
@@ -280,45 +271,27 @@ async function executeGitPull(
       logLine,
     )
     if (!resetResult.success) {
-      logLine(
-        `[T-Build] Git reset failed with exit code: ${resetResult.exitCode}`,
-      )
+      logLine(`[T-Build] Git reset failed with exit code: ${resetResult.exitCode}`)
       return { success: false }
     }
 
-    const cleanResult = await executeGitCommand(
-      ['clean', '-fd'],
-      projectDir,
-      gitEnv,
-      logLine,
-    )
+    const cleanResult = await executeGitCommand(['clean', '-fd'], projectDir, gitEnv, logLine)
     if (!cleanResult.success) {
-      logLine(
-        `[T-Build] Git clean failed with exit code: ${cleanResult.exitCode}`,
-      )
+      logLine(`[T-Build] Git clean failed with exit code: ${cleanResult.exitCode}`)
       return { success: false }
     }
 
     logLine('[T-Build] Git working tree restored')
 
-    const pullResult = await executeGitCommand(
-      ['pull', '--ff-only'],
-      projectDir,
-      gitEnv,
-      logLine,
-    )
+    const pullResult = await executeGitCommand(['pull', '--ff-only'], projectDir, gitEnv, logLine)
     if (!pullResult.success) {
-      logLine(
-        `[T-Build] Git pull failed with exit code: ${pullResult.exitCode}`,
-      )
+      logLine(`[T-Build] Git pull failed with exit code: ${pullResult.exitCode}`)
       return { success: false }
     }
 
     const gitInfo = getGitInfo(projectDir)
     if (gitInfo.hash) {
-      logLine(
-        `[T-Build] Git pull successful, commit: ${gitInfo.hash.substring(0, 8)}`,
-      )
+      logLine(`[T-Build] Git pull successful, commit: ${gitInfo.hash.substring(0, 8)}`)
       if (gitInfo.message) {
         logLine(`[T-Build] Commit message: ${gitInfo.message}`)
       }
@@ -443,8 +416,7 @@ export async function executeBuild(buildId: string): Promise<void> {
   // Path variants for different tool output formats on Windows
   const workDirFwd = workDir.replaceAll('\\', '/') // Vite/Rollup: C:/Users/...
   const workDirEsc = workDir.replaceAll('\\', '\\\\') // Rust Debug: C:\\Users\\...
-  const shortPath = (p: string) =>
-    p.startsWith(workDir) ? p.slice(workDir.length + 1) || '/' : p
+  const shortPath = (p: string) => (p.startsWith(workDir) ? p.slice(workDir.length + 1) || '/' : p)
 
   const logLine = (line: string) => {
     // Strip workspace absolute path from all output
@@ -453,14 +425,10 @@ export async function executeBuild(buildId: string): Promise<void> {
       .replaceAll(workDir + '\\', '')
       .replaceAll(workDir, '.')
     if (workDirFwd !== workDir) {
-      sanitized = sanitized
-        .replaceAll(workDirFwd + '/', '')
-        .replaceAll(workDirFwd, '.')
+      sanitized = sanitized.replaceAll(workDirFwd + '/', '').replaceAll(workDirFwd, '.')
     }
     if (workDirEsc !== workDir) {
-      sanitized = sanitized
-        .replaceAll(workDirEsc + '\\\\', '')
-        .replaceAll(workDirEsc, '.')
+      sanitized = sanitized.replaceAll(workDirEsc + '\\\\', '').replaceAll(workDirEsc, '.')
     }
     for (const secret of secretValues) {
       sanitized = sanitized.replaceAll(secret, '***')
@@ -486,12 +454,7 @@ export async function executeBuild(buildId: string): Promise<void> {
   // Run git pull before the build if configured
   if (project.gitPullBeforeBuild) {
     logLine('')
-    const gitResult = await executeGitPull(
-      project,
-      projectDir,
-      buildId,
-      logLine,
-    )
+    const gitResult = await executeGitPull(project, projectDir, buildId, logLine)
     if (!gitResult.success) {
       logLine('')
       logLine('[T-Build] Build aborted due to git pull failure')
@@ -542,9 +505,7 @@ export async function executeBuild(buildId: string): Promise<void> {
     projectEnv = await getEnvVarsForBuild(project.id)
     secretValues = Object.values(projectEnv).filter((v) => v.length >= 4)
     if (Object.keys(projectEnv).length > 0) {
-      logLine(
-        `[T-Build] Loaded ${Object.keys(projectEnv).length} environment variable(s)`,
-      )
+      logLine(`[T-Build] Loaded ${Object.keys(projectEnv).length} environment variable(s)`)
     }
   } catch (error) {
     logLine(
@@ -590,9 +551,7 @@ export async function executeBuild(buildId: string): Promise<void> {
     // Handle cd commands - change the working directory for subsequent commands
     if (line.startsWith('cd ')) {
       const targetDir = line.slice(3).trim()
-      const newDir = path.isAbsolute(targetDir)
-        ? targetDir
-        : path.resolve(currentDir, targetDir)
+      const newDir = path.isAbsolute(targetDir) ? targetDir : path.resolve(currentDir, targetDir)
 
       // Verify that the directory exists
       try {
@@ -606,9 +565,7 @@ export async function executeBuild(buildId: string): Promise<void> {
         continue
       } catch {
         logLine('')
-        logLine(
-          `[T-Build] Failed to change directory: ${newDir} does not exist`,
-        )
+        logLine(`[T-Build] Failed to change directory: ${newDir} does not exist`)
 
         if (flushTimer) {
           clearTimeout(flushTimer)
@@ -648,9 +605,7 @@ export async function executeBuild(buildId: string): Promise<void> {
 
     if (!result.success) {
       logLine('')
-      logLine(
-        `[T-Build] Build failed at step ${stepCount} with exit code: ${result.exitCode}`,
-      )
+      logLine(`[T-Build] Build failed at step ${stepCount} with exit code: ${result.exitCode}`)
 
       if (flushTimer) {
         clearTimeout(flushTimer)
@@ -683,16 +638,12 @@ export async function executeBuild(buildId: string): Promise<void> {
 
     let deployDir = projectDir
     let deployStepCount = 0
-    const totalDeploySteps = deployLines.filter(
-      (line) => !line.startsWith('cd '),
-    ).length
+    const totalDeploySteps = deployLines.filter((line) => !line.startsWith('cd ')).length
 
     for (const line of deployLines) {
       if (line.startsWith('cd ')) {
         const targetDir = line.slice(3).trim()
-        const newDir = path.isAbsolute(targetDir)
-          ? targetDir
-          : path.resolve(deployDir, targetDir)
+        const newDir = path.isAbsolute(targetDir) ? targetDir : path.resolve(deployDir, targetDir)
 
         try {
           const stat = await import('fs/promises').then((fs) => fs.stat(newDir))
@@ -701,15 +652,11 @@ export async function executeBuild(buildId: string): Promise<void> {
           }
           deployDir = newDir
           logLine('')
-          logLine(
-            `[T-Build] Changed deploy directory to: ${shortPath(deployDir)}`,
-          )
+          logLine(`[T-Build] Changed deploy directory to: ${shortPath(deployDir)}`)
           continue
         } catch {
           logLine('')
-          logLine(
-            `[T-Build] Failed to change deploy directory: ${newDir} does not exist`,
-          )
+          logLine(`[T-Build] Failed to change deploy directory: ${newDir} does not exist`)
 
           if (flushTimer) {
             clearTimeout(flushTimer)
@@ -734,8 +681,7 @@ export async function executeBuild(buildId: string): Promise<void> {
       }
 
       deployStepCount++
-      const stepNum =
-        totalDeploySteps > 1 ? ` [${deployStepCount}/${totalDeploySteps}]` : ''
+      const stepNum = totalDeploySteps > 1 ? ` [${deployStepCount}/${totalDeploySteps}]` : ''
 
       logLine('')
       logLine(`[T-Build] Deploy${stepNum} executing: ${line}`)

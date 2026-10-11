@@ -34,9 +34,9 @@ function slugify(value: string) {
 }
 
 function countUsers() {
-  return getSqliteDatabase()
-    .prepare('select count(*) as count from user')
-    .get() as { count: number }
+  return getSqliteDatabase().prepare('select count(*) as count from user').get() as {
+    count: number
+  }
 }
 
 export function getBootstrapStatus() {
@@ -45,9 +45,7 @@ export function getBootstrapStatus() {
   }
 }
 
-export async function bootstrapAdministrator(
-  input: BootstrapInput,
-): Promise<BootstrapResult> {
+export async function bootstrapAdministrator(input: BootstrapInput): Promise<BootstrapResult> {
   const db = getSqliteDatabase()
 
   if (countUsers().count > 0) {
@@ -75,9 +73,7 @@ export async function bootstrapAdministrator(
 
   try {
     db.transaction(() => {
-      const existing = db
-        .prepare('select count(*) as count from user')
-        .get() as { count: number }
+      const existing = db.prepare('select count(*) as count from user').get() as { count: number }
 
       if (existing.count > 0) {
         throw new Error('BOOTSTRAP_ALREADY_DONE')
@@ -128,14 +124,7 @@ export async function bootstrapAdministrator(
         `insert into organization (
           id, name, slug, logo, createdAt, metadata
         ) values (?, ?, ?, ?, ?, ?)`,
-      ).run(
-        organizationId,
-        organizationName,
-        slugify(organizationName),
-        null,
-        now,
-        null,
-      )
+      ).run(organizationId, organizationName, slugify(organizationName), null, now, null)
 
       db.prepare(
         `insert into member (

@@ -28,10 +28,7 @@ export async function getEnvVars(projectId: string): Promise<MaskedEnvVar[]> {
   return rows.map((row) => ({ key: row.key, value: MASK }))
 }
 
-export async function setEnvVars(
-  projectId: string,
-  vars: EnvVar[],
-): Promise<void> {
+export async function setEnvVars(projectId: string, vars: EnvVar[]): Promise<void> {
   const db = getBusinessDatabase()
   const now = new Date().toISOString()
 
@@ -48,10 +45,7 @@ export async function setEnvVars(
   const nextEntries = await Promise.all(
     [...deduped.entries()].map(async ([key, value]) => ({
       key,
-      value:
-        value === MASK && existingMap.has(key)
-          ? existingMap.get(key)!
-          : await encrypt(value),
+      value: value === MASK && existingMap.has(key) ? existingMap.get(key)! : await encrypt(value),
     })),
   )
 
@@ -70,28 +64,20 @@ export async function setEnvVars(
   })()
 }
 
-export async function getEnvVarsForBuild(
-  projectId: string,
-): Promise<Record<string, string>> {
+export async function getEnvVarsForBuild(projectId: string): Promise<Record<string, string>> {
   const db = getBusinessDatabase()
   const rows = db
-    .prepare(
-      'select projectId, key, value from tbuild_env_var where projectId = ?',
-    )
+    .prepare('select projectId, key, value from tbuild_env_var where projectId = ?')
     .all(projectId) as EnvVarRow[]
 
   const result: Record<string, string> = {}
   for (const row of rows) {
-    result[row.key] = isEncrypted(row.value)
-      ? await decrypt(row.value)
-      : row.value
+    result[row.key] = isEncrypted(row.value) ? await decrypt(row.value) : row.value
   }
   return result
 }
 
-export async function deleteEnvVarsByProjectId(
-  projectId: string,
-): Promise<void> {
+export async function deleteEnvVarsByProjectId(projectId: string): Promise<void> {
   const db = getBusinessDatabase()
   db.prepare('delete from tbuild_env_var where projectId = ?').run(projectId)
 }

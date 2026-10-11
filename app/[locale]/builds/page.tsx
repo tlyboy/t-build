@@ -9,11 +9,7 @@ import { getTranslations, setRequestLocale } from 'next-intl/server'
 // Build records come from the local database and change continuously, so the latest data must be read on every request.
 export const dynamic = 'force-dynamic'
 
-export default async function BuildsPage({
-  params,
-}: {
-  params: Promise<{ locale: string }>
-}) {
+export default async function BuildsPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params
   setRequestLocale(locale)
 
@@ -22,9 +18,7 @@ export default async function BuildsPage({
     getAllBuilds(),
     getAllProjects(),
   ])
-  const projectNameById = new Map(
-    projects.map((project) => [project.id, project.name]),
-  )
+  const projectNameById = new Map(projects.map((project) => [project.id, project.name]))
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
@@ -39,9 +33,7 @@ export default async function BuildsPage({
           <CardContent className="flex flex-col items-center py-12 text-center">
             <Clock3 className="mb-3 h-8 w-8 text-muted-foreground" />
             <p className="font-medium">{t('noBuilds')}</p>
-            <p className="mt-1 text-sm text-muted-foreground">
-              {t('noBuildsDescription')}
-            </p>
+            <p className="mt-1 text-sm text-muted-foreground">{t('noBuildsDescription')}</p>
           </CardContent>
         </Card>
       ) : (
@@ -51,8 +43,7 @@ export default async function BuildsPage({
               {builds.map((build) => {
                 const duration = build.finishedAt
                   ? Math.round(
-                      (new Date(build.finishedAt).getTime() -
-                        new Date(build.startedAt).getTime()) /
+                      (new Date(build.finishedAt).getTime() - new Date(build.startedAt).getTime()) /
                         1000,
                     )
                   : null
@@ -62,18 +53,11 @@ export default async function BuildsPage({
                     <BuildRow
                       href={`/builds/${build.id}`}
                       status={build.status}
-                      projectName={
-                        projectNameById.get(build.projectId) ??
-                        t('unknownProject')
-                      }
-                      timeLabel={new Date(build.startedAt).toLocaleString(
-                        locale,
-                      )}
+                      projectName={projectNameById.get(build.projectId) ?? t('unknownProject')}
+                      timeLabel={new Date(build.startedAt).toLocaleString(locale)}
                       dateTime={build.startedAt}
                       durationLabel={
-                        duration !== null
-                          ? t('duration', { seconds: duration })
-                          : undefined
+                        duration !== null ? t('duration', { seconds: duration }) : undefined
                       }
                       commitHash={build.gitCommitHash}
                       commitMessage={build.gitCommitMessage}

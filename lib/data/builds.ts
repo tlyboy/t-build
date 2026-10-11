@@ -1,7 +1,6 @@
 import { getBusinessDatabase } from '@/lib/db/business'
 
-export type BuildStatus =
-  'pending' | 'running' | 'success' | 'failed' | 'skipped'
+export type BuildStatus = 'pending' | 'running' | 'success' | 'failed' | 'skipped'
 
 export interface Build {
   id: string
@@ -32,9 +31,7 @@ function getBuildHistoryLimit(): number {
   if (!configuredLimit) return DEFAULT_BUILD_HISTORY_LIMIT
 
   const limit = Number(configuredLimit)
-  return Number.isSafeInteger(limit) && limit > 0
-    ? limit
-    : DEFAULT_BUILD_HISTORY_LIMIT
+  return Number.isSafeInteger(limit) && limit > 0 ? limit : DEFAULT_BUILD_HISTORY_LIMIT
 }
 
 export async function pruneBuildHistory(): Promise<number> {
@@ -78,28 +75,21 @@ function toBuild(row: BuildRow): Build {
 export async function getAllBuilds(): Promise<Build[]> {
   await pruneBuildHistory()
   const db = getBusinessDatabase()
-  const rows = db
-    .prepare('select * from tbuild_build order by startedAt desc')
-    .all() as BuildRow[]
+  const rows = db.prepare('select * from tbuild_build order by startedAt desc').all() as BuildRow[]
   return rows.map(toBuild)
 }
 
 export async function getBuildById(id: string): Promise<Build | null> {
   const db = getBusinessDatabase()
-  const row = db.prepare('select * from tbuild_build where id = ?').get(id) as
-    BuildRow | undefined
+  const row = db.prepare('select * from tbuild_build where id = ?').get(id) as BuildRow | undefined
   return row ? toBuild(row) : null
 }
 
-export async function getBuildsByProjectId(
-  projectId: string,
-): Promise<Build[]> {
+export async function getBuildsByProjectId(projectId: string): Promise<Build[]> {
   await pruneBuildHistory()
   const db = getBusinessDatabase()
   const rows = db
-    .prepare(
-      'select * from tbuild_build where projectId = ? order by startedAt desc',
-    )
+    .prepare('select * from tbuild_build where projectId = ? order by startedAt desc')
     .all(projectId) as BuildRow[]
   return rows.map(toBuild)
 }
@@ -118,16 +108,7 @@ export async function createBuild(projectId: string): Promise<Build> {
       id, projectId, status, startedAt, finishedAt, exitCode,
       gitCommitHash, gitCommitMessage
     ) values (?, ?, ?, ?, ?, ?, ?, ?)`,
-  ).run(
-    build.id,
-    build.projectId,
-    build.status,
-    build.startedAt,
-    null,
-    null,
-    null,
-    null,
-  )
+  ).run(build.id, build.projectId, build.status, build.startedAt, null, null, null, null)
 
   await pruneBuildHistory()
 
@@ -172,10 +153,7 @@ export async function appendBuildLog(id: string, log: string): Promise<void> {
   await appendBuildLogs(id, [log])
 }
 
-export async function appendBuildLogs(
-  id: string,
-  logs: string[],
-): Promise<void> {
+export async function appendBuildLogs(id: string, logs: string[]): Promise<void> {
   if (logs.length === 0) return
 
   const db = getBusinessDatabase()
@@ -208,8 +186,6 @@ export async function deleteBuild(id: string): Promise<boolean> {
 
 export async function deleteProjectBuilds(projectId: string): Promise<number> {
   const db = getBusinessDatabase()
-  const result = db
-    .prepare('delete from tbuild_build where projectId = ?')
-    .run(projectId)
+  const result = db.prepare('delete from tbuild_build where projectId = ?').run(projectId)
   return result.changes
 }

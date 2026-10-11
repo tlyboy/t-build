@@ -77,9 +77,7 @@ async function encryptCredential(
   return encrypted
 }
 
-async function decryptCredential(
-  credential: GitCredential,
-): Promise<GitCredential> {
+async function decryptCredential(credential: GitCredential): Promise<GitCredential> {
   const decrypted = { ...credential }
 
   if (decrypted.password && isEncrypted(decrypted.password)) {
@@ -94,9 +92,9 @@ async function decryptCredential(
 
 function readWorkDir() {
   const db = getBusinessDatabase()
-  const row = db
-    .prepare('select value from tbuild_setting where key = ?')
-    .get('workDir') as { value: string } | undefined
+  const row = db.prepare('select value from tbuild_setting where key = ?').get('workDir') as
+    | { value: string }
+    | undefined
   return row?.value ?? defaultSettings.workDir
 }
 
@@ -115,9 +113,7 @@ export async function getSettings(): Promise<Settings> {
   }
 }
 
-export async function updateSettings(
-  data: Partial<Settings>,
-): Promise<Settings> {
+export async function updateSettings(data: Partial<Settings>): Promise<Settings> {
   const db = getBusinessDatabase()
 
   if (data.workDir !== undefined) {
@@ -180,9 +176,8 @@ export async function updateGitCredential(
   data: Partial<Omit<GitCredential, 'id'>>,
 ): Promise<SafeGitCredential | null> {
   const db = getBusinessDatabase()
-  const current = (db
-    .prepare('select * from tbuild_git_credential where id = ?')
-    .get(id) ?? null) as GitCredentialRow | null
+  const current = (db.prepare('select * from tbuild_git_credential where id = ?').get(id) ??
+    null) as GitCredentialRow | null
   if (!current) return null
 
   const encrypted = await encryptCredential(data)
@@ -210,18 +205,14 @@ export async function updateGitCredential(
 
 export async function deleteGitCredential(id: string): Promise<boolean> {
   const db = getBusinessDatabase()
-  const result = db
-    .prepare('delete from tbuild_git_credential where id = ?')
-    .run(id)
+  const result = db.prepare('delete from tbuild_git_credential where id = ?').run(id)
   return result.changes > 0
 }
 
-export async function getGitCredentialById(
-  id: string,
-): Promise<GitCredential | null> {
+export async function getGitCredentialById(id: string): Promise<GitCredential | null> {
   const db = getBusinessDatabase()
-  const row = db
-    .prepare('select * from tbuild_git_credential where id = ?')
-    .get(id) as GitCredentialRow | undefined
+  const row = db.prepare('select * from tbuild_git_credential where id = ?').get(id) as
+    | GitCredentialRow
+    | undefined
   return row ? decryptCredential(toCredential(row)) : null
 }

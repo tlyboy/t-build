@@ -27,10 +27,7 @@ export async function POST(request: Request) {
   const body = await request.json()
 
   if (!body.name || !body.type) {
-    return NextResponse.json(
-      { error: 'Missing required fields: name, type' },
-      { status: 400 },
-    )
+    return NextResponse.json({ error: 'Missing required fields: name, type' }, { status: 400 })
   }
 
   const credential = await addGitCredential({

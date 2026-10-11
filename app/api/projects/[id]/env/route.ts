@@ -3,33 +3,25 @@ import { getProjectById } from '@/lib/data/projects'
 import { getEnvVars, setEnvVars } from '@/lib/data/env-vars'
 import { requireApiSession } from '@/lib/auth/api'
 
-export async function GET(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> },
-) {
+export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const unauthorized = await requireApiSession()
   if (unauthorized) return unauthorized
 
   const { id } = await params
   const project = await getProjectById(id)
-  if (!project)
-    return NextResponse.json({ error: 'Project not found' }, { status: 404 })
+  if (!project) return NextResponse.json({ error: 'Project not found' }, { status: 404 })
 
   const vars = await getEnvVars(id)
   return NextResponse.json(vars)
 }
 
-export async function PUT(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> },
-) {
+export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const unauthorized = await requireApiSession()
   if (unauthorized) return unauthorized
 
   const { id } = await params
   const project = await getProjectById(id)
-  if (!project)
-    return NextResponse.json({ error: 'Project not found' }, { status: 404 })
+  if (!project) return NextResponse.json({ error: 'Project not found' }, { status: 404 })
 
   const body = await request.json()
   const vars: { key: string; value: string }[] = body.vars
@@ -44,9 +36,6 @@ export async function PUT(
     await setEnvVars(id, validVars)
     return NextResponse.json({ success: true })
   } catch {
-    return NextResponse.json(
-      { error: 'Failed to save environment variables' },
-      { status: 500 },
-    )
+    return NextResponse.json({ error: 'Failed to save environment variables' }, { status: 500 })
   }
 }

@@ -62,9 +62,7 @@ interface ProjectFormProps {
 function generateSecret() {
   const bytes = new Uint8Array(32)
   crypto.getRandomValues(bytes)
-  return Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join(
-    '',
-  )
+  return Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('')
 }
 
 function providerLabel(provider: WebhookProvider) {
@@ -97,33 +95,20 @@ export function ProjectForm({
   const credentials = initialCredentials
 
   const [name, setName] = useState(project?.name || '')
-  const [relativePath, setRelativePath] = useState(
-    project?.path?.replace(/\\/g, '/') || '',
-  )
-  const [buildCommand, setBuildCommand] = useState(
-    project?.buildCommand || 'ni\nnr build',
-  )
-  const [gitPullBeforeBuild, setGitPullBeforeBuild] = useState(
-    project?.gitPullBeforeBuild || false,
-  )
-  const [outputPaths, setOutputPaths] = useState(
-    project?.outputPaths?.join('\n') || 'dist',
-  )
-  const [deployCommand, setDeployCommand] = useState(
-    project?.deployCommand || '',
-  )
+  const [relativePath, setRelativePath] = useState(project?.path?.replace(/\\/g, '/') || '')
+  const [buildCommand, setBuildCommand] = useState(project?.buildCommand || 'ni\nnr build')
+  const [gitPullBeforeBuild, setGitPullBeforeBuild] = useState(project?.gitPullBeforeBuild || false)
+  const [outputPaths, setOutputPaths] = useState(project?.outputPaths?.join('\n') || 'dist')
+  const [deployCommand, setDeployCommand] = useState(project?.deployCommand || '')
 
   const [showCloneOptions, setShowCloneOptions] = useState(false)
   const [gitUrl, setGitUrl] = useState('')
   const [gitBranch, setGitBranch] = useState('main')
-  const [gitCredentialId, setGitCredentialId] = useState(
-    project?.gitCredentialId || '',
-  )
+  const [gitCredentialId, setGitCredentialId] = useState(project?.gitCredentialId || '')
   const [webhookEnabled, setWebhookEnabled] = useState(false)
   const [webhookId] = useState(() => crypto.randomUUID())
   const [webhookName, setWebhookName] = useState('')
-  const [webhookProvider, setWebhookProvider] =
-    useState<WebhookProvider>('github')
+  const [webhookProvider, setWebhookProvider] = useState<WebhookProvider>('github')
   const [webhookBranch, setWebhookBranch] = useState('main')
   const [webhookSecret, setWebhookSecret] = useState(() => generateSecret())
 
@@ -153,8 +138,7 @@ export function ProjectForm({
       .filter((p) => p.length > 0)
 
     try {
-      const url =
-        mode === 'create' ? '/api/projects' : `/api/projects/${project?.id}`
+      const url = mode === 'create' ? '/api/projects' : `/api/projects/${project?.id}`
       const method = mode === 'create' ? 'POST' : 'PUT'
 
       const res = await fetch(url, {
@@ -166,8 +150,7 @@ export function ProjectForm({
           buildCommand,
           deployCommand: deployCommand.trim() || undefined,
           gitPullBeforeBuild,
-          outputPaths:
-            parsedOutputPaths.length > 0 ? parsedOutputPaths : undefined,
+          outputPaths: parsedOutputPaths.length > 0 ? parsedOutputPaths : undefined,
           gitCredentialId: gitCredentialId || undefined,
         }),
       })
@@ -200,9 +183,7 @@ export function ProjectForm({
           const data = (await webhookRes.json().catch(() => null)) as {
             error?: string
           } | null
-          toast.error(
-            `${t('projectSavedWebhookFailed')}${data?.error ? `: ${data.error}` : ''}`,
-          )
+          toast.error(`${t('projectSavedWebhookFailed')}${data?.error ? `: ${data.error}` : ''}`)
           router.push(`/projects/${savedProject.id}/edit`)
           router.refresh()
           return
@@ -307,9 +288,7 @@ export function ProjectForm({
       <CardContent className="pt-6">
         <form id={formId} onSubmit={handleSubmit} className="space-y-6">
           {error && (
-            <div className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive">
-              {error}
-            </div>
+            <div className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive">{error}</div>
           )}
 
           <div className="space-y-2">
@@ -323,10 +302,7 @@ export function ProjectForm({
                 required
                 className="flex-1 font-mono"
               />
-              <DirectoryPicker
-                value={relativePath}
-                onChange={handleDirectorySelect}
-              />
+              <DirectoryPicker value={relativePath} onChange={handleDirectorySelect} />
             </div>
           </div>
 
@@ -366,9 +342,7 @@ export function ProjectForm({
                     {gitUrl && (
                       <p className="text-xs text-muted-foreground">
                         {t('cloneTo')}:{' '}
-                        <code className="rounded bg-muted px-1">
-                          {getRepoNameFromUrl(gitUrl)}
-                        </code>
+                        <code className="rounded bg-muted px-1">{getRepoNameFromUrl(gitUrl)}</code>
                       </p>
                     )}
                   </div>
@@ -380,18 +354,14 @@ export function ProjectForm({
                         <Select
                           value={gitCredentialId || '_none'}
                           onValueChange={(v) =>
-                            setGitCredentialId(
-                              v === '_none' || v === null ? '' : v,
-                            )
+                            setGitCredentialId(v === '_none' || v === null ? '' : v)
                           }
                         >
                           <SelectTrigger className="w-full">
                             <SelectValue placeholder={t('selectCredential')} />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="_none">
-                              {t('publicRepo')}
-                            </SelectItem>
+                            <SelectItem value="_none">{t('publicRepo')}</SelectItem>
                             {credentials.map((cred) => (
                               <SelectItem key={cred.id} value={cred.id}>
                                 {cred.name} ({cred.type.toUpperCase()})
@@ -404,12 +374,7 @@ export function ProjectForm({
                           <span className="text-xs text-muted-foreground">
                             {t('publicRepoCanClone')}
                           </span>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-6 px-2 text-xs"
-                            asChild
-                          >
+                          <Button variant="ghost" size="sm" className="h-6 px-2 text-xs" asChild>
                             <Link href={settingsHref}>
                               <Settings className="mr-1 h-3 w-3" />
                               {t('configure')}
@@ -477,9 +442,7 @@ export function ProjectForm({
               required
               className="font-mono text-sm"
             />
-            <p className="text-xs text-muted-foreground">
-              {t('buildCommandHint')}
-            </p>
+            <p className="text-xs text-muted-foreground">{t('buildCommandHint')}</p>
           </div>
 
           <div className="space-y-2">
@@ -492,9 +455,7 @@ export function ProjectForm({
               rows={2}
               className="font-mono text-sm"
             />
-            <p className="text-xs text-muted-foreground">
-              {t('outputPathsHint')}
-            </p>
+            <p className="text-xs text-muted-foreground">{t('outputPathsHint')}</p>
           </div>
 
           <div className="space-y-2">
@@ -509,9 +470,7 @@ export function ProjectForm({
               rows={3}
               className="font-mono text-sm"
             />
-            <p className="text-xs text-muted-foreground">
-              {t('deployCommandHint')}
-            </p>
+            <p className="text-xs text-muted-foreground">{t('deployCommandHint')}</p>
           </div>
 
           <div className="flex items-center justify-between rounded-lg border p-3">
@@ -519,9 +478,7 @@ export function ProjectForm({
               <Label htmlFor="gitPull" className="text-sm font-medium">
                 {t('gitPullBeforeBuild')}
               </Label>
-              <p className="text-xs text-muted-foreground">
-                {t('gitPullHint')}
-              </p>
+              <p className="text-xs text-muted-foreground">{t('gitPullHint')}</p>
             </div>
             <Switch
               id="gitPull"
@@ -536,9 +493,7 @@ export function ProjectForm({
               {credentials.length > 0 ? (
                 <Select
                   value={gitCredentialId || '_none'}
-                  onValueChange={(v) =>
-                    setGitCredentialId(v === '_none' || v === null ? '' : v)
-                  }
+                  onValueChange={(v) => setGitCredentialId(v === '_none' || v === null ? '' : v)}
                 >
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder={t('selectCredential')} />
@@ -554,9 +509,7 @@ export function ProjectForm({
                 </Select>
               ) : (
                 <div className="flex items-center justify-between rounded-md border border-dashed p-3">
-                  <p className="text-sm text-muted-foreground">
-                    {t('noCredentialHint')}
-                  </p>
+                  <p className="text-sm text-muted-foreground">{t('noCredentialHint')}</p>
                   <Button variant="outline" size="sm" asChild>
                     <Link href={settingsHref}>
                       <Settings className="mr-1 h-3 w-3" />
@@ -579,9 +532,7 @@ export function ProjectForm({
                     <Webhook className="h-4 w-4" />
                     {t('enableWebhook')}
                   </Label>
-                  <p className="text-xs text-muted-foreground">
-                    {t('enableWebhookHint')}
-                  </p>
+                  <p className="text-xs text-muted-foreground">{t('enableWebhookHint')}</p>
                 </div>
                 <Switch
                   id="webhookEnabled"
@@ -611,9 +562,7 @@ export function ProjectForm({
                       <Label>{t('webhookProvider')}</Label>
                       <Select
                         value={webhookProvider}
-                        onValueChange={(value) =>
-                          setWebhookProvider(value as WebhookProvider)
-                        }
+                        onValueChange={(value) => setWebhookProvider(value as WebhookProvider)}
                       >
                         <SelectTrigger className="w-full">
                           <SelectValue />
@@ -626,15 +575,11 @@ export function ProjectForm({
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="webhookBranch">
-                        {t('webhookBranch')}
-                      </Label>
+                      <Label htmlFor="webhookBranch">{t('webhookBranch')}</Label>
                       <Input
                         id="webhookBranch"
                         value={webhookBranch}
-                        onChange={(event) =>
-                          setWebhookBranch(event.target.value)
-                        }
+                        onChange={(event) => setWebhookBranch(event.target.value)}
                         placeholder={t('webhookBranchPlaceholder')}
                       />
                     </div>
@@ -646,9 +591,7 @@ export function ProjectForm({
                       <Input
                         id="webhookSecret"
                         value={webhookSecret}
-                        onChange={(event) =>
-                          setWebhookSecret(event.target.value)
-                        }
+                        onChange={(event) => setWebhookSecret(event.target.value)}
                         className="font-mono text-xs"
                         required={webhookEnabled}
                       />
@@ -672,9 +615,7 @@ export function ProjectForm({
                       </Button>
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      {webhookProvider === 'github'
-                        ? t('githubSecretHint')
-                        : t('codeupSecretHint')}
+                      {webhookProvider === 'github' ? t('githubSecretHint') : t('codeupSecretHint')}
                     </p>
                   </div>
 
@@ -695,9 +636,7 @@ export function ProjectForm({
                         <Copy className="h-3.5 w-3.5" />
                       </Button>
                     </div>
-                    <p className="text-xs text-muted-foreground">
-                      {t('webhookUrlHint')}
-                    </p>
+                    <p className="text-xs text-muted-foreground">{t('webhookUrlHint')}</p>
                   </div>
                 </div>
               )}

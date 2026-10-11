@@ -1,11 +1,7 @@
 import type { Metadata } from 'next'
 import { Inter, Fira_Code } from 'next/font/google'
 import { hasLocale, NextIntlClientProvider } from 'next-intl'
-import {
-  getTranslations,
-  setRequestLocale,
-  getMessages,
-} from 'next-intl/server'
+import { getTranslations, setRequestLocale, getMessages } from 'next-intl/server'
 import { notFound } from 'next/navigation'
 import { ThemeProvider } from '@/components/theme-provider'
 import { ModeToggle } from '@/components/mode-toggle'
@@ -17,10 +13,7 @@ import { LogoutButton } from '@/components/logout-button'
 import { Link } from '@/i18n/navigation'
 import { routing } from '@/i18n/routing'
 import { getCurrentSession } from '@/lib/auth/server'
-import {
-  DesktopNavigation,
-  MobileNavigation,
-} from '@/components/main-navigation'
+import { DesktopNavigation, MobileNavigation } from '@/components/main-navigation'
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
 const firaCode = Fira_Code({ subsets: ['latin'], variable: '--font-fira-code' })
@@ -71,15 +64,9 @@ export default async function LocaleLayout({
 
   setRequestLocale(locale)
 
-  const [messages, session] = await Promise.all([
-    getMessages(),
-    getCurrentSession(),
-  ])
+  const [messages, session] = await Promise.all([getMessages(), getCurrentSession()])
   const clientMessages = Object.fromEntries(
-    clientMessageNamespaces.map((namespace) => [
-      namespace,
-      messages[namespace],
-    ]),
+    clientMessageNamespaces.map((namespace) => [namespace, messages[namespace]]),
   )
 
   return (
@@ -112,12 +99,7 @@ export default async function LocaleLayout({
                   </div>
 
                   <div className="flex items-center gap-1">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="hidden md:inline-flex"
-                      asChild
-                    >
+                    <Button variant="ghost" size="icon" className="hidden md:inline-flex" asChild>
                       <a
                         href="https://github.com/tlyboy/t-build"
                         target="_blank"
@@ -140,9 +122,7 @@ export default async function LocaleLayout({
                 </div>
               </header>
 
-              <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 sm:py-8">
-                {children}
-              </main>
+              <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 sm:py-8">{children}</main>
             </div>
             <Toaster />
           </ThemeProvider>

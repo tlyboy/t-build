@@ -14,13 +14,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   Dialog,
   DialogContent,
@@ -43,8 +37,7 @@ export function GitCredentialsSettingsCard({
   const t = useTranslations('settings')
   const tCommon = useTranslations('common')
   const tDelete = useTranslations('deleteCredential')
-  const [credentials, setCredentials] =
-    useState<SafeGitCredential[]>(initialCredentials)
+  const [credentials, setCredentials] = useState<SafeGitCredential[]>(initialCredentials)
 
   const [credentialDialogOpen, setCredentialDialogOpen] = useState(false)
   const [credentialType, setCredentialType] = useState<'https' | 'ssh'>('ssh')
@@ -53,9 +46,7 @@ export function GitCredentialsSettingsCard({
   const [credentialPassword, setCredentialPassword] = useState('')
   const [credentialSshKey, setCredentialSshKey] = useState('')
   const [savingCredential, setSavingCredential] = useState(false)
-  const [deleteCredentialId, setDeleteCredentialId] = useState<string | null>(
-    null,
-  )
+  const [deleteCredentialId, setDeleteCredentialId] = useState<string | null>(null)
 
   const fetchSettings = async () => {
     const res = await fetch('/api/settings')
@@ -119,10 +110,7 @@ export function GitCredentialsSettingsCard({
               </CardTitle>
               <CardDescription>{t('gitCredentialsDesc')}</CardDescription>
             </div>
-            <Dialog
-              open={credentialDialogOpen}
-              onOpenChange={setCredentialDialogOpen}
-            >
+            <Dialog open={credentialDialogOpen} onOpenChange={setCredentialDialogOpen}>
               <DialogTrigger asChild>
                 <Button size="sm">
                   <Plus className="mr-1 h-4 w-4" />
@@ -132,9 +120,7 @@ export function GitCredentialsSettingsCard({
               <DialogContent className="max-w-lg">
                 <DialogHeader>
                   <DialogTitle>{t('addCredential')}</DialogTitle>
-                  <DialogDescription>
-                    {t('addCredentialDesc')}
-                  </DialogDescription>
+                  <DialogDescription>{t('addCredentialDesc')}</DialogDescription>
                 </DialogHeader>
 
                 <div className="space-y-4 pt-4">
@@ -149,9 +135,7 @@ export function GitCredentialsSettingsCard({
 
                   <Tabs
                     value={credentialType}
-                    onValueChange={(v) =>
-                      setCredentialType(v as 'https' | 'ssh')
-                    }
+                    onValueChange={(v) => setCredentialType(v as 'https' | 'ssh')}
                   >
                     <TabsList className="grid w-full grid-cols-2">
                       <TabsTrigger value="ssh" className="gap-2">
@@ -176,9 +160,7 @@ export function GitCredentialsSettingsCard({
                           rows={8}
                           className="font-mono text-xs break-all"
                         />
-                        <p className="text-xs text-muted-foreground">
-                          {t('sshKeyHint')}
-                        </p>
+                        <p className="text-xs text-muted-foreground">{t('sshKeyHint')}</p>
                       </div>
                     </TabsContent>
 
@@ -187,9 +169,7 @@ export function GitCredentialsSettingsCard({
                         <Label>{t('username')}</Label>
                         <Input
                           value={credentialUsername}
-                          onChange={(e) =>
-                            setCredentialUsername(e.target.value)
-                          }
+                          onChange={(e) => setCredentialUsername(e.target.value)}
                           placeholder={t('usernamePlaceholder')}
                         />
                       </div>
@@ -198,23 +178,16 @@ export function GitCredentialsSettingsCard({
                         <Input
                           type="password"
                           value={credentialPassword}
-                          onChange={(e) =>
-                            setCredentialPassword(e.target.value)
-                          }
+                          onChange={(e) => setCredentialPassword(e.target.value)}
                           placeholder={t('passwordPlaceholder')}
                         />
-                        <p className="text-xs text-muted-foreground">
-                          {t('passwordHint')}
-                        </p>
+                        <p className="text-xs text-muted-foreground">{t('passwordHint')}</p>
                       </div>
                     </TabsContent>
                   </Tabs>
 
                   <div className="flex justify-end gap-2 pt-4">
-                    <Button
-                      variant="outline"
-                      onClick={() => setCredentialDialogOpen(false)}
-                    >
+                    <Button variant="outline" onClick={() => setCredentialDialogOpen(false)}>
                       {tCommon('cancel')}
                     </Button>
                     <Button
@@ -286,16 +259,11 @@ export function GitCredentialsSettingsCard({
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>{tDelete('title')}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {tDelete('description')}
-            </AlertDialogDescription>
+            <AlertDialogDescription>{tDelete('description')}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>{tCommon('cancel')}</AlertDialogCancel>
-            <AlertDialogAction
-              variant="destructive"
-              onClick={handleDeleteCredential}
-            >
+            <AlertDialogAction variant="destructive" onClick={handleDeleteCredential}>
               {tCommon('delete')}
             </AlertDialogAction>
           </AlertDialogFooter>

@@ -64,13 +64,9 @@ export function PageHeader({
             </Button>
           ))}
         <div className="min-w-0 flex-1 pt-1 sm:pt-0">
-          <h1 className="text-2xl leading-tight font-bold break-words">
-            {title}
-          </h1>
+          <h1 className="text-2xl leading-tight font-bold break-words">{title}</h1>
           {description && (
-            <p className="mt-0.5 text-sm break-all text-muted-foreground">
-              {description}
-            </p>
+            <p className="mt-0.5 text-sm break-all text-muted-foreground">{description}</p>
           )}
         </div>
       </div>

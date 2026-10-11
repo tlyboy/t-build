@@ -34,11 +34,7 @@ export async function POST(request: Request) {
 
   // If a working directory is configured and the target path is relative
   const settings = await getSettings()
-  if (
-    settings.workDir &&
-    !path.isAbsolute(targetPath) &&
-    !targetPath.startsWith('~')
-  ) {
+  if (settings.workDir && !path.isAbsolute(targetPath) && !targetPath.startsWith('~')) {
     resolvedTargetPath = path.join(settings.workDir, targetPath)
   }
 
@@ -57,10 +53,7 @@ export async function POST(request: Request) {
   // Check whether the target directory already exists
   try {
     await fs.access(resolvedTargetPath)
-    return NextResponse.json(
-      { error: 'Target directory already exists' },
-      { status: 400 },
-    )
+    return NextResponse.json({ error: 'Target directory already exists' }, { status: 400 })
   } catch {
     // The directory does not exist, so we can continue
   }
@@ -86,11 +79,7 @@ export async function POST(request: Request) {
   let cloneUrl = gitUrl
 
   if (credential) {
-    if (
-      credential.type === 'https' &&
-      credential.username &&
-      credential.password
-    ) {
+    if (credential.type === 'https' && credential.username && credential.password) {
       // HTTPS authentication: embed the credentials in the URL
       try {
         const url = new URL(gitUrl)
@@ -104,8 +93,7 @@ export async function POST(request: Request) {
       // SSH authentication: write the key to a temporary file and normalize line endings to LF
       const tempKeyPath = path.join(os.tmpdir(), `git-ssh-key-${Date.now()}`)
       const normalizedKey =
-        credential.sshKey.replace(/\r\n/g, '\n').replace(/\r/g, '\n').trim() +
-        '\n'
+        credential.sshKey.replace(/\r\n/g, '\n').replace(/\r/g, '\n').trim() + '\n'
       await fs.writeFile(tempKeyPath, normalizedKey, { mode: 0o600 })
       env.GIT_SSH_COMMAND = `ssh -i "${tempKeyPath}" -o StrictHostKeyChecking=no`
       // Delete the temporary file after cloning completes
@@ -130,9 +118,7 @@ export async function POST(request: Request) {
 
     child.stderr?.on('data', (data: Buffer) => {
       // Filter out output that may contain credentials
-      const output = data
-        .toString()
-        .replace(/https:\/\/[^@]+@/g, 'https://***@')
+      const output = data.toString().replace(/https:\/\/[^@]+@/g, 'https://***@')
       logs.push(output)
     })
 

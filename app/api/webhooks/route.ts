@@ -7,10 +7,7 @@ export async function GET() {
   const unauthorized = await requireApiSession()
   if (unauthorized) return unauthorized
 
-  const [webhooks, projects] = await Promise.all([
-    getSafeWebhooks(),
-    getAllProjects(),
-  ])
+  const [webhooks, projects] = await Promise.all([getSafeWebhooks(), getAllProjects()])
 
   return NextResponse.json({
     webhooks,
