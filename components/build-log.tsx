@@ -14,6 +14,8 @@ interface BuildLogProps {
 }
 
 function stripAnsi(str: string): string {
+  // \x1B is the escape character these sequences start with; matching it is the whole point.
+  // oxlint-disable-next-line no-control-regex
   return str.replace(/\x1B\[[0-9;]*[A-Za-z]/g, '')
 }
 
