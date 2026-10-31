@@ -9,7 +9,7 @@
 | 认证   | Better Auth, 用户名/密码, 组织              |
 | 存储   | SQLite, better-sqlite3                      |
 | UI     | Tailwind CSS, shadcn 风格组件, lucide-react |
-| 运行时 | Node.js 24.x, pnpm 10                       |
+| 运行时 | Node.js 26.x, pnpm 10                       |
 
 T-Build 是面向企业内部团队的开源构建管理控制台。它可以统一管理多项目、Git 凭证、构建队列、构建产物、GitHub/Codeup Webhook 回调，以及构建成功后的可选部署命令。
 
@@ -17,7 +17,7 @@ T-Build 是面向企业内部团队的开源构建管理控制台。它可以统
 
 ### 环境要求
 
-- Node.js 24.x
+- Node.js 26.x
 - pnpm 10.x
 - Git
 - 目标项目所需的构建工具链，例如 Node、pnpm、Rust、Tauri、Electron、Java 或其他宿主机依赖

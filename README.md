@@ -9,7 +9,7 @@
 | Auth      | Better Auth, username/password, organization        |
 | Storage   | SQLite, better-sqlite3                              |
 | UI        | Tailwind CSS, shadcn-style components, lucide-react |
-| Runtime   | Node.js 24.x, pnpm 10                               |
+| Runtime   | Node.js 26.x, pnpm 10                               |
 
 T-Build is an open-source build management console for internal teams. It manages multiple projects, Git credentials, build queues, artifacts, GitHub/Codeup webhook callbacks, and optional post-build deployment commands from one local or self-hosted service.
 
@@ -17,7 +17,7 @@ T-Build is an open-source build management console for internal teams. It manage
 
 ### Requirements
 
-- Node.js 24.x
+- Node.js 26.x
 - pnpm 10.x
 - Git
 - The build toolchains required by your projects, such as Node, pnpm, Rust, Tauri, Electron, Java, or other host-level dependencies
