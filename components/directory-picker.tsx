@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { useResetOnHide } from '@/lib/use-reset-on-hide'
 import { Folder, ChevronUp, FolderOpen, Search } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
@@ -42,6 +43,10 @@ export function DirectoryPicker({ value, onChange, disabled }: DirectoryPickerPr
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [search, setSearch] = useState('')
+  useResetOnHide(() => {
+    setOpen(false)
+    setSearch('')
+  })
 
   const fetchDirectory = async (relativePath: string = '') => {
     setLoading(true)

@@ -3,15 +3,13 @@ import { ProjectCard } from '@/components/project-card'
 import { PageHeader } from '@/components/page-header'
 import { Plus } from 'lucide-react'
 import { Link } from '@/i18n/navigation'
-import { getTranslations, setRequestLocale } from 'next-intl/server'
+import { getTranslations } from 'next-intl/server'
+import { connection } from 'next/server'
 import { getAllProjects } from '@/lib/data/projects'
 
-// The project list changes based on user actions, so it needs to be dynamically rendered on every request.
-export const dynamic = 'force-dynamic'
-
-export default async function ProjectsPage({ params }: { params: Promise<{ locale: string }> }) {
-  const { locale } = await params
-  setRequestLocale(locale)
+export default async function ProjectsPage() {
+  // Reads the local database without touching cookies, so opt into request-time rendering explicitly
+  await connection()
 
   const t = await getTranslations('projects')
   const projects = await getAllProjects()

@@ -1,5 +1,6 @@
 'use client'
 
+import { Suspense, type ComponentProps } from 'react'
 import { useLocale, useTranslations } from 'next-intl'
 import { useRouter, usePathname } from '@/i18n/navigation'
 import { Button } from '@/components/ui/button'
@@ -16,9 +17,33 @@ const localeLabels: Record<string, string> = {
   zh: '中文',
 }
 
+// The pathname of a dynamic route is only known at request time, so the static shell shows a disabled trigger until it streams in
 export function LocaleSwitcher() {
-  const locale = useLocale()
+  return (
+    <Suspense fallback={<TriggerButton disabled />}>
+      <LocaleMenu />
+    </Suspense>
+  )
+}
+
+function TriggerButton(props: ComponentProps<typeof Button>) {
   const t = useTranslations('nav')
+
+  return (
+    <Button
+      variant="ghost"
+      size="icon"
+      className="size-10 md:size-8"
+      aria-label={t('changeLanguage')}
+      {...props}
+    >
+      <Languages className="size-4.5" />
+    </Button>
+  )
+}
+
+function LocaleMenu() {
+  const locale = useLocale()
   const router = useRouter()
   const pathname = usePathname()
 
@@ -30,14 +55,7 @@ export function LocaleSwitcher() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="size-10 md:size-8"
-          aria-label={t('changeLanguage')}
-        >
-          <Languages className="size-4.5" />
-        </Button>
+        <TriggerButton />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         {Object.entries(localeLabels).map(([key, label]) => (

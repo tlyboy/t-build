@@ -22,6 +22,7 @@ import type { Project } from '@/lib/data/projects'
 import type { SafeGitCredential } from '@/lib/data/settings'
 import type { SafeWebhookConfig } from '@/lib/data/webhooks'
 import { WebhookSettingsCard } from '@/components/webhook-settings-card'
+import { useResetOnHide } from '@/lib/use-reset-on-hide'
 
 export function EditProjectView({
   project,
@@ -42,6 +43,10 @@ export function EditProjectView({
   const tCommon = useTranslations('common')
   const [formLoading, setFormLoading] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  const [confirmOpen, setConfirmOpen] = useState(false)
+  useResetOnHide(() => {
+    setConfirmOpen(false)
+  })
 
   const handleDelete = async () => {
     setDeleting(true)
@@ -63,7 +68,7 @@ export function EditProjectView({
   return (
     <>
       <PageHeader title={t('editProject')} backHref={backHref}>
-        <AlertDialog>
+        <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
           <AlertDialogTrigger asChild>
             <Button
               variant="outline"

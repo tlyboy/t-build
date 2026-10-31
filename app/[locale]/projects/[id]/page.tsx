@@ -6,7 +6,7 @@ import { PageHeader } from '@/components/page-header'
 import { StartBuildButton } from '@/components/start-build-button'
 import { Download, Settings } from 'lucide-react'
 import { Link } from '@/i18n/navigation'
-import { getTranslations, getLocale, setRequestLocale } from 'next-intl/server'
+import { getTranslations, getLocale } from 'next-intl/server'
 import { getProjectById } from '@/lib/data/projects'
 import { getBuildsByProjectId } from '@/lib/data/builds'
 
@@ -15,8 +15,7 @@ export default async function ProjectDetailPage({
 }: {
   params: Promise<{ locale: string; id: string }>
 }) {
-  const { locale, id } = await params
-  setRequestLocale(locale)
+  const { id } = await params
 
   const t = await getTranslations('projectDetail')
   const currentLocale = await getLocale()

@@ -4,8 +4,6 @@ import { getProjectById } from '@/lib/data/projects'
 import { handleWebhookDelivery, verifyWebhookRequest } from '@/lib/webhooks/handler'
 import { requireApiSession } from '@/lib/auth/api'
 
-export const runtime = 'nodejs'
-
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const webhook = await getWebhookById(id)

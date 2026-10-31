@@ -26,6 +26,7 @@ import {
 } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
 import type { SafeWebhookConfig, WebhookProvider } from '@/lib/data/webhooks'
+import { useResetOnHide } from '@/lib/use-reset-on-hide'
 
 interface SettingsProject {
   id: string
@@ -56,6 +57,9 @@ export function WebhookSettingsCard({
   const [projects] = useState(initialProjects)
   const [webhooks, setWebhooks] = useState(initialWebhooks)
   const [dialogOpen, setDialogOpen] = useState(false)
+  useResetOnHide(() => {
+    setDialogOpen(false)
+  })
   const [saving, setSaving] = useState(false)
   const [name, setName] = useState('')
   const [provider, setProvider] = useState<WebhookProvider>('github')

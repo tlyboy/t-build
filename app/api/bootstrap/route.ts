@@ -1,8 +1,6 @@
 import { NextResponse } from 'next/server'
 import { BootstrapError, bootstrapAdministrator, getBootstrapStatus } from '@/lib/auth/bootstrap'
 
-export const runtime = 'nodejs'
-
 export async function GET() {
   return NextResponse.json(getBootstrapStatus())
 }

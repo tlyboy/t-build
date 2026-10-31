@@ -3,8 +3,6 @@ import { NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { getSqliteDatabase } from '@/lib/db/sqlite'
 
-export const runtime = 'nodejs'
-
 interface UserOrganization {
   id: string
   name: string

@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/alert-dialog'
 import { Trash2 } from 'lucide-react'
 import { useRouter } from '@/i18n/navigation'
+import { useResetOnHide } from '@/lib/use-reset-on-hide'
 import { useTranslations } from 'next-intl'
 
 interface DeleteBuildButtonProps {
@@ -28,6 +29,10 @@ export function DeleteBuildButton({ buildId, redirectHref }: DeleteBuildButtonPr
   const tCommon = useTranslations('common')
   const router = useRouter()
   const [deleting, setDeleting] = useState(false)
+  const [confirmOpen, setConfirmOpen] = useState(false)
+  useResetOnHide(() => {
+    setConfirmOpen(false)
+  })
 
   const handleDelete = async () => {
     setDeleting(true)
@@ -49,7 +54,7 @@ export function DeleteBuildButton({ buildId, redirectHref }: DeleteBuildButtonPr
   }
 
   return (
-    <AlertDialog>
+    <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
       <AlertDialogTrigger asChild>
         <Button
           variant="outline"

@@ -1,8 +1,10 @@
 import type { Metadata } from 'next'
+import { Suspense } from 'react'
 import { Inter, Fira_Code } from 'next/font/google'
 import { hasLocale, NextIntlClientProvider } from 'next-intl'
-import { getTranslations, setRequestLocale, getMessages } from 'next-intl/server'
+import { getTranslations, getMessages } from 'next-intl/server'
 import { notFound } from 'next/navigation'
+import '../globals.css'
 import { ThemeProvider } from '@/components/theme-provider'
 import { ModeToggle } from '@/components/mode-toggle'
 import { LocaleSwitcher } from '@/components/locale-switcher'
@@ -62,9 +64,7 @@ export default async function LocaleLayout({
     notFound()
   }
 
-  setRequestLocale(locale)
-
-  const [messages, session] = await Promise.all([getMessages(), getCurrentSession()])
+  const messages = await getMessages()
   const clientMessages = Object.fromEntries(
     clientMessageNamespaces.map((namespace) => [namespace, messages[namespace]]),
   )
@@ -95,7 +95,11 @@ export default async function LocaleLayout({
                       <Hammer className="h-5 w-5 text-primary" />
                       <span className="hidden sm:inline">T-Build</span>
                     </Link>
-                    {session && <DesktopNavigation />}
+                    <Suspense>
+                      <SignedIn>
+                        <DesktopNavigation />
+                      </SignedIn>
+                    </Suspense>
                   </div>
 
                   <div className="flex items-center gap-1">
@@ -116,8 +120,12 @@ export default async function LocaleLayout({
                     </Button>
                     <LocaleSwitcher />
                     <ModeToggle />
-                    {session && <LogoutButton />}
-                    {session && <MobileNavigation />}
+                    <Suspense>
+                      <SignedIn>
+                        <LogoutButton />
+                        <MobileNavigation />
+                      </SignedIn>
+                    </Suspense>
                   </div>
                 </div>
               </header>
@@ -130,4 +138,9 @@ export default async function LocaleLayout({
       </body>
     </html>
   )
+}
+
+// The session comes from request cookies, so only these header controls wait for it; the rest of the shell prerenders.
+async function SignedIn({ children }: { children: React.ReactNode }) {
+  return (await getCurrentSession()) ? children : null
 }

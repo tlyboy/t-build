@@ -1,6 +1,6 @@
 import { PageHeader } from '@/components/page-header'
 import { EditProjectView } from '@/components/edit-project-view'
-import { getTranslations, setRequestLocale } from 'next-intl/server'
+import { getTranslations } from 'next-intl/server'
 import { getProjectById } from '@/lib/data/projects'
 import { getSafeSettings } from '@/lib/data/settings'
 import { getSafeWebhooks } from '@/lib/data/webhooks'
@@ -12,9 +12,8 @@ export default async function EditProjectPage({
   params: Promise<{ locale: string; id: string }>
   searchParams: Promise<{ from?: string | string[] }>
 }) {
-  const { locale, id } = await params
+  const { id } = await params
   const { from } = await searchParams
-  setRequestLocale(locale)
 
   const backHref =
     typeof from === 'string' && (from === '/projects' || from === `/projects/${id}`)

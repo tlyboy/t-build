@@ -4,14 +4,13 @@ import { Card, CardContent } from '@/components/ui/card'
 import { getAllBuilds } from '@/lib/data/builds'
 import { getAllProjects } from '@/lib/data/projects'
 import { Clock3 } from 'lucide-react'
-import { getTranslations, setRequestLocale } from 'next-intl/server'
-
-// Build records come from the local database and change continuously, so the latest data must be read on every request.
-export const dynamic = 'force-dynamic'
+import { getTranslations } from 'next-intl/server'
+import { connection } from 'next/server'
 
 export default async function BuildsPage({ params }: { params: Promise<{ locale: string }> }) {
+  // Reads the local database without touching cookies, so opt into request-time rendering explicitly
+  await connection()
   const { locale } = await params
-  setRequestLocale(locale)
 
   const [t, builds, projects] = await Promise.all([
     getTranslations('buildHistory'),

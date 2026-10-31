@@ -3,7 +3,7 @@ import { PageHeader } from '@/components/page-header'
 import { BuildLogSection } from '@/components/build-log-section'
 import { DeleteBuildButton } from '@/components/delete-build-button'
 import { GitCommit } from 'lucide-react'
-import { getTranslations, getLocale, setRequestLocale } from 'next-intl/server'
+import { getTranslations, getLocale } from 'next-intl/server'
 import { getBuildById } from '@/lib/data/builds'
 import { getProjectById } from '@/lib/data/projects'
 
@@ -12,8 +12,7 @@ export default async function BuildDetailPage({
 }: {
   params: Promise<{ locale: string; id: string }>
 }) {
-  const { locale, id } = await params
-  setRequestLocale(locale)
+  const { id } = await params
 
   const t = await getTranslations('buildDetail')
   const currentLocale = await getLocale()

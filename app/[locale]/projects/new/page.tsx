@@ -1,10 +1,10 @@
 import { NewProjectView } from '@/components/new-project-view'
-import { setRequestLocale } from 'next-intl/server'
 import { getSafeSettings } from '@/lib/data/settings'
+import { connection } from 'next/server'
 
-export default async function NewProjectPage({ params }: { params: Promise<{ locale: string }> }) {
-  const { locale } = await params
-  setRequestLocale(locale)
+export default async function NewProjectPage() {
+  // Reads the local database without touching cookies, so opt into request-time rendering explicitly
+  await connection()
   const settings = await getSafeSettings()
 
   return (

@@ -28,6 +28,7 @@ import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Textarea } from '@/components/ui/textarea'
 import type { SafeGitCredential } from '@/lib/data/settings'
+import { useResetOnHide } from '@/lib/use-reset-on-hide'
 
 export function GitCredentialsSettingsCard({
   initialCredentials,
@@ -47,6 +48,10 @@ export function GitCredentialsSettingsCard({
   const [credentialSshKey, setCredentialSshKey] = useState('')
   const [savingCredential, setSavingCredential] = useState(false)
   const [deleteCredentialId, setDeleteCredentialId] = useState<string | null>(null)
+  useResetOnHide(() => {
+    setCredentialDialogOpen(false)
+    setDeleteCredentialId(null)
+  })
 
   const fetchSettings = async () => {
     const res = await fetch('/api/settings')

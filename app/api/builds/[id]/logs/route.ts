@@ -2,8 +2,6 @@ import { getBuildById, getBuildLogs } from '@/lib/data/builds'
 import { getBuildEmitter, getBuildMemoryLogs } from '@/lib/build-executor'
 import { requireApiSession } from '@/lib/auth/api'
 
-export const dynamic = 'force-dynamic'
-
 function isTerminalBuildStatus(status: string) {
   return status === 'success' || status === 'failed' || status === 'skipped'
 }

@@ -3,15 +3,12 @@ import { Button } from '@/components/ui/button'
 import { BuildRow } from '@/components/build-row'
 import { PageHeader } from '@/components/page-header'
 import { Link } from '@/i18n/navigation'
-import { getTranslations, setRequestLocale } from 'next-intl/server'
+import { getTranslations } from 'next-intl/server'
 import { FolderGit2, Plus, CheckCircle2, Clock, Layers, TrendingUp, ArrowRight } from 'lucide-react'
 import { getAllProjects } from '@/lib/data/projects'
 import { getAllBuilds } from '@/lib/data/builds'
 import { getCurrentSession } from '@/lib/auth/server'
 import { redirect } from '@/i18n/navigation'
-
-// Data comes from local files and changes with each build, so render dynamically on every request (avoiding a static snapshot at build time).
-export const dynamic = 'force-dynamic'
 
 function formatRelativeTime(
   dateString: string,
@@ -51,7 +48,6 @@ function formatRelativeTime(
 
 export default async function Home({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params
-  setRequestLocale(locale)
 
   const session = await getCurrentSession()
   if (!session) {
