@@ -27,7 +27,7 @@ T-Build 是面向企业内部团队的开源构建管理控制台。它可以统
 ```bash
 git clone https://github.com/tlyboy/t-build.git
 cd t-build
-corepack enable
+npm install -g pnpm
 pnpm install
 ```
 

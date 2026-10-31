@@ -27,7 +27,7 @@ T-Build is an open-source build management console for internal teams. It manage
 ```bash
 git clone https://github.com/tlyboy/t-build.git
 cd t-build
-corepack enable
+npm install -g pnpm
 pnpm install
 ```
 
